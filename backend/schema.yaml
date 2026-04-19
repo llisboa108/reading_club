@@ -1,0 +1,2844 @@
+openapi: 3.0.3
+info:
+  title: Reading Club API
+  version: 1.0.0
+  description: API for managing a reading club, including authentication, memberships,
+    billing, payments, meetings and blog.
+paths:
+  /api/v1/auth/change-password/:
+    put:
+      operationId: auth_change_password_update
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangePassword'
+          description: ''
+    patch:
+      operationId: auth_change_password_partial_update
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedChangePasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedChangePasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedChangePasswordRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangePassword'
+          description: ''
+  /api/v1/auth/invite-codes/:
+    get:
+      operationId: auth_invite_codes_list
+      tags:
+      - Auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InviteCode'
+          description: ''
+    post:
+      operationId: auth_invite_codes_create
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteCodeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InviteCodeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InviteCodeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteCode'
+          description: ''
+  /api/v1/auth/invite-codes/{id}/:
+    get:
+      operationId: auth_invite_codes_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this invite code.
+        required: true
+      tags:
+      - Auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteCode'
+          description: ''
+    put:
+      operationId: auth_invite_codes_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this invite code.
+        required: true
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteCodeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InviteCodeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InviteCodeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteCode'
+          description: ''
+    patch:
+      operationId: auth_invite_codes_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this invite code.
+        required: true
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedInviteCodeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedInviteCodeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedInviteCodeRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteCode'
+          description: ''
+    delete:
+      operationId: auth_invite_codes_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this invite code.
+        required: true
+      tags:
+      - Auth
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/v1/auth/me/:
+    get:
+      operationId: auth_me_retrieve
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+  /api/v1/auth/profile/:
+    get:
+      operationId: auth_profile_retrieve
+      tags:
+      - Auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileUpdate'
+          description: ''
+    put:
+      operationId: auth_profile_update
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileUpdate'
+          description: ''
+    patch:
+      operationId: auth_profile_partial_update
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileUpdate'
+          description: ''
+  /api/v1/auth/refresh/:
+    post:
+      operationId: auth_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/auth/register/:
+    post:
+      operationId: auth_register_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: ''
+  /api/v1/auth/validate-password/:
+    post:
+      operationId: auth_validate_password_create
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordValiRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordValiRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordValiRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/billing/payments/:
+    get:
+      operationId: paymentsList
+      tags:
+      - Billing
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'
+          description: ''
+    post:
+      operationId: paymentsCreate
+      tags:
+      - Billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaymentCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaymentCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentCreate'
+          description: ''
+  /api/v1/billing/payments/{payment_id}/confirm/:
+    post:
+      operationId: paymentsConfirm
+      description: Confirms a pending payment. Only financial users can perform this
+        action.
+      summary: Confirm a payment
+      parameters:
+      - in: path
+        name: payment_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentConfirmRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaymentConfirmRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaymentConfirmRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/billing/payments/{id}/:
+    get:
+      operationId: paymentsRetrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this payment.
+        required: true
+      tags:
+      - Billing
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+    put:
+      operationId: billing_payments_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this payment.
+        required: true
+      tags:
+      - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+    patch:
+      operationId: billing_payments_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this payment.
+        required: true
+      tags:
+      - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPaymentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPaymentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPaymentRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+    delete:
+      operationId: billing_payments_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this payment.
+        required: true
+      tags:
+      - billing
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/billing/plans/:
+    get:
+      operationId: planList
+      tags:
+      - Billing
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plan'
+          description: ''
+    post:
+      operationId: billing_plans_create
+      tags:
+      - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlanRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+          description: ''
+  /api/v1/billing/plans/{id}/:
+    get:
+      operationId: planRetrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - Billing
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+          description: ''
+    put:
+      operationId: billing_plans_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlanRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+          description: ''
+    patch:
+      operationId: billing_plans_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPlanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPlanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPlanRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+          description: ''
+    delete:
+      operationId: billing_plans_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plan.
+        required: true
+      tags:
+      - billing
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/billing/subscription/:
+    get:
+      operationId: billing_subscription_retrieve
+      tags:
+      - billing
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/v1/club/authors/:
+    get:
+      operationId: club_authors_list
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+          description: ''
+    post:
+      operationId: club_authors_create
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AuthorRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+          description: ''
+  /api/v1/club/authors/{id}/:
+    get:
+      operationId: club_authors_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this author.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+          description: ''
+    put:
+      operationId: club_authors_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this author.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AuthorRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+          description: ''
+    patch:
+      operationId: club_authors_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this author.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAuthorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAuthorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAuthorRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+          description: ''
+    delete:
+      operationId: club_authors_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this author.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/club/blog/:
+    get:
+      operationId: club_blog_list
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BlogPostList'
+          description: ''
+    post:
+      operationId: club_blog_create
+      tags:
+      - Club
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BlogPostWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BlogPostWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostWrite'
+          description: ''
+  /api/v1/club/blog-categories/:
+    get:
+      operationId: club_blog_categories_list
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BlogCategory'
+          description: ''
+  /api/v1/club/blog-categories/{id}/:
+    get:
+      operationId: club_blog_categories_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this blog category.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogCategory'
+          description: ''
+  /api/v1/club/blog/{slug}/:
+    get:
+      operationId: club_blog_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostDetail'
+          description: ''
+    put:
+      operationId: club_blog_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BlogPostWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BlogPostWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostWrite'
+          description: ''
+    patch:
+      operationId: club_blog_partial_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBlogPostWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBlogPostWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostWrite'
+          description: ''
+    delete:
+      operationId: club_blog_destroy
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/club/books/:
+    get:
+      operationId: club_books_list
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+          description: ''
+    post:
+      operationId: club_books_create
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookWrite'
+          description: ''
+  /api/v1/club/books/{id}/:
+    get:
+      operationId: club_books_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this book.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+          description: ''
+    put:
+      operationId: club_books_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this book.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookWrite'
+          description: ''
+    patch:
+      operationId: club_books_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this book.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBookWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBookWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBookWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookWrite'
+          description: ''
+    delete:
+      operationId: club_books_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this book.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/club/meets/:
+    get:
+      operationId: club_meets_list
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meet'
+          description: ''
+    post:
+      operationId: club_meets_create
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MeetWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MeetWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetWrite'
+          description: ''
+  /api/v1/club/meets/{id}/:
+    get:
+      operationId: club_meets_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this meet.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meet'
+          description: ''
+    put:
+      operationId: club_meets_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this meet.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MeetWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MeetWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetWrite'
+          description: ''
+    patch:
+      operationId: club_meets_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this meet.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMeetWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMeetWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMeetWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetWrite'
+          description: ''
+    delete:
+      operationId: club_meets_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this meet.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/club/notifications/:
+    get:
+      operationId: club_notifications_list
+      tags:
+      - club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/club/notifications/{id}/:
+    get:
+      operationId: club_notifications_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/club/publishers/:
+    get:
+      operationId: club_publishers_list
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Publisher'
+          description: ''
+    post:
+      operationId: club_publishers_create
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublisherRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PublisherRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PublisherRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Publisher'
+          description: ''
+  /api/v1/club/publishers/{id}/:
+    get:
+      operationId: club_publishers_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this publisher.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Publisher'
+          description: ''
+    put:
+      operationId: club_publishers_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this publisher.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublisherRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PublisherRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PublisherRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Publisher'
+          description: ''
+    patch:
+      operationId: club_publishers_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this publisher.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPublisherRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPublisherRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPublisherRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Publisher'
+          description: ''
+    delete:
+      operationId: club_publishers_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this publisher.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/club/readings/:
+    get:
+      operationId: club_readings_list
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reading'
+          description: ''
+    post:
+      operationId: club_readings_create
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadingWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReadingWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReadingWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingWrite'
+          description: ''
+  /api/v1/club/readings/{id}/:
+    get:
+      operationId: club_readings_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this reading.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reading'
+          description: ''
+    put:
+      operationId: club_readings_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this reading.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadingWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReadingWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReadingWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingWrite'
+          description: ''
+    patch:
+      operationId: club_readings_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this reading.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedReadingWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedReadingWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedReadingWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingWrite'
+          description: ''
+    delete:
+      operationId: club_readings_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this reading.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    Author:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+      required:
+      - first_name
+      - id
+    AuthorRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+      required:
+      - first_name
+    BlogCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - id
+      - name
+      - slug
+    BlogPostDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        author:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/BlogCategory'
+        content:
+          type: string
+        image:
+          type: string
+          format: uri
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - author
+      - category
+      - content
+      - id
+      - image
+      - slug
+      - title
+    BlogPostList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        author:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/BlogCategory'
+        image:
+          type: string
+          format: uri
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - author
+      - category
+      - id
+      - image
+      - slug
+      - title
+    BlogPostWrite:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        content:
+          type: string
+        image:
+          type: string
+          format: uri
+          nullable: true
+          description: Optional cover image
+        category:
+          type: integer
+          nullable: true
+        is_published:
+          type: boolean
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - content
+      - slug
+      - title
+    BlogPostWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        content:
+          type: string
+          minLength: 1
+        image:
+          type: string
+          format: binary
+          nullable: true
+          description: Optional cover image
+        category:
+          type: integer
+          nullable: true
+        is_published:
+          type: boolean
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - content
+      - slug
+      - title
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 150
+        subtitle:
+          type: string
+          maxLength: 150
+        isbn:
+          type: string
+          maxLength: 20
+        published_date:
+          type: string
+          format: date
+          nullable: true
+        pages:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        author:
+          $ref: '#/components/schemas/Author'
+        publisher:
+          $ref: '#/components/schemas/Publisher'
+      required:
+      - author
+      - id
+      - pages
+      - publisher
+      - title
+    BookWrite:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 150
+        subtitle:
+          type: string
+          maxLength: 150
+        isbn:
+          type: string
+          maxLength: 20
+        published_date:
+          type: string
+          format: date
+          nullable: true
+        pages:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        author:
+          type: integer
+        publisher:
+          type: integer
+      required:
+      - author
+      - pages
+      - publisher
+      - title
+    BookWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 150
+        subtitle:
+          type: string
+          maxLength: 150
+        isbn:
+          type: string
+          maxLength: 20
+        published_date:
+          type: string
+          format: date
+          nullable: true
+        pages:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        author:
+          type: integer
+        publisher:
+          type: integer
+      required:
+      - author
+      - pages
+      - publisher
+      - title
+    ChangePassword:
+      type: object
+      properties:
+        old_password:
+          type: string
+        new_password:
+          type: string
+          minLength: 8
+      required:
+      - new_password
+      - old_password
+    ChangePasswordRequest:
+      type: object
+      properties:
+        old_password:
+          type: string
+          minLength: 1
+        new_password:
+          type: string
+          minLength: 8
+      required:
+      - new_password
+      - old_password
+    InviteCode:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 50
+        is_active:
+          type: boolean
+        max_uses:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: How many times this code can be used
+        used_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - id
+      - used_count
+    InviteCodeRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 50
+        is_active:
+          type: boolean
+        max_uses:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: How many times this code can be used
+      required:
+      - code
+    Me:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        is_admin:
+          type: boolean
+        is_financial:
+          type: boolean
+        profile:
+          type: string
+          readOnly: true
+      required:
+      - email
+      - id
+      - is_admin
+      - is_financial
+      - profile
+    Meet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reading:
+          type: integer
+        moderator:
+          type: string
+          readOnly: true
+        meet_date:
+          type: string
+          format: date-time
+        start_page:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        end_page:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        meet_type:
+          $ref: '#/components/schemas/MeetTypeEnum'
+        meeting_link:
+          type: string
+          format: uri
+          maxLength: 200
+        address:
+          type: string
+          maxLength: 255
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetUser'
+          readOnly: true
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetPhoto'
+          readOnly: true
+      required:
+      - id
+      - meet_date
+      - moderator
+      - participants
+      - photos
+      - reading
+    MeetPhoto:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        image:
+          type: string
+          format: uri
+      required:
+      - id
+      - image
+    MeetTypeEnum:
+      enum:
+      - ONLINE
+      - IN_PERSON
+      type: string
+      description: |-
+        * `ONLINE` - Online
+        * `IN_PERSON` - Presencial
+    MeetUser:
+      type: object
+      properties:
+        user:
+          type: string
+          readOnly: true
+        joined_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - joined_at
+      - user
+    MeetWrite:
+      type: object
+      properties:
+        reading:
+          type: integer
+        moderator:
+          type: integer
+          nullable: true
+        meet_date:
+          type: string
+          format: date-time
+        start_page:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        end_page:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        meet_type:
+          $ref: '#/components/schemas/MeetTypeEnum'
+        meeting_link:
+          type: string
+          format: uri
+          maxLength: 200
+        address:
+          type: string
+          maxLength: 255
+      required:
+      - meet_date
+      - reading
+    MeetWriteRequest:
+      type: object
+      properties:
+        reading:
+          type: integer
+        moderator:
+          type: integer
+          nullable: true
+        meet_date:
+          type: string
+          format: date-time
+        start_page:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        end_page:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        meet_type:
+          $ref: '#/components/schemas/MeetTypeEnum'
+        meeting_link:
+          type: string
+          format: uri
+          maxLength: 200
+        address:
+          type: string
+          maxLength: 255
+      required:
+      - meet_date
+      - reading
+    MethodEnum:
+      enum:
+      - PIX
+      - CASH
+      - MP
+      type: string
+      description: |-
+        * `PIX` - PIX
+        * `CASH` - Dinheiro
+        * `MP` - Mercado Pago
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        message:
+          type: string
+          maxLength: 255
+        is_seen:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - message
+      - type
+    PasswordValiRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+      required:
+      - password
+    PatchedAuthorRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+    PatchedBlogPostWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        content:
+          type: string
+          minLength: 1
+        image:
+          type: string
+          format: binary
+          nullable: true
+          description: Optional cover image
+        category:
+          type: integer
+          nullable: true
+        is_published:
+          type: boolean
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+    PatchedBookWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 150
+        subtitle:
+          type: string
+          maxLength: 150
+        isbn:
+          type: string
+          maxLength: 20
+        published_date:
+          type: string
+          format: date
+          nullable: true
+        pages:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        author:
+          type: integer
+        publisher:
+          type: integer
+    PatchedChangePasswordRequest:
+      type: object
+      properties:
+        old_password:
+          type: string
+          minLength: 1
+        new_password:
+          type: string
+          minLength: 8
+    PatchedInviteCodeRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 50
+        is_active:
+          type: boolean
+        max_uses:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: How many times this code can be used
+    PatchedMeetWriteRequest:
+      type: object
+      properties:
+        reading:
+          type: integer
+        moderator:
+          type: integer
+          nullable: true
+        meet_date:
+          type: string
+          format: date-time
+        start_page:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        end_page:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        meet_type:
+          $ref: '#/components/schemas/MeetTypeEnum'
+        meeting_link:
+          type: string
+          format: uri
+          maxLength: 200
+        address:
+          type: string
+          maxLength: 255
+    PatchedPaymentRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+        method:
+          $ref: '#/components/schemas/MethodEnum'
+        status:
+          $ref: '#/components/schemas/PaymentStatusEnum'
+        due_date:
+          type: string
+          format: date
+        paid_at:
+          type: string
+          format: date-time
+          nullable: true
+        notes:
+          type: string
+        receipt:
+          type: string
+          format: binary
+          nullable: true
+    PatchedPlanRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 255
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+        is_active:
+          type: boolean
+    PatchedProfileUpdateRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          maxLength: 100
+        photo:
+          type: string
+          format: binary
+          nullable: true
+        phone:
+          type: string
+          maxLength: 30
+        bio:
+          type: string
+        facebook:
+          type: string
+          format: uri
+          maxLength: 200
+        instagram:
+          type: string
+          format: uri
+          maxLength: 200
+    PatchedPublisherRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+    PatchedReadingWriteRequest:
+      type: object
+      properties:
+        book:
+          type: integer
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        status:
+          $ref: '#/components/schemas/Status8ecEnum'
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+        method:
+          $ref: '#/components/schemas/MethodEnum'
+        method_display:
+          type: string
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/PaymentStatusEnum'
+        status_display:
+          type: string
+          readOnly: true
+        issued_at:
+          type: string
+          format: date-time
+          readOnly: true
+        due_date:
+          type: string
+          format: date
+        paid_at:
+          type: string
+          format: date-time
+          nullable: true
+        notes:
+          type: string
+        receipt:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - amount
+      - due_date
+      - id
+      - issued_at
+      - method_display
+      - status_display
+    PaymentConfirmRequest:
+      type: object
+      properties:
+        confirm:
+          type: boolean
+      required:
+      - confirm
+    PaymentCreate:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+        method:
+          $ref: '#/components/schemas/MethodEnum'
+        due_date:
+          type: string
+          format: date
+        external_id:
+          type: string
+          nullable: true
+          maxLength: 100
+        receipt:
+          type: string
+          format: uri
+          nullable: true
+        notes:
+          type: string
+      required:
+      - amount
+      - due_date
+    PaymentCreateRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+        method:
+          $ref: '#/components/schemas/MethodEnum'
+        due_date:
+          type: string
+          format: date
+        external_id:
+          type: string
+          nullable: true
+          maxLength: 100
+        receipt:
+          type: string
+          format: binary
+          nullable: true
+        notes:
+          type: string
+      required:
+      - amount
+      - due_date
+    PaymentRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+        method:
+          $ref: '#/components/schemas/MethodEnum'
+        status:
+          $ref: '#/components/schemas/PaymentStatusEnum'
+        due_date:
+          type: string
+          format: date
+        paid_at:
+          type: string
+          format: date-time
+          nullable: true
+        notes:
+          type: string
+        receipt:
+          type: string
+          format: binary
+          nullable: true
+      required:
+      - amount
+      - due_date
+    PaymentStatusEnum:
+      enum:
+      - PENDING
+      - CONFIRMED
+      - CANCELED
+      - FAILED
+      type: string
+      description: |-
+        * `PENDING` - Pendente
+        * `CONFIRMED` - Confirmado
+        * `CANCELED` - Cancelado
+        * `FAILED` - Falhou
+    Plan:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 255
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+        is_active:
+          type: boolean
+      required:
+      - id
+      - name
+      - price
+    PlanRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 255
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+        is_active:
+          type: boolean
+      required:
+      - name
+      - price
+    ProfileUpdate:
+      type: object
+      properties:
+        full_name:
+          type: string
+          maxLength: 100
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        phone:
+          type: string
+          maxLength: 30
+        bio:
+          type: string
+        facebook:
+          type: string
+          format: uri
+          maxLength: 200
+        instagram:
+          type: string
+          format: uri
+          maxLength: 200
+    ProfileUpdateRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          maxLength: 100
+        photo:
+          type: string
+          format: binary
+          nullable: true
+        phone:
+          type: string
+          maxLength: 30
+        bio:
+          type: string
+        facebook:
+          type: string
+          format: uri
+          maxLength: 200
+        instagram:
+          type: string
+          format: uri
+          maxLength: 200
+    Publisher:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+      required:
+      - id
+      - name
+    PublisherRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required:
+      - name
+    Reading:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        book:
+          $ref: '#/components/schemas/Book'
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        status:
+          $ref: '#/components/schemas/Status8ecEnum'
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadingUser'
+          readOnly: true
+      required:
+      - book
+      - id
+      - participants
+      - start_date
+    ReadingUser:
+      type: object
+      properties:
+        user:
+          type: string
+          readOnly: true
+        joined_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - joined_at
+      - user
+    ReadingWrite:
+      type: object
+      properties:
+        book:
+          type: integer
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        status:
+          $ref: '#/components/schemas/Status8ecEnum'
+      required:
+      - book
+      - start_date
+    ReadingWriteRequest:
+      type: object
+      properties:
+        book:
+          type: integer
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        status:
+          $ref: '#/components/schemas/Status8ecEnum'
+      required:
+      - book
+      - start_date
+    Register:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+      required:
+      - email
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+        invite_code:
+          type: string
+          writeOnly: true
+          minLength: 1
+        full_name:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - full_name
+      - invite_code
+      - password
+    Status8ecEnum:
+      enum:
+      - PLANNED
+      - IN_PROGRESS
+      - FINISHED
+      - CANCELED
+      type: string
+      description: |-
+        * `PLANNED` - Planejada
+        * `IN_PROGRESS` - Em andamento
+        * `FINISHED` - Finalizada
+        * `CANCELED` - Cancelada
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/SubscriptionStatusEnum'
+        plan:
+          $ref: '#/components/schemas/Plan'
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        next_billing_date:
+          type: string
+          format: date
+      required:
+      - end_date
+      - id
+      - next_billing_date
+      - plan
+      - start_date
+    SubscriptionStatusEnum:
+      enum:
+      - PENDING
+      - ACTIVE
+      - EXPIRED
+      - CANCELED
+      type: string
+      description: |-
+        * `PENDING` - Pendente
+        * `ACTIVE` - Ativa
+        * `EXPIRED` - Expirada
+        * `CANCELED` - Cancelada
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    TypeEnum:
+      enum:
+      - PAYMENT
+      - MEET
+      - READING
+      - SYSTEM
+      type: string
+      description: |-
+        * `PAYMENT` - Pagamento
+        * `MEET` - Encontro
+        * `READING` - Leitura
+        * `SYSTEM` - Sistema
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
