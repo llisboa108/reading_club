@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { apiRequest } from "../../api/client";
@@ -11,6 +12,12 @@ interface Notification {
   created_at: string;
 }
 
+// Pages a notification type can link to. Types without an entry here
+// have no single related page yet, so clicking them just marks as seen.
+const NOTIFICATION_ROUTES: Record<string, string> = {
+  PAYMENT: "/billing",
+};
+
 function formatDateTime(d: string) {
   return new Date(d).toLocaleString("pt-PT", {
     day: "2-digit",
@@ -21,6 +28,7 @@ function formatDateTime(d: string) {
 }
 
 export default function NotificationDropdown() {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
@@ -38,6 +46,34 @@ export default function NotificationDropdown() {
 
   function closeDropdown() {
     setIsOpen(false);
+  }
+
+  async function handleNotificationClick(notification: Notification) {
+    closeDropdown();
+
+    if (!notification.is_seen) {
+      try {
+        await apiRequest(
+          `/club/notifications/${notification.id}/mark-seen/`,
+          "PATCH",
+          undefined,
+          { silent: true }
+        );
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notification.id ? { ...n, is_seen: true } : n
+          )
+        );
+      } catch {
+        // Best-effort: navigation below still happens even if marking
+        // as seen fails (e.g. offline) - it isn't worth blocking on.
+      }
+    }
+
+    const route = NOTIFICATION_ROUTES[notification.type];
+    if (route) {
+      navigate(route);
+    }
   }
 
   return (
@@ -106,7 +142,7 @@ export default function NotificationDropdown() {
           {notifications.map((n) => (
             <li key={n.id}>
               <DropdownItem
-                onItemClick={closeDropdown}
+                onItemClick={() => handleNotificationClick(n)}
                 className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
               >
                 <span className="block">

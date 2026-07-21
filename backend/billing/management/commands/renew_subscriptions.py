@@ -51,8 +51,8 @@ class Command(BaseCommand):
                 user=sub.user,
                 type=NotificationType.PAYMENT,
                 message=(
-                    "Your subscription will expire in 10 days. "
-                    "A new payment has been generated."
+                    "A sua assinatura expira em 10 dias. "
+                    "Um novo pagamento foi gerado."
                 ),
             )
 
@@ -89,7 +89,7 @@ class Command(BaseCommand):
                 user=sub.user,
                 type=NotificationType.PAYMENT,
                 message=(
-                    "Your subscription has expired due to non-payment."
+                    "A sua assinatura expirou por falta de pagamento."
                 ),
             )
 

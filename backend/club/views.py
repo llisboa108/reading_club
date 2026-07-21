@@ -236,6 +236,20 @@ class NotificationViewSet(ReadOnlyModelViewSet):
             user=self.request.user
         ).order_by("-created_at")
 
+    @extend_schema(
+        tags=["Club"],
+        operation_id="notificationsMarkSeen",
+        summary="Mark a notification as seen",
+        request=None,
+        responses={200: NotificationSerializer},
+    )
+    @action(detail=True, methods=["patch"], url_path="mark-seen")
+    def mark_seen(self, request, pk=None):
+        notification = self.get_object()
+        notification.is_seen = True
+        notification.save(update_fields=["is_seen"])
+        return Response(NotificationSerializer(notification).data)
+
 # Blog
 @extend_schema_view(
     list=extend_schema(tags=["Club"]),

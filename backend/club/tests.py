@@ -4,9 +4,43 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import Author, Publisher, Book
+from .models import Author, Publisher, Book, Notification, NotificationType
 
 User = get_user_model()
+
+
+class NotificationMarkSeenTests(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(
+            email="owner@example.com", password="Str0ng!Passw0rd"
+        )
+        self.other = User.objects.create_user(
+            email="other@example.com", password="Str0ng!Passw0rd"
+        )
+        self.notification = Notification.objects.create(
+            user=self.owner,
+            type=NotificationType.PAYMENT,
+            message="Your payment has been confirmed.",
+        )
+
+    def _url(self, notification):
+        return f"/api/v1/club/notifications/{notification.id}/mark-seen/"
+
+    def test_owner_can_mark_notification_seen(self):
+        self.client.force_authenticate(self.owner)
+        response = self.client.patch(self._url(self.notification), format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.notification.refresh_from_db()
+        self.assertTrue(self.notification.is_seen)
+
+    def test_non_owner_cannot_mark_notification_seen(self):
+        self.client.force_authenticate(self.other)
+        response = self.client.patch(self._url(self.notification), format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.notification.refresh_from_db()
+        self.assertFalse(self.notification.is_seen)
 
 OPEN_LIBRARY_SUCCESS_RESPONSE = {
     "ISBN:9780545139700": {
