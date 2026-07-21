@@ -27,6 +27,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import BooksPage from "./pages/Books/BooksPage";
 import BookDetailPage from "./pages/Books/BookDetailPage";
+import AuthorsPublishersPage from "./pages/Catalog/AuthorsPublishersPage";
 import ReadingsPage from "./pages/Readings/ReadingsPage";
 import ReadingDetailPage from "./pages/Readings/Readingdetailpage";
 import MeetsPage from "./pages/Meets/MeetsPage";
@@ -46,6 +47,7 @@ export default function App() {
             {/* Club pages */}
             <Route path="/books" element={<BooksPage />} />
             <Route path="/books/:id" element={<BookDetailPage />} />
+            <Route path="/catalog" element={<AuthorsPublishersPage />} />
             <Route path="/readings" element={<ReadingsPage />} />
             <Route path="/readings/:id" element={<ReadingDetailPage />} />
             <Route path="/meets" element={<MeetsPage />} />

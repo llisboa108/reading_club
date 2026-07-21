@@ -7,6 +7,7 @@ import Badge from "../../components/ui/badge/Badge";
 import PageBreadCrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import { useAuth } from "../../hooks/useAuth";
+import { useToast } from "../../context/ToastContext";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -43,6 +44,8 @@ interface BookForm {
   publisher: string;
   coverFile: File | null;
   removeCover: boolean;
+  // Cover URL returned by the ISBN lookup, used when no file was uploaded manually.
+  coverUrl: string;
 }
 
 const EMPTY_FORM: BookForm = {
@@ -55,7 +58,20 @@ const EMPTY_FORM: BookForm = {
   publisher: "",
   coverFile: null,
   removeCover: false,
+  coverUrl: "",
 };
+
+interface ISBNLookupResult {
+  isbn: string;
+  title: string;
+  subtitle: string;
+  published_date: string | null;
+  pages: number | null;
+  cover_url: string | null;
+  author: Author | null;
+  publisher: Publisher | null;
+  already_registered: boolean;
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -74,6 +90,7 @@ function getPagesBadge(pages: number) {
 export default function BooksPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const isAdmin = user?.is_admin;
 
   const [books, setBooks] = useState<Book[]>([]);
@@ -90,6 +107,10 @@ export default function BooksPage() {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+
+  // ISBN lookup
+  const [lookingUpIsbn, setLookingUpIsbn] = useState(false);
+  const [isbnLookupMessage, setIsbnLookupMessage] = useState("");
 
   // Delete confirm
   const [deleteBook, setDeleteBook] = useState<Book | null>(null);
@@ -140,6 +161,7 @@ export default function BooksPage() {
     setForm(EMPTY_FORM);
     setCoverPreview(null);
     setFormError("");
+    setIsbnLookupMessage("");
     setModalOpen(true);
   }
 
@@ -155,18 +177,70 @@ export default function BooksPage() {
       publisher: String(book.publisher.id),
       coverFile: null,
       removeCover: false,
+      coverUrl: "",
     });
     setCoverPreview(book.cover || null);
     setFormError("");
+    setIsbnLookupMessage("");
     setModalOpen(true);
   }
 
   function closeModal() {
     setModalOpen(false);
+    setIsbnLookupMessage("");
     setEditingBook(null);
     setForm(EMPTY_FORM);
     setCoverPreview(null);
     setFormError("");
+  }
+
+  // ── ISBN lookup ────────────────────────────────────────────────────────────
+
+  async function handleIsbnLookup() {
+    if (!form.isbn.trim()) return;
+
+    setLookingUpIsbn(true);
+    setIsbnLookupMessage("");
+    try {
+      const result = await apiRequest<ISBNLookupResult>(
+        `/club/books/lookup-isbn/?isbn=${encodeURIComponent(form.isbn.trim())}`
+      );
+
+      if (result.author && !authors.some((a) => a.id === result.author!.id)) {
+        setAuthors((prev) => [...prev, result.author!]);
+      }
+      if (result.publisher && !publishers.some((p) => p.id === result.publisher!.id)) {
+        setPublishers((prev) => [...prev, result.publisher!]);
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        title: result.title || prev.title,
+        subtitle: result.subtitle || prev.subtitle,
+        published_date: result.published_date || prev.published_date,
+        pages: result.pages ? String(result.pages) : prev.pages,
+        author: result.author ? String(result.author.id) : prev.author,
+        publisher: result.publisher ? String(result.publisher.id) : prev.publisher,
+        coverFile: null,
+        removeCover: false,
+        coverUrl: result.cover_url || "",
+      }));
+      if (result.cover_url) setCoverPreview(result.cover_url);
+
+      if (result.already_registered) {
+        showToast(
+          "warning",
+          "Livro já cadastrado",
+          "Já existe um livro com este ISBN no catálogo."
+        );
+      } else {
+        showToast("success", "Livro encontrado", "Dados preenchidos a partir do ISBN.");
+      }
+    } catch (err: any) {
+      setIsbnLookupMessage(err?.message || "Não foi possível buscar esse ISBN.");
+    } finally {
+      setLookingUpIsbn(false);
+    }
   }
 
   // ── Save ───────────────────────────────────────────────────────────────────
@@ -193,6 +267,8 @@ export default function BooksPage() {
         fd.append("cover", form.coverFile);
       } else if (form.removeCover) {
         fd.append("cover", "");  // sinal para o backend limpar o campo
+      } else if (form.coverUrl) {
+        fd.append("cover_url", form.coverUrl);
       }
 
       if (editingBook) {
@@ -397,13 +473,29 @@ export default function BooksPage() {
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 ISBN
               </label>
-              <input
-                type="text"
-                value={form.isbn}
-                onChange={(e) => setForm({ ...form, isbn: e.target.value })}
-                placeholder="Ex: 978-..."
-                className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={form.isbn}
+                  onChange={(e) => {
+                    setForm({ ...form, isbn: e.target.value });
+                    setIsbnLookupMessage("");
+                  }}
+                  placeholder="Ex: 978-..."
+                  className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleIsbnLookup}
+                  disabled={!form.isbn.trim() || lookingUpIsbn}
+                >
+                  {lookingUpIsbn ? "…" : "Buscar"}
+                </Button>
+              </div>
+              {isbnLookupMessage && (
+                <p className="mt-1.5 text-xs text-error-500">{isbnLookupMessage}</p>
+              )}
             </div>
           </div>
 
@@ -444,7 +536,7 @@ export default function BooksPage() {
                     className="sr-only"
                     onChange={(e) => {
                       const file = e.target.files?.[0] ?? null;
-                      setForm({ ...form, coverFile: file, removeCover: false });
+                      setForm({ ...form, coverFile: file, removeCover: false, coverUrl: "" });
                       if (file) setCoverPreview(URL.createObjectURL(file));
                     }}
                   />
@@ -453,7 +545,7 @@ export default function BooksPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setForm({ ...form, coverFile: null, removeCover: true });
+                      setForm({ ...form, coverFile: null, removeCover: true, coverUrl: "" });
                       setCoverPreview(null);
                     }}
                     className="text-left text-xs text-error-500 hover:underline"

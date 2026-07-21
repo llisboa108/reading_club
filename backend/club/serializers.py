@@ -1,4 +1,10 @@
+from uuid import uuid4
+
+import httpx
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
+
 from django.conf import settings
 
 from .models import (
@@ -59,6 +65,14 @@ class ReadingUserSerializer(serializers.ModelSerializer):
         model = ReadingUser
         fields = ("user", "joined_at")
 
+# Serilizer to show who suggested the reading
+class MemberSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source="profile.full_name", default="")
+
+    class Meta:
+        model = get_user_model()
+        fields = ("id", "email", "full_name")
+
 # Reading serializer
 class ReadingSerializer(serializers.ModelSerializer):
     book = BookSerializer()
@@ -67,12 +81,14 @@ class ReadingSerializer(serializers.ModelSerializer):
         many=True,
         read_only=True
     )
+    suggested_by = MemberSerializer(read_only=True)
 
     class Meta:
         model = Reading
         fields = (
             "id",
             "book",
+            "suggested_by",
             "start_date",
             "end_date",
             "status",
@@ -177,11 +193,13 @@ class BlogPostDetailSerializer(serializers.ModelSerializer):
 # Write serializers
 
 class BookWriteSerializer(serializers.ModelSerializer):
-    # ── CORRIGIDO: campos opcionais explicitamente nullable/blank ─────────────
     subtitle = serializers.CharField(required=False, allow_blank=True, default="")
     isbn = serializers.CharField(required=False, allow_blank=True, default="")
     published_date = serializers.DateField(required=False, allow_null=True, default=None)
     cover = serializers.ImageField(required=False, allow_null=True, default=None)
+    # Set by the ISBN lookup flow: a cover image URL to fetch and attach
+    # server-side, as an alternative to uploading a `cover` file directly.
+    cover_url = serializers.URLField(required=False, allow_blank=True, write_only=True)
 
     class Meta:
         model = Book
@@ -194,21 +212,82 @@ class BookWriteSerializer(serializers.ModelSerializer):
             "author",
             "publisher",
             "cover",
+            "cover_url",
         )
 
+    def _attach_cover_from_url(self, instance, url):
+        if not url:
+            return
+        try:
+            response = httpx.get(url, timeout=10)
+            response.raise_for_status()
+        except httpx.HTTPError:
+            # Best-effort: a failed cover download shouldn't block saving the book.
+            return
+        instance.cover.save(f"{uuid4().hex}.jpg", ContentFile(response.content), save=True)
 
+    def create(self, validated_data):
+        cover_url = validated_data.pop("cover_url", None)
+        instance = super().create(validated_data)
+        self._attach_cover_from_url(instance, cover_url)
+        return instance
+
+    def update(self, instance, validated_data):
+        cover_url = validated_data.pop("cover_url", None)
+        instance = super().update(instance, validated_data)
+        self._attach_cover_from_url(instance, cover_url)
+        return instance
+
+# Reading write serializer
 class ReadingWriteSerializer(serializers.ModelSerializer):
+    users = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=get_user_model().objects.all(),
+        required=False,
+    )
+    suggested_by = serializers.PrimaryKeyRelatedField(
+        queryset=get_user_model().objects.all(),
+        required=False,
+        allow_null=True,
+    )
+
     class Meta:
         model = Reading
         fields = (
             "book",
+            "suggested_by",
             "start_date",
             "end_date",
             "status",
+            "users",
         )
 
+    def _sync_users(self, instance, users):
+        ReadingUser.objects.filter(reading=instance).delete()
+        ReadingUser.objects.bulk_create([
+            ReadingUser(reading=instance, user=u) for u in users
+        ])
+
+    def create(self, validated_data):
+        users = validated_data.pop("users", [])
+        reading = super().create(validated_data)
+        self._sync_users(reading, users)
+        return reading
+
+    def update(self, instance, validated_data):
+        users = validated_data.pop("users", None)
+        instance = super().update(instance, validated_data)
+        if users is not None:
+            self._sync_users(instance, users)
+        return instance
 
 class MeetWriteSerializer(serializers.ModelSerializer):
+    users = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=get_user_model().objects.all(),
+        required=False,
+    )
+
     class Meta:
         model = Meet
         fields = (
@@ -220,7 +299,28 @@ class MeetWriteSerializer(serializers.ModelSerializer):
             "meet_type",
             "meeting_link",
             "address",
+            "users",
         )
+
+    def _sync_users(self, instance, users):
+        MeetUser.objects.filter(meet=instance).delete()
+        MeetUser.objects.bulk_create([
+            MeetUser(meet=instance, user=u) for u in users
+        ])
+
+    def create(self, validated_data):
+        users = validated_data.pop("users", [])
+        meet = super().create(validated_data)
+        self._sync_users(meet, users)
+        return meet
+
+    def update(self, instance, validated_data):
+        users = validated_data.pop("users", None)
+        instance = super().update(instance, validated_data)
+        if users is not None:
+            self._sync_users(instance, users)
+        return instance
+
 
 
 class BlogPostWriteSerializer(serializers.ModelSerializer):

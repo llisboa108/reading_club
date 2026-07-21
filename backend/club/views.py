@@ -1,7 +1,10 @@
 from django.utils import timezone
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.response import Response
+from rest_framework import status
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from api.permissions import (
@@ -9,6 +12,13 @@ from api.permissions import (
     IsAdminOrReadOnly,
     IsMemberWithActiveSubscription,
     IsNotificationOwner,
+)
+
+from .isbn_lookup import (
+    ISBNLookupError,
+    ISBNNotFoundError,
+    fetch_book_metadata,
+    split_author_name,
 )
 
 from .models import (
@@ -87,6 +97,77 @@ class BookViewSet(ModelViewSet):
         if self.action in ["create", "update", "partial_update"]:
             return BookWriteSerializer
         return BookSerializer
+
+    def get_permissions(self):
+        if self.action == "lookup_isbn":
+            # A GET that has side effects (get-or-create on Author/Publisher),
+            # so it needs to be admin-only unlike the rest of this viewset.
+            return [IsAuthenticated(), IsAdmin()]
+        return super().get_permissions()
+
+    @extend_schema(
+        tags=["Club"],
+        operation_id="booksLookupIsbn",
+        summary="Look up book metadata by ISBN",
+        description=(
+            "Queries the Google Books API for the given ISBN and returns "
+            "book metadata (title, author, publisher, cover, etc.) to "
+            "pre-fill the create-book form. Get-or-creates the matching "
+            "Author/Publisher by name so the frontend can select them "
+            "immediately. Admin-only."
+        ),
+        responses={200: None},
+    )
+    @action(detail=False, methods=["get"], url_path="lookup-isbn")
+    def lookup_isbn(self, request):
+        isbn = request.query_params.get("isbn", "").strip().replace("-", "").replace(" ", "")
+        if not isbn:
+            return Response(
+                {"detail": "Informe um ISBN."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            metadata = fetch_book_metadata(isbn)
+        except ISBNNotFoundError:
+            return Response(
+                {"detail": "Nenhum livro encontrado para esse ISBN."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except ISBNLookupError:
+            return Response(
+                {"detail": "Não foi possível consultar o serviço de busca por ISBN no momento."},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        author = None
+        if metadata["author_name"]:
+            first_name, last_name = split_author_name(metadata["author_name"])
+            author = Author.objects.filter(
+                first_name__iexact=first_name, last_name__iexact=last_name
+            ).first()
+            if not author:
+                author = Author.objects.create(first_name=first_name, last_name=last_name)
+
+        publisher = None
+        if metadata["publisher_name"]:
+            publisher = Publisher.objects.filter(
+                name__iexact=metadata["publisher_name"]
+            ).first()
+            if not publisher:
+                publisher = Publisher.objects.create(name=metadata["publisher_name"])
+
+        return Response({
+            "isbn": isbn,
+            "title": metadata["title"],
+            "subtitle": metadata["subtitle"],
+            "published_date": metadata["published_date"],
+            "pages": metadata["pages"],
+            "cover_url": metadata["cover_url"],
+            "author": AuthorSerializer(author).data if author else None,
+            "publisher": PublisherSerializer(publisher).data if publisher else None,
+            "already_registered": Book.objects.filter(isbn=isbn).exists(),
+        })
 
 # Readings
 @extend_schema_view(

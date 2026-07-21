@@ -80,6 +80,12 @@ const navItems: NavItem[] = [
     path: "/books",
   },
   {
+    icon: <BookIcon />,
+    name: "Autores e Editoras",
+    path: "/catalog",
+    admin: true,
+  },
+  {
     icon: <ReadingIcon />,
     name: "Leituras",
     path: "/readings",
