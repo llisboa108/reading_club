@@ -154,3 +154,17 @@ class ChangePasswordSerializer(serializers.Serializer):
 # Password validator serializer
 class PasswordValiSerializer(serializers.Serializer):
     password = serializers.CharField()
+
+# Password reset request (forgot password)
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+# Password reset confirmation (set new password from emailed link)
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(required=True)
+
+    def validate_new_password(self, value):
+        validate_password(value)
+        return value

@@ -168,3 +168,10 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
+
+# Local/dev email: password-reset links are printed to the runserver
+# console instead of actually being sent. Production needs a real
+# EMAIL_BACKEND (SMTP) configured.
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "no-reply@readingclub.local"
+FRONTEND_URL = "http://localhost:5173"
