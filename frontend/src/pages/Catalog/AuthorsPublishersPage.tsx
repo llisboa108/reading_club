@@ -87,7 +87,7 @@ export default function AuthorsPublishersPage() {
   }, [user?.is_admin]);
 
   if (!user?.is_admin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   // ── Author handlers ────────────────────────────────────────────────────────

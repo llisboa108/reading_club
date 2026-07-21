@@ -32,7 +32,7 @@ export default function SignInForm() {
         "Login efetuado",
         "Bem-vindo(a)"
       );
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       showToast(
         "error",

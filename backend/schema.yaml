@@ -1465,6 +1465,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/Notification'
           description: ''
+  /api/v1/club/public-stats/:
+    get:
+      operationId: clubPublicStats
+      summary: Public club stats for the landing page
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClubStats'
+          description: ''
   /api/v1/club/publishers/:
     get:
       operationId: club_publishers_list
@@ -2057,6 +2073,22 @@ components:
       required:
       - new_password
       - old_password
+    ClubStats:
+      type: object
+      properties:
+        books_read:
+          type: integer
+        pages_read:
+          type: integer
+        reading_hours:
+          type: integer
+        meets_held:
+          type: integer
+      required:
+      - books_read
+      - meets_held
+      - pages_read
+      - reading_hours
     InviteCode:
       type: object
       properties:

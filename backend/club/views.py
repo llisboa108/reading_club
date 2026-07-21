@@ -1,4 +1,6 @@
+from django.db.models import Sum
 from django.utils import timezone
+from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -26,6 +28,7 @@ from .models import (
     Publisher,
     Book,
     Reading,
+    ReadingStatus,
     Meet,
     Notification,
     BlogCategory,
@@ -46,7 +49,13 @@ from .serializers import (
     BookWriteSerializer,
     ReadingWriteSerializer,
     MeetWriteSerializer,
+    ClubStatsSerializer,
 )
+
+# No Meet.duration field exists yet, so "reading hours" is estimated from
+# pages actually read at a typical book-club reading pace rather than
+# tracked directly - see PublicClubStatsView.
+READING_PAGES_PER_HOUR = 30
 
 @extend_schema(tags=["Club"])
 
@@ -308,3 +317,31 @@ class BlogCategoryViewSet(ReadOnlyModelViewSet):
     queryset = BlogCategory.objects.all()
     serializer_class = BlogCategorySerializer
     permission_classes = [AllowAny]
+
+
+# Public club stats (landing page counters)
+class PublicClubStatsView(APIView):
+
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        tags=["Club"],
+        operation_id="clubPublicStats",
+        summary="Public club stats for the landing page",
+        responses={200: ClubStatsSerializer},
+    )
+    def get(self, request):
+        finished_readings = Reading.objects.filter(status=ReadingStatus.FINISHED)
+
+        pages_read = (
+            finished_readings.aggregate(total=Sum("book__pages"))["total"] or 0
+        )
+
+        data = {
+            "books_read": finished_readings.count(),
+            "pages_read": pages_read,
+            "reading_hours": pages_read // READING_PAGES_PER_HOUR,
+            "meets_held": Meet.objects.filter(meet_date__lte=timezone.now()).count(),
+        }
+
+        return Response(ClubStatsSerializer(data).data)

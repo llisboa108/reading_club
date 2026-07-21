@@ -1,6 +1,7 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import (
-    AuthorViewSet, 
+    AuthorViewSet,
     PublisherViewSet,
     BookViewSet,
     ReadingViewSet,
@@ -8,6 +9,7 @@ from .views import (
     NotificationViewSet,
     PublicBlogPostViewSet,
     BlogCategoryViewSet,
+    PublicClubStatsView,
 )
 
 router = DefaultRouter()
@@ -20,4 +22,7 @@ router.register("notifications", NotificationViewSet, basename="notifications")
 router.register("blog", PublicBlogPostViewSet, basename="blog")
 router.register("blog-categories", BlogCategoryViewSet, basename="blog-categories")
 
-urlpatterns = router.urls
+urlpatterns = [
+    path("public-stats/", PublicClubStatsView.as_view(), name="public-stats"),
+]
+urlpatterns += router.urls

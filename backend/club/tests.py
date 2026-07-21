@@ -1,10 +1,22 @@
+from datetime import timedelta
 from unittest.mock import Mock, patch
 
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import Author, Publisher, Book, Notification, NotificationType
+from .models import (
+    Author,
+    Publisher,
+    Book,
+    Notification,
+    NotificationType,
+    Reading,
+    ReadingStatus,
+    Meet,
+    MeetType,
+)
 
 User = get_user_model()
 
@@ -136,3 +148,71 @@ class ISBNLookupTests(APITestCase):
         response = self.client.get(self.url, {"isbn": "9780545139700"})
 
         self.assertTrue(response.data["already_registered"])
+
+
+class PublicClubStatsTests(APITestCase):
+    url = "/api/v1/club/public-stats/"
+
+    def setUp(self):
+        author = Author.objects.create(first_name="Jane", last_name="Austen")
+        publisher = Publisher.objects.create(name="Editora Teste")
+
+        finished_book = Book.objects.create(
+            title="Orgulho e Preconceito",
+            isbn="9780000000001",
+            pages=300,
+            author=author,
+            publisher=publisher,
+        )
+        planned_book = Book.objects.create(
+            title="Persuasão",
+            isbn="9780000000002",
+            pages=250,
+            author=author,
+            publisher=publisher,
+        )
+
+        self.finished_reading = Reading.objects.create(
+            book=finished_book,
+            start_date=timezone.now().date() - timedelta(days=60),
+            end_date=timezone.now().date() - timedelta(days=30),
+            status=ReadingStatus.FINISHED,
+        )
+        # A second finished reading of a book with the same page count as
+        # the first, to make the pages_read sum unambiguous in assertions.
+        self.other_finished_reading = Reading.objects.create(
+            book=finished_book,
+            start_date=timezone.now().date() - timedelta(days=120),
+            end_date=timezone.now().date() - timedelta(days=90),
+            status=ReadingStatus.FINISHED,
+        )
+        self.planned_reading = Reading.objects.create(
+            book=planned_book,
+            start_date=timezone.now().date() + timedelta(days=10),
+            status=ReadingStatus.PLANNED,
+        )
+
+        Meet.objects.create(
+            reading=self.finished_reading,
+            meet_date=timezone.now() - timedelta(days=45),
+            meet_type=MeetType.ONLINE,
+        )
+        Meet.objects.create(
+            reading=self.planned_reading,
+            meet_date=timezone.now() + timedelta(days=10),
+            meet_type=MeetType.IN_PERSON,
+        )
+
+    def test_stats_only_count_finished_readings_and_past_meets(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["books_read"], 2)
+        self.assertEqual(response.data["pages_read"], 600)
+        self.assertEqual(response.data["reading_hours"], 20)  # 600 // 30
+        self.assertEqual(response.data["meets_held"], 1)
+
+    def test_stats_endpoint_does_not_require_authentication(self):
+        # No force_authenticate call - the landing page calls this anonymously.
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

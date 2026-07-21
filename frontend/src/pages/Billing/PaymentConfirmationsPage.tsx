@@ -47,7 +47,7 @@ export default function PaymentConfirmationsPage() {
   }, [user?.is_financial]);
 
   if (!user?.is_financial) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const handleConfirm = async (paymentId: number) => {

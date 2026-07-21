@@ -19,6 +19,7 @@ export type { BookWrite } from './models/BookWrite';
 export type { BookWriteRequest } from './models/BookWriteRequest';
 export type { ChangePassword } from './models/ChangePassword';
 export type { ChangePasswordRequest } from './models/ChangePasswordRequest';
+export type { ClubStats } from './models/ClubStats';
 export type { InviteCode } from './models/InviteCode';
 export type { InviteCodeRequest } from './models/InviteCodeRequest';
 export type { Me } from './models/Me';

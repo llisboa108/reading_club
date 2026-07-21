@@ -335,3 +335,11 @@ class BlogPostWriteSerializer(serializers.ModelSerializer):
             "is_published",
             "published_at",
         )
+
+
+# Public club stats (landing page counters)
+class ClubStatsSerializer(serializers.Serializer):
+    books_read = serializers.IntegerField()
+    pages_read = serializers.IntegerField()
+    reading_hours = serializers.IntegerField()
+    meets_held = serializers.IntegerField()

@@ -12,6 +12,7 @@ import type { BlogPostWriteRequest } from '../models/BlogPostWriteRequest';
 import type { Book } from '../models/Book';
 import type { BookWrite } from '../models/BookWrite';
 import type { BookWriteRequest } from '../models/BookWriteRequest';
+import type { ClubStats } from '../models/ClubStats';
 import type { Meet } from '../models/Meet';
 import type { MeetWrite } from '../models/MeetWrite';
 import type { MeetWriteRequest } from '../models/MeetWriteRequest';
@@ -498,6 +499,17 @@ export class ClubService {
             path: {
                 'id': id,
             },
+        });
+    }
+    /**
+     * Public club stats for the landing page
+     * @returns ClubStats
+     * @throws ApiError
+     */
+    public static clubPublicStats(): CancelablePromise<ClubStats> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/club/public-stats/',
         });
     }
     /**

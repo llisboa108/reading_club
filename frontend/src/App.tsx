@@ -22,6 +22,7 @@ import ReadingDetailPage from "./pages/Readings/Readingdetailpage";
 import MeetsPage from "./pages/Meets/MeetsPage";
 import BlogPage from "./pages/Blog/BlogPage";
 import BlogDetailPage from "./pages/Blog/BlogDetailPage";
+import LandingPage from "./pages/Landing/LandingPage";
 
 export default function App() {
   return (
@@ -29,9 +30,12 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
+          {/* Public marketing site */}
+          <Route path="/" element={<LandingPage />} />
+
           {/* Dashboard Layout */}
           <Route element={ <ProtectedRoute> <AppLayout /> </ProtectedRoute> } >
-            <Route index path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Home />} />
 
             {/* Club pages */}
             <Route path="/books" element={<BooksPage />} />

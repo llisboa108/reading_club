@@ -1,3 +1,8 @@
 # Brand guide assets (huge PDF, not source) - logos already copied into
 # frontend/public/images/logo/ where they're actually used by the app.
 identidade/
+
+# Old static landing page (its own nested git repo) - reference content only,
+# already rebuilt as frontend/src/pages/Landing/ and assets copied into
+# frontend/public/images/landing/.
+landingpage/
