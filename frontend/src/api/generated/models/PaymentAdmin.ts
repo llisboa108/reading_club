@@ -4,8 +4,10 @@
 /* eslint-disable */
 import type { MethodEnum } from './MethodEnum';
 import type { Status5d9Enum } from './Status5d9Enum';
-export type Payment = {
+export type PaymentAdmin = {
     readonly id: number;
+    readonly member_email: string;
+    readonly member_name: string;
     amount: string;
     method?: MethodEnum;
     readonly method_display: string;

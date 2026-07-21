@@ -104,7 +104,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this invite code.
+        description: Um valor inteiro único que identifica este invite code.
         required: true
       tags:
       - Auth
@@ -124,7 +124,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this invite code.
+        description: Um valor inteiro único que identifica este invite code.
         required: true
       tags:
       - Auth
@@ -156,7 +156,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this invite code.
+        description: Um valor inteiro único que identifica este invite code.
         required: true
       tags:
       - Auth
@@ -187,7 +187,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this invite code.
+        description: Um valor inteiro único que identifica este invite code.
         required: true
       tags:
       - Auth
@@ -237,6 +237,68 @@ paths:
               schema:
                 $ref: '#/components/schemas/Me'
           description: ''
+  /api/v1/auth/members/:
+    get:
+      operationId: auth_members_list
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MemberList'
+          description: ''
+  /api/v1/auth/password-reset/:
+    post:
+      operationId: auth_password_reset_create
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/password-reset-confirm/:
+    post:
+      operationId: auth_password_reset_confirm_create
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
   /api/v1/auth/profile/:
     get:
       operationId: auth_profile_retrieve
@@ -447,6 +509,25 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/v1/billing/payments/{payment_id}/mercadopago-preference/:
+    post:
+      operationId: paymentsMercadoPagoPreference
+      description: Creates a Checkout Pro preference for one of the caller's own pending
+        payments and returns the checkout URL to redirect to.
+      summary: Create a Mercado Pago checkout preference for a payment
+      parameters:
+      - in: path
+        name: payment_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Billing
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
   /api/v1/billing/payments/{id}/:
     get:
       operationId: paymentsRetrieve
@@ -455,7 +536,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this payment.
+        description: Um valor inteiro único que identifica este payment.
         required: true
       tags:
       - Billing
@@ -475,7 +556,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this payment.
+        description: Um valor inteiro único que identifica este payment.
         required: true
       tags:
       - billing
@@ -507,7 +588,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this payment.
+        description: Um valor inteiro único que identifica este payment.
         required: true
       tags:
       - billing
@@ -538,7 +619,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this payment.
+        description: Um valor inteiro único que identifica este payment.
         required: true
       tags:
       - billing
@@ -547,6 +628,24 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/billing/payments/pending/:
+    get:
+      operationId: paymentsPendingList
+      description: Only financial staff can list every member's pending payments.
+      summary: List pending payments across all members
+      tags:
+      - Billing
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentAdmin'
+          description: ''
   /api/v1/billing/plans/:
     get:
       operationId: planList
@@ -571,13 +670,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PlanRequest'
+              $ref: '#/components/schemas/PlanWriteRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PlanRequest'
+              $ref: '#/components/schemas/PlanWriteRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PlanRequest'
+              $ref: '#/components/schemas/PlanWriteRequest'
         required: true
       security:
       - jwtAuth: []
@@ -586,7 +685,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Plan'
+                $ref: '#/components/schemas/PlanWrite'
           description: ''
   /api/v1/billing/plans/{id}/:
     get:
@@ -596,7 +695,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this plan.
+        description: Um valor inteiro único que identifica este plan.
         required: true
       tags:
       - Billing
@@ -616,7 +715,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this plan.
+        description: Um valor inteiro único que identifica este plan.
         required: true
       tags:
       - billing
@@ -624,13 +723,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PlanRequest'
+              $ref: '#/components/schemas/PlanWriteRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PlanRequest'
+              $ref: '#/components/schemas/PlanWriteRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PlanRequest'
+              $ref: '#/components/schemas/PlanWriteRequest'
         required: true
       security:
       - jwtAuth: []
@@ -639,7 +738,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Plan'
+                $ref: '#/components/schemas/PlanWrite'
           description: ''
     patch:
       operationId: billing_plans_partial_update
@@ -648,7 +747,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this plan.
+        description: Um valor inteiro único que identifica este plan.
         required: true
       tags:
       - billing
@@ -656,13 +755,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedPlanRequest'
+              $ref: '#/components/schemas/PatchedPlanWriteRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedPlanRequest'
+              $ref: '#/components/schemas/PatchedPlanWriteRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedPlanRequest'
+              $ref: '#/components/schemas/PatchedPlanWriteRequest'
       security:
       - jwtAuth: []
       responses:
@@ -670,7 +769,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Plan'
+                $ref: '#/components/schemas/PlanWrite'
           description: ''
     delete:
       operationId: billing_plans_destroy
@@ -679,7 +778,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this plan.
+        description: Um valor inteiro único que identifica este plan.
         required: true
       tags:
       - billing
@@ -751,7 +850,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this author.
+        description: Um valor inteiro único que identifica este author.
         required: true
       tags:
       - Club
@@ -771,7 +870,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this author.
+        description: Um valor inteiro único que identifica este author.
         required: true
       tags:
       - Club
@@ -803,7 +902,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this author.
+        description: Um valor inteiro único que identifica este author.
         required: true
       tags:
       - Club
@@ -834,7 +933,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this author.
+        description: Um valor inteiro único que identifica este author.
         required: true
       tags:
       - Club
@@ -907,7 +1006,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this blog category.
+        description: Um valor inteiro único que identifica este blog category.
         required: true
       tags:
       - Club
@@ -1034,13 +1133,13 @@ paths:
       - Club
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/BookWriteRequest'
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/BookWriteRequest'
-          multipart/form-data:
+          application/json:
             schema:
               $ref: '#/components/schemas/BookWriteRequest'
         required: true
@@ -1061,7 +1160,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this book.
+        description: Um valor inteiro único que identifica este book.
         required: true
       tags:
       - Club
@@ -1081,19 +1180,19 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this book.
+        description: Um valor inteiro único que identifica este book.
         required: true
       tags:
       - Club
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/BookWriteRequest'
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/BookWriteRequest'
-          multipart/form-data:
+          application/json:
             schema:
               $ref: '#/components/schemas/BookWriteRequest'
         required: true
@@ -1113,19 +1212,19 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this book.
+        description: Um valor inteiro único que identifica este book.
         required: true
       tags:
       - Club
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedBookWriteRequest'
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/PatchedBookWriteRequest'
-          multipart/form-data:
+          application/json:
             schema:
               $ref: '#/components/schemas/PatchedBookWriteRequest'
       security:
@@ -1144,7 +1243,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this book.
+        description: Um valor inteiro único que identifica este book.
         required: true
       tags:
       - Club
@@ -1152,6 +1251,21 @@ paths:
       - jwtAuth: []
       responses:
         '204':
+          description: No response body
+  /api/v1/club/books/lookup-isbn/:
+    get:
+      operationId: booksLookupIsbn
+      description: Queries the Google Books API for the given ISBN and returns book
+        metadata (title, author, publisher, cover, etc.) to pre-fill the create-book
+        form. Get-or-creates the matching Author/Publisher by name so the frontend
+        can select them immediately. Admin-only.
+      summary: Look up book metadata by ISBN
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
           description: No response body
   /api/v1/club/meets/:
     get:
@@ -1202,7 +1316,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this meet.
+        description: Um valor inteiro único que identifica este meet.
         required: true
       tags:
       - Club
@@ -1222,7 +1336,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this meet.
+        description: Um valor inteiro único que identifica este meet.
         required: true
       tags:
       - Club
@@ -1254,7 +1368,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this meet.
+        description: Um valor inteiro único que identifica este meet.
         required: true
       tags:
       - Club
@@ -1285,7 +1399,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this meet.
+        description: Um valor inteiro único que identifica este meet.
         required: true
       tags:
       - Club
@@ -1321,6 +1435,27 @@ paths:
         required: true
       tags:
       - club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/club/notifications/{id}/mark-seen/:
+    patch:
+      operationId: notificationsMarkSeen
+      summary: Mark a notification as seen
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Club
       security:
       - jwtAuth: []
       responses:
@@ -1379,7 +1514,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this publisher.
+        description: Um valor inteiro único que identifica este publisher.
         required: true
       tags:
       - Club
@@ -1399,7 +1534,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this publisher.
+        description: Um valor inteiro único que identifica este publisher.
         required: true
       tags:
       - Club
@@ -1431,7 +1566,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this publisher.
+        description: Um valor inteiro único que identifica este publisher.
         required: true
       tags:
       - Club
@@ -1462,7 +1597,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this publisher.
+        description: Um valor inteiro único que identifica este publisher.
         required: true
       tags:
       - Club
@@ -1520,7 +1655,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this reading.
+        description: Um valor inteiro único que identifica este reading.
         required: true
       tags:
       - Club
@@ -1540,7 +1675,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this reading.
+        description: Um valor inteiro único que identifica este reading.
         required: true
       tags:
       - Club
@@ -1572,7 +1707,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this reading.
+        description: Um valor inteiro único que identifica este reading.
         required: true
       tags:
       - Club
@@ -1603,7 +1738,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this reading.
+        description: Um valor inteiro único que identifica este reading.
         required: true
       tags:
       - Club
@@ -1816,6 +1951,10 @@ components:
           $ref: '#/components/schemas/Author'
         publisher:
           $ref: '#/components/schemas/Publisher'
+        cover:
+          type: string
+          format: uri
+          nullable: true
       required:
       - author
       - id
@@ -1830,10 +1969,10 @@ components:
           maxLength: 150
         subtitle:
           type: string
-          maxLength: 150
+          default: ''
         isbn:
           type: string
-          maxLength: 20
+          default: ''
         published_date:
           type: string
           format: date
@@ -1847,6 +1986,10 @@ components:
           type: integer
         publisher:
           type: integer
+        cover:
+          type: string
+          format: uri
+          nullable: true
       required:
       - author
       - pages
@@ -1861,10 +2004,10 @@ components:
           maxLength: 150
         subtitle:
           type: string
-          maxLength: 150
+          default: ''
         isbn:
           type: string
-          maxLength: 20
+          default: ''
         published_date:
           type: string
           format: date
@@ -1878,6 +2021,14 @@ components:
           type: integer
         publisher:
           type: integer
+        cover:
+          type: string
+          format: binary
+          nullable: true
+        cover_url:
+          type: string
+          format: uri
+          writeOnly: true
       required:
       - author
       - pages
@@ -2092,6 +2243,10 @@ components:
         address:
           type: string
           maxLength: 255
+        users:
+          type: array
+          items:
+            type: integer
       required:
       - meet_date
       - reading
@@ -2127,9 +2282,45 @@ components:
         address:
           type: string
           maxLength: 255
+        users:
+          type: array
+          items:
+            type: integer
       required:
       - meet_date
       - reading
+    Member:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        full_name:
+          type: string
+          default: ''
+      required:
+      - email
+      - id
+    MemberList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        full_name:
+          type: string
+          default: ''
+      required:
+      - email
+      - id
     MethodEnum:
       enum:
       - PIX
@@ -2162,6 +2353,31 @@ components:
       - id
       - message
       - type
+    PasswordResetConfirmRequest:
+      type: object
+      properties:
+        uid:
+          type: string
+          minLength: 1
+        token:
+          type: string
+          minLength: 1
+        new_password:
+          type: string
+          minLength: 1
+      required:
+      - new_password
+      - token
+      - uid
+    PasswordResetRequestRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
     PasswordValiRequest:
       type: object
       properties:
@@ -2218,10 +2434,10 @@ components:
           maxLength: 150
         subtitle:
           type: string
-          maxLength: 150
+          default: ''
         isbn:
           type: string
-          maxLength: 20
+          default: ''
         published_date:
           type: string
           format: date
@@ -2235,6 +2451,14 @@ components:
           type: integer
         publisher:
           type: integer
+        cover:
+          type: string
+          format: binary
+          nullable: true
+        cover_url:
+          type: string
+          format: uri
+          writeOnly: true
     PatchedChangePasswordRequest:
       type: object
       properties:
@@ -2291,6 +2515,10 @@ components:
         address:
           type: string
           maxLength: 255
+        users:
+          type: array
+          items:
+            type: integer
     PatchedPaymentRequest:
       type: object
       properties:
@@ -2300,22 +2528,16 @@ components:
           pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
         method:
           $ref: '#/components/schemas/MethodEnum'
-        status:
-          $ref: '#/components/schemas/PaymentStatusEnum'
         due_date:
           type: string
           format: date
-        paid_at:
-          type: string
-          format: date-time
-          nullable: true
         notes:
           type: string
         receipt:
           type: string
           format: binary
           nullable: true
-    PatchedPlanRequest:
+    PatchedPlanWriteRequest:
       type: object
       properties:
         name:
@@ -2331,6 +2553,9 @@ components:
           pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
         is_active:
           type: boolean
+        is_default:
+          type: boolean
+          description: Default plan for new users
     PatchedProfileUpdateRequest:
       type: object
       properties:
@@ -2366,6 +2591,9 @@ components:
       properties:
         book:
           type: integer
+        suggested_by:
+          type: integer
+          nullable: true
         start_date:
           type: string
           format: date
@@ -2375,6 +2603,10 @@ components:
           nullable: true
         status:
           $ref: '#/components/schemas/Status8ecEnum'
+        users:
+          type: array
+          items:
+            type: integer
     Payment:
       type: object
       properties:
@@ -2391,7 +2623,9 @@ components:
           type: string
           readOnly: true
         status:
-          $ref: '#/components/schemas/PaymentStatusEnum'
+          allOf:
+          - $ref: '#/components/schemas/Status5d9Enum'
+          readOnly: true
         status_display:
           type: string
           readOnly: true
@@ -2405,6 +2639,7 @@ components:
         paid_at:
           type: string
           format: date-time
+          readOnly: true
           nullable: true
         notes:
           type: string
@@ -2418,6 +2653,67 @@ components:
       - id
       - issued_at
       - method_display
+      - paid_at
+      - status
+      - status_display
+    PaymentAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        member_email:
+          type: string
+          format: email
+          readOnly: true
+        member_name:
+          type: string
+          readOnly: true
+          default: ''
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+        method:
+          $ref: '#/components/schemas/MethodEnum'
+        method_display:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/Status5d9Enum'
+          readOnly: true
+        status_display:
+          type: string
+          readOnly: true
+        issued_at:
+          type: string
+          format: date-time
+          readOnly: true
+        due_date:
+          type: string
+          format: date
+        paid_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        notes:
+          type: string
+        receipt:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - amount
+      - due_date
+      - id
+      - issued_at
+      - member_email
+      - member_name
+      - method_display
+      - paid_at
+      - status
       - status_display
     PaymentConfirmRequest:
       type: object
@@ -2485,15 +2781,9 @@ components:
           pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
         method:
           $ref: '#/components/schemas/MethodEnum'
-        status:
-          $ref: '#/components/schemas/PaymentStatusEnum'
         due_date:
           type: string
           format: date
-        paid_at:
-          type: string
-          format: date-time
-          nullable: true
         notes:
           type: string
         receipt:
@@ -2503,18 +2793,6 @@ components:
       required:
       - amount
       - due_date
-    PaymentStatusEnum:
-      enum:
-      - PENDING
-      - CONFIRMED
-      - CANCELED
-      - FAILED
-      type: string
-      description: |-
-        * `PENDING` - Pendente
-        * `CONFIRMED` - Confirmado
-        * `CANCELED` - Cancelado
-        * `FAILED` - Falhou
     Plan:
       type: object
       properties:
@@ -2533,11 +2811,35 @@ components:
           pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
         is_active:
           type: boolean
+        is_default:
+          type: boolean
+          description: Default plan for new users
       required:
       - id
       - name
       - price
-    PlanRequest:
+    PlanWrite:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 255
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+        is_active:
+          type: boolean
+        is_default:
+          type: boolean
+          description: Default plan for new users
+      required:
+      - name
+      - price
+    PlanWriteRequest:
       type: object
       properties:
         name:
@@ -2553,6 +2855,9 @@ components:
           pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
         is_active:
           type: boolean
+        is_default:
+          type: boolean
+          description: Default plan for new users
       required:
       - name
       - price
@@ -2631,6 +2936,10 @@ components:
           readOnly: true
         book:
           $ref: '#/components/schemas/Book'
+        suggested_by:
+          allOf:
+          - $ref: '#/components/schemas/Member'
+          readOnly: true
         start_date:
           type: string
           format: date
@@ -2650,6 +2959,7 @@ components:
       - id
       - participants
       - start_date
+      - suggested_by
     ReadingUser:
       type: object
       properties:
@@ -2668,6 +2978,9 @@ components:
       properties:
         book:
           type: integer
+        suggested_by:
+          type: integer
+          nullable: true
         start_date:
           type: string
           format: date
@@ -2677,6 +2990,10 @@ components:
           nullable: true
         status:
           $ref: '#/components/schemas/Status8ecEnum'
+        users:
+          type: array
+          items:
+            type: integer
       required:
       - book
       - start_date
@@ -2685,6 +3002,9 @@ components:
       properties:
         book:
           type: integer
+        suggested_by:
+          type: integer
+          nullable: true
         start_date:
           type: string
           format: date
@@ -2694,6 +3014,10 @@ components:
           nullable: true
         status:
           $ref: '#/components/schemas/Status8ecEnum'
+        users:
+          type: array
+          items:
+            type: integer
       required:
       - book
       - start_date
@@ -2717,7 +3041,7 @@ components:
         password:
           type: string
           writeOnly: true
-          minLength: 8
+          minLength: 1
         invite_code:
           type: string
           writeOnly: true
@@ -2731,6 +3055,18 @@ components:
       - full_name
       - invite_code
       - password
+    Status5d9Enum:
+      enum:
+      - PENDING
+      - CONFIRMED
+      - CANCELED
+      - FAILED
+      type: string
+      description: |-
+        * `PENDING` - Pendente
+        * `CONFIRMED` - Confirmado
+        * `CANCELED` - Cancelado
+        * `FAILED` - Falhou
     Status8ecEnum:
       enum:
       - PLANNED

@@ -2,8 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Plan = {
-    readonly id: number;
+export type PlanWriteRequest = {
     name: string;
     description?: string;
     price: string;

@@ -12,5 +12,6 @@ export type MeetWrite = {
     meet_type?: MeetTypeEnum;
     meeting_link?: string;
     address?: string;
+    users?: Array<number>;
 };
 

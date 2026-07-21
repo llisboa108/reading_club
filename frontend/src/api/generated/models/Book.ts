@@ -13,5 +13,6 @@ export type Book = {
     pages: number;
     author: Author;
     publisher: Publisher;
+    cover?: string | null;
 };
 

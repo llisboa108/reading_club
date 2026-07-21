@@ -8,7 +8,7 @@
  * * `CANCELED` - Cancelado
  * * `FAILED` - Falhou
  */
-export enum PaymentStatusEnum {
+export enum Status5d9Enum {
     PENDING = 'PENDING',
     CONFIRMED = 'CONFIRMED',
     CANCELED = 'CANCELED',

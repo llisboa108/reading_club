@@ -1,15 +1,22 @@
+import hashlib
+import hmac
+from unittest.mock import patch
+
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from . import mercadopago_service
 from .models import (
     Plan,
     Subscription,
     SubscriptionStatus,
     Payment,
     PaymentMethod,
+    PaymentStatus,
 )
 
 User = get_user_model()
@@ -220,3 +227,177 @@ class PlanManagementTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
         self.assertTrue(Plan.objects.filter(pk=self.active_plan.id).exists())
+
+
+class MercadoPagoSignatureTests(TestCase):
+    """Unit tests for the HMAC manifest check itself, no network involved."""
+
+    @override_settings(MERCADOPAGO_WEBHOOK_SECRET="test-secret")
+    def test_valid_signature_passes(self):
+        manifest = "id:123;request-id:req-1;ts:1700000000;"
+        v1 = hmac.new(b"test-secret", manifest.encode(), hashlib.sha256).hexdigest()
+        x_signature = f"ts=1700000000,v1={v1}"
+
+        self.assertTrue(
+            mercadopago_service.verify_webhook_signature(x_signature, "req-1", "123")
+        )
+
+    @override_settings(MERCADOPAGO_WEBHOOK_SECRET="test-secret")
+    def test_tampered_signature_fails(self):
+        x_signature = "ts=1700000000,v1=deadbeef"
+
+        self.assertFalse(
+            mercadopago_service.verify_webhook_signature(x_signature, "req-1", "123")
+        )
+
+    @override_settings(MERCADOPAGO_WEBHOOK_SECRET="")
+    def test_missing_secret_raises(self):
+        with self.assertRaises(mercadopago_service.MercadoPagoNotConfigured):
+            mercadopago_service.verify_webhook_signature("ts=1,v1=x", "req-1", "123")
+
+
+class MercadoPagoPreferenceViewTests(APITestCase):
+    def setUp(self):
+        self.plan = Plan.objects.create(
+            name="Basic", price=50, is_active=True, is_default=True
+        )
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+        self.other_member = User.objects.create_user(
+            email="other@example.com", password="Str0ng!Passw0rd"
+        )
+        self.subscription = self.member.subscriptions.order_by("-created_at").first()
+        self.payment = Payment.objects.create(
+            subscription=self.subscription,
+            amount=self.plan.price,
+            method=PaymentMethod.MERCADOPAGO,
+            due_date=timezone.now().date(),
+        )
+
+    def _url(self, payment):
+        return f"/api/v1/billing/payments/{payment.id}/mercadopago-preference/"
+
+    @patch.object(mercadopago_service, "create_payment_preference")
+    def test_create_preference_returns_checkout_url(self, mock_create):
+        mock_create.return_value = {"init_point": "https://mp.example/checkout/abc"}
+
+        self.client.force_authenticate(self.member)
+        response = self.client.post(self._url(self.payment))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["init_point"], "https://mp.example/checkout/abc")
+        mock_create.assert_called_once()
+
+    def test_cannot_create_preference_for_another_members_payment(self):
+        self.client.force_authenticate(self.other_member)
+        response = self.client.post(self._url(self.payment))
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    @patch.object(mercadopago_service, "create_payment_preference")
+    def test_confirmed_payment_cannot_generate_new_preference(self, mock_create):
+        self.payment.confirm(user=None)
+
+        self.client.force_authenticate(self.member)
+        response = self.client.post(self._url(self.payment))
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        mock_create.assert_not_called()
+
+    @patch.object(mercadopago_service, "create_payment_preference")
+    def test_missing_credentials_returns_503(self, mock_create):
+        mock_create.side_effect = mercadopago_service.MercadoPagoNotConfigured("no token")
+
+        self.client.force_authenticate(self.member)
+        response = self.client.post(self._url(self.payment))
+
+        self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
+
+
+class MercadoPagoWebhookViewTests(APITestCase):
+    url = "/api/v1/billing/mercadopago/webhook/"
+
+    def setUp(self):
+        self.plan = Plan.objects.create(
+            name="Basic", price=50, is_active=True, is_default=True
+        )
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+        self.subscription = self.member.subscriptions.order_by("-created_at").first()
+        self.payment = Payment.objects.create(
+            subscription=self.subscription,
+            amount=self.plan.price,
+            method=PaymentMethod.MERCADOPAGO,
+            due_date=timezone.now().date(),
+        )
+
+    def _notify(self, mp_payment_id=999):
+        return self.client.post(
+            f"{self.url}?type=payment&data.id={mp_payment_id}",
+            HTTP_X_SIGNATURE="ts=1700000000,v1=fake",
+            HTTP_X_REQUEST_ID="req-1",
+        )
+
+    @patch.object(mercadopago_service, "fetch_mp_payment")
+    @patch.object(mercadopago_service, "verify_webhook_signature", return_value=True)
+    def test_approved_payment_confirms_subscription(self, mock_verify, mock_fetch):
+        mock_fetch.return_value = {
+            "status": "approved",
+            "external_reference": str(self.payment.id),
+        }
+
+        response = self._notify()
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.payment.refresh_from_db()
+        self.assertEqual(self.payment.status, PaymentStatus.CONFIRMED)
+        self.assertEqual(self.payment.external_id, "999")
+
+    @patch.object(mercadopago_service, "fetch_mp_payment")
+    @patch.object(mercadopago_service, "verify_webhook_signature", return_value=True)
+    def test_duplicate_notification_is_idempotent(self, mock_verify, mock_fetch):
+        mock_fetch.return_value = {
+            "status": "approved",
+            "external_reference": str(self.payment.id),
+        }
+
+        self._notify()
+        response = self._notify()
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # confirm() should only ever have run once - refetch to be sure
+        # the second call didn't re-trigger the confirmation signal.
+        self.assertEqual(
+            Payment.objects.get(pk=self.payment.id).status, PaymentStatus.CONFIRMED
+        )
+
+    @patch.object(mercadopago_service, "fetch_mp_payment")
+    @patch.object(mercadopago_service, "verify_webhook_signature", return_value=True)
+    def test_pending_mp_status_does_not_confirm(self, mock_verify, mock_fetch):
+        mock_fetch.return_value = {
+            "status": "pending",
+            "external_reference": str(self.payment.id),
+        }
+
+        response = self._notify()
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.payment.refresh_from_db()
+        self.assertEqual(self.payment.status, PaymentStatus.PENDING)
+
+    @patch.object(mercadopago_service, "verify_webhook_signature", return_value=False)
+    def test_invalid_signature_is_rejected(self, mock_verify):
+        response = self._notify()
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.payment.refresh_from_db()
+        self.assertEqual(self.payment.status, PaymentStatus.PENDING)
+
+    @patch.object(mercadopago_service, "fetch_mp_payment")
+    def test_non_payment_topics_are_ignored(self, mock_fetch):
+        response = self.client.post(f"{self.url}?type=merchant_order&data.id=1")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        mock_fetch.assert_not_called()

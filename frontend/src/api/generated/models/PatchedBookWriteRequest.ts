@@ -10,5 +10,7 @@ export type PatchedBookWriteRequest = {
     pages?: number;
     author?: number;
     publisher?: number;
+    cover?: Blob | null;
+    cover_url?: string;
 };
 

@@ -2,10 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type PatchedPlanRequest = {
-    name?: string;
-    description?: string;
-    price?: string;
-    is_active?: boolean;
+export type PasswordResetConfirmRequest = {
+    uid: string;
+    token: string;
+    new_password: string;
 };
 

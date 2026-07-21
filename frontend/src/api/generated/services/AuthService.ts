@@ -7,6 +7,9 @@ import type { ChangePasswordRequest } from '../models/ChangePasswordRequest';
 import type { InviteCode } from '../models/InviteCode';
 import type { InviteCodeRequest } from '../models/InviteCodeRequest';
 import type { Me } from '../models/Me';
+import type { MemberList } from '../models/MemberList';
+import type { PasswordResetConfirmRequest } from '../models/PasswordResetConfirmRequest';
+import type { PasswordResetRequestRequest } from '../models/PasswordResetRequestRequest';
 import type { PasswordValiRequest } from '../models/PasswordValiRequest';
 import type { PatchedChangePasswordRequest } from '../models/PatchedChangePasswordRequest';
 import type { PatchedInviteCodeRequest } from '../models/PatchedInviteCodeRequest';
@@ -79,7 +82,7 @@ export class AuthService {
         });
     }
     /**
-     * @param id A unique integer value identifying this invite code.
+     * @param id Um valor inteiro único que identifica este invite code.
      * @returns InviteCode
      * @throws ApiError
      */
@@ -95,7 +98,7 @@ export class AuthService {
         });
     }
     /**
-     * @param id A unique integer value identifying this invite code.
+     * @param id Um valor inteiro único que identifica este invite code.
      * @param requestBody
      * @returns InviteCode
      * @throws ApiError
@@ -115,7 +118,7 @@ export class AuthService {
         });
     }
     /**
-     * @param id A unique integer value identifying this invite code.
+     * @param id Um valor inteiro único que identifica este invite code.
      * @param requestBody
      * @returns InviteCode
      * @throws ApiError
@@ -135,7 +138,7 @@ export class AuthService {
         });
     }
     /**
-     * @param id A unique integer value identifying this invite code.
+     * @param id Um valor inteiro único que identifica este invite code.
      * @returns void
      * @throws ApiError
      */
@@ -175,6 +178,46 @@ export class AuthService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/auth/me/',
+        });
+    }
+    /**
+     * @returns MemberList
+     * @throws ApiError
+     */
+    public static authMembersList(): CancelablePromise<Array<MemberList>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/auth/members/',
+        });
+    }
+    /**
+     * @param requestBody
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static authPasswordResetCreate(
+        requestBody: PasswordResetRequestRequest,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/auth/password-reset/',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @param requestBody
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static authPasswordResetConfirmCreate(
+        requestBody: PasswordResetConfirmRequest,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/auth/password-reset-confirm/',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

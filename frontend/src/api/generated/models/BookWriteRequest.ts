@@ -10,5 +10,7 @@ export type BookWriteRequest = {
     pages: number;
     author: number;
     publisher: number;
+    cover?: Blob | null;
+    cover_url?: string;
 };
 

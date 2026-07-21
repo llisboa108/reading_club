@@ -5,8 +5,10 @@
 import type { Status8ecEnum } from './Status8ecEnum';
 export type ReadingWriteRequest = {
     book: number;
+    suggested_by?: number | null;
     start_date: string;
     end_date?: string | null;
     status?: Status8ecEnum;
+    users?: Array<number>;
 };
 

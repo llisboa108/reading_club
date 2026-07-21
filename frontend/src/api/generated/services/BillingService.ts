@@ -3,14 +3,16 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { PatchedPaymentRequest } from '../models/PatchedPaymentRequest';
-import type { PatchedPlanRequest } from '../models/PatchedPlanRequest';
+import type { PatchedPlanWriteRequest } from '../models/PatchedPlanWriteRequest';
 import type { Payment } from '../models/Payment';
+import type { PaymentAdmin } from '../models/PaymentAdmin';
 import type { PaymentConfirmRequest } from '../models/PaymentConfirmRequest';
 import type { PaymentCreate } from '../models/PaymentCreate';
 import type { PaymentCreateRequest } from '../models/PaymentCreateRequest';
 import type { PaymentRequest } from '../models/PaymentRequest';
 import type { Plan } from '../models/Plan';
-import type { PlanRequest } from '../models/PlanRequest';
+import type { PlanWrite } from '../models/PlanWrite';
+import type { PlanWriteRequest } from '../models/PlanWriteRequest';
 import type { Subscription } from '../models/Subscription';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -64,7 +66,25 @@ export class BillingService {
         });
     }
     /**
-     * @param id A unique integer value identifying this payment.
+     * Create a Mercado Pago checkout preference for a payment
+     * Creates a Checkout Pro preference for one of the caller's own pending payments and returns the checkout URL to redirect to.
+     * @param paymentId
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static paymentsMercadoPagoPreference(
+        paymentId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/billing/payments/{payment_id}/mercadopago-preference/',
+            path: {
+                'payment_id': paymentId,
+            },
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este payment.
      * @returns Payment
      * @throws ApiError
      */
@@ -80,7 +100,7 @@ export class BillingService {
         });
     }
     /**
-     * @param id A unique integer value identifying this payment.
+     * @param id Um valor inteiro único que identifica este payment.
      * @param requestBody
      * @returns Payment
      * @throws ApiError
@@ -100,7 +120,7 @@ export class BillingService {
         });
     }
     /**
-     * @param id A unique integer value identifying this payment.
+     * @param id Um valor inteiro único que identifica este payment.
      * @param requestBody
      * @returns Payment
      * @throws ApiError
@@ -120,7 +140,7 @@ export class BillingService {
         });
     }
     /**
-     * @param id A unique integer value identifying this payment.
+     * @param id Um valor inteiro único que identifica este payment.
      * @returns void
      * @throws ApiError
      */
@@ -136,6 +156,18 @@ export class BillingService {
         });
     }
     /**
+     * List pending payments across all members
+     * Only financial staff can list every member's pending payments.
+     * @returns PaymentAdmin
+     * @throws ApiError
+     */
+    public static paymentsPendingList(): CancelablePromise<Array<PaymentAdmin>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/billing/payments/pending/',
+        });
+    }
+    /**
      * @returns Plan
      * @throws ApiError
      */
@@ -147,12 +179,12 @@ export class BillingService {
     }
     /**
      * @param requestBody
-     * @returns Plan
+     * @returns PlanWrite
      * @throws ApiError
      */
     public static billingPlansCreate(
-        requestBody: PlanRequest,
-    ): CancelablePromise<Plan> {
+        requestBody: PlanWriteRequest,
+    ): CancelablePromise<PlanWrite> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/billing/plans/',
@@ -161,7 +193,7 @@ export class BillingService {
         });
     }
     /**
-     * @param id A unique integer value identifying this plan.
+     * @param id Um valor inteiro único que identifica este plan.
      * @returns Plan
      * @throws ApiError
      */
@@ -177,15 +209,15 @@ export class BillingService {
         });
     }
     /**
-     * @param id A unique integer value identifying this plan.
+     * @param id Um valor inteiro único que identifica este plan.
      * @param requestBody
-     * @returns Plan
+     * @returns PlanWrite
      * @throws ApiError
      */
     public static billingPlansUpdate(
         id: number,
-        requestBody: PlanRequest,
-    ): CancelablePromise<Plan> {
+        requestBody: PlanWriteRequest,
+    ): CancelablePromise<PlanWrite> {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/v1/billing/plans/{id}/',
@@ -197,15 +229,15 @@ export class BillingService {
         });
     }
     /**
-     * @param id A unique integer value identifying this plan.
+     * @param id Um valor inteiro único que identifica este plan.
      * @param requestBody
-     * @returns Plan
+     * @returns PlanWrite
      * @throws ApiError
      */
     public static billingPlansPartialUpdate(
         id: number,
-        requestBody?: PatchedPlanRequest,
-    ): CancelablePromise<Plan> {
+        requestBody?: PatchedPlanWriteRequest,
+    ): CancelablePromise<PlanWrite> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/v1/billing/plans/{id}/',
@@ -217,7 +249,7 @@ export class BillingService {
         });
     }
     /**
-     * @param id A unique integer value identifying this plan.
+     * @param id Um valor inteiro único que identifica este plan.
      * @returns void
      * @throws ApiError
      */

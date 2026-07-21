@@ -57,7 +57,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this author.
+     * @param id Um valor inteiro único que identifica este author.
      * @returns Author
      * @throws ApiError
      */
@@ -73,7 +73,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this author.
+     * @param id Um valor inteiro único que identifica este author.
      * @param requestBody
      * @returns Author
      * @throws ApiError
@@ -93,7 +93,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this author.
+     * @param id Um valor inteiro único que identifica este author.
      * @param requestBody
      * @returns Author
      * @throws ApiError
@@ -113,7 +113,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this author.
+     * @param id Um valor inteiro único que identifica este author.
      * @returns void
      * @throws ApiError
      */
@@ -164,7 +164,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this blog category.
+     * @param id Um valor inteiro único que identifica este blog category.
      * @returns BlogCategory
      * @throws ApiError
      */
@@ -262,22 +262,22 @@ export class ClubService {
         });
     }
     /**
-     * @param requestBody
+     * @param formData
      * @returns BookWrite
      * @throws ApiError
      */
     public static clubBooksCreate(
-        requestBody: BookWriteRequest,
+        formData: BookWriteRequest,
     ): CancelablePromise<BookWrite> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/club/books/',
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
-     * @param id A unique integer value identifying this book.
+     * @param id Um valor inteiro único que identifica este book.
      * @returns Book
      * @throws ApiError
      */
@@ -293,14 +293,14 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this book.
-     * @param requestBody
+     * @param id Um valor inteiro único que identifica este book.
+     * @param formData
      * @returns BookWrite
      * @throws ApiError
      */
     public static clubBooksUpdate(
         id: number,
-        requestBody: BookWriteRequest,
+        formData: BookWriteRequest,
     ): CancelablePromise<BookWrite> {
         return __request(OpenAPI, {
             method: 'PUT',
@@ -308,19 +308,19 @@ export class ClubService {
             path: {
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
-     * @param id A unique integer value identifying this book.
-     * @param requestBody
+     * @param id Um valor inteiro único que identifica este book.
+     * @param formData
      * @returns BookWrite
      * @throws ApiError
      */
     public static clubBooksPartialUpdate(
         id: number,
-        requestBody?: PatchedBookWriteRequest,
+        formData?: PatchedBookWriteRequest,
     ): CancelablePromise<BookWrite> {
         return __request(OpenAPI, {
             method: 'PATCH',
@@ -328,12 +328,12 @@ export class ClubService {
             path: {
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
-     * @param id A unique integer value identifying this book.
+     * @param id Um valor inteiro único que identifica este book.
      * @returns void
      * @throws ApiError
      */
@@ -346,6 +346,18 @@ export class ClubService {
             path: {
                 'id': id,
             },
+        });
+    }
+    /**
+     * Look up book metadata by ISBN
+     * Queries the Google Books API for the given ISBN and returns book metadata (title, author, publisher, cover, etc.) to pre-fill the create-book form. Get-or-creates the matching Author/Publisher by name so the frontend can select them immediately. Admin-only.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static booksLookupIsbn(): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/club/books/lookup-isbn/',
         });
     }
     /**
@@ -374,7 +386,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this meet.
+     * @param id Um valor inteiro único que identifica este meet.
      * @returns Meet
      * @throws ApiError
      */
@@ -390,7 +402,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this meet.
+     * @param id Um valor inteiro único que identifica este meet.
      * @param requestBody
      * @returns MeetWrite
      * @throws ApiError
@@ -410,7 +422,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this meet.
+     * @param id Um valor inteiro único que identifica este meet.
      * @param requestBody
      * @returns MeetWrite
      * @throws ApiError
@@ -430,7 +442,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this meet.
+     * @param id Um valor inteiro único que identifica este meet.
      * @returns void
      * @throws ApiError
      */
@@ -472,6 +484,23 @@ export class ClubService {
         });
     }
     /**
+     * Mark a notification as seen
+     * @param id
+     * @returns Notification
+     * @throws ApiError
+     */
+    public static notificationsMarkSeen(
+        id: string,
+    ): CancelablePromise<Notification> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/club/notifications/{id}/mark-seen/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
      * @returns Publisher
      * @throws ApiError
      */
@@ -497,7 +526,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this publisher.
+     * @param id Um valor inteiro único que identifica este publisher.
      * @returns Publisher
      * @throws ApiError
      */
@@ -513,7 +542,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this publisher.
+     * @param id Um valor inteiro único que identifica este publisher.
      * @param requestBody
      * @returns Publisher
      * @throws ApiError
@@ -533,7 +562,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this publisher.
+     * @param id Um valor inteiro único que identifica este publisher.
      * @param requestBody
      * @returns Publisher
      * @throws ApiError
@@ -553,7 +582,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this publisher.
+     * @param id Um valor inteiro único que identifica este publisher.
      * @returns void
      * @throws ApiError
      */
@@ -594,7 +623,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this reading.
+     * @param id Um valor inteiro único que identifica este reading.
      * @returns Reading
      * @throws ApiError
      */
@@ -610,7 +639,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this reading.
+     * @param id Um valor inteiro único que identifica este reading.
      * @param requestBody
      * @returns ReadingWrite
      * @throws ApiError
@@ -630,7 +659,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this reading.
+     * @param id Um valor inteiro único que identifica este reading.
      * @param requestBody
      * @returns ReadingWrite
      * @throws ApiError
@@ -650,7 +679,7 @@ export class ClubService {
         });
     }
     /**
-     * @param id A unique integer value identifying this reading.
+     * @param id Um valor inteiro único que identifica este reading.
      * @returns void
      * @throws ApiError
      */

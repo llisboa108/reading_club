@@ -10,5 +10,6 @@ export type BookWrite = {
     pages: number;
     author: number;
     publisher: number;
+    cover?: string | null;
 };
 

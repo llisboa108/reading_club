@@ -20,20 +20,22 @@ export default function PaymentHistoryTable({ payments, reload }: any) {
   const { showToast } = useToast();
   const [loadingId, setLoadingId] = useState<number | null>(null);
 
-  // Mercado Pago / PIX → mark method, stays PENDING until financial staff confirms
-  const handlePix = async (paymentId: number) => {
+  // Mercado Pago → creates a real checkout preference and redirects the
+  // member there; the payment is confirmed automatically by the webhook
+  // once Mercado Pago reports it as approved (see billing/views.py).
+  const handleMercadoPago = async (paymentId: number) => {
     setLoadingId(paymentId);
     try {
-      await apiRequest(
-        `/billing/payments/${paymentId}/`,
-        "PATCH",
-        { method: "MP" }
+      const { init_point } = await apiRequest<{ init_point: string }>(
+        `/billing/payments/${paymentId}/mercadopago-preference/`,
+        "POST"
       );
-      showToast("success", "Pagamento registado", "O pagamento via PIX/Mercado Pago foi registado e aguarda confirmação.");
-      reload();
+      if (!init_point) {
+        throw new Error("no init_point");
+      }
+      window.location.href = init_point;
     } catch {
-      showToast("error", "Erro", "Não foi possível registar o pagamento.");
-    } finally {
+      showToast("error", "Erro", "Não foi possível iniciar o pagamento via Mercado Pago.");
       setLoadingId(null);
     }
   };
@@ -134,11 +136,11 @@ export default function PaymentHistoryTable({ payments, reload }: any) {
                       <div className="flex items-center gap-2 justify-end">
 
                         <button
-                          onClick={() => handlePix(p.id)}
+                          onClick={() => handleMercadoPago(p.id)}
                           disabled={isLoading}
                           className="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 disabled:opacity-50 px-3 py-1.5 text-xs font-medium text-white transition-colors"
                         >
-                          {isLoading ? "..." : "Mercado Pago / PIX"}
+                          {isLoading ? "..." : "Pagar com Mercado Pago"}
                         </button>
 
                         <button

@@ -2,10 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type PlanRequest = {
+export type PlanWrite = {
     name: string;
     description?: string;
     price: string;
     is_active?: boolean;
+    /**
+     * Default plan for new users
+     */
+    is_default?: boolean;
 };
 

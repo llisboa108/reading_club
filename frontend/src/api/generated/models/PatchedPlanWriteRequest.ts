@@ -2,11 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Plan = {
-    readonly id: number;
-    name: string;
+export type PatchedPlanWriteRequest = {
+    name?: string;
     description?: string;
-    price: string;
+    price?: string;
     is_active?: boolean;
     /**
      * Default plan for new users
