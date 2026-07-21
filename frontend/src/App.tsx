@@ -29,6 +29,9 @@ import BooksPage from "./pages/Books/BooksPage";
 import BookDetailPage from "./pages/Books/BookDetailPage";
 import ReadingsPage from "./pages/Readings/ReadingsPage";
 import ReadingDetailPage from "./pages/Readings/Readingdetailpage";
+import MeetsPage from "./pages/Meets/MeetsPage";
+import BlogPage from "./pages/Blog/BlogPage";
+import BlogDetailPage from "./pages/Blog/BlogDetailPage";
 
 export default function App() {
   return (
@@ -45,6 +48,9 @@ export default function App() {
             <Route path="/books/:id" element={<BookDetailPage />} />
             <Route path="/readings" element={<ReadingsPage />} />
             <Route path="/readings/:id" element={<ReadingDetailPage />} />
+            <Route path="/meets" element={<MeetsPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogDetailPage />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
