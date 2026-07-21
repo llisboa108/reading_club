@@ -11,6 +11,7 @@ import Home from "./pages/Dashboard/Home";
 import BillingPage from "./pages/Billing/BillingPage";
 import PaymentConfirmationsPage from "./pages/Billing/PaymentConfirmationsPage";
 import MembersPage from "./pages/Members/MembersPage";
+import PlansPage from "./pages/Plans/PlansPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import BooksPage from "./pages/Books/BooksPage";
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/billing" element={<BillingPage />} />
             <Route path="/billing/confirmations" element={<PaymentConfirmationsPage />} />
             <Route path="/members" element={<MembersPage />} />
+            <Route path="/plans" element={<PlansPage />} />
           </Route>
 
           {/* Auth Layout */}

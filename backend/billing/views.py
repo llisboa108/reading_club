@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import ProtectedError
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
@@ -37,13 +38,35 @@ from .serializers import (
 )
 class PlanViewSet(ModelViewSet):
 
-    queryset = Plan.objects.filter(is_active=True)
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
+    # necessário para spectacular inferir o model (get_queryset é o real filtro em runtime)
+    queryset = Plan.objects.all()
+
+    def get_queryset(self):
+        # Admins manage the full catalogue (including inactive plans);
+        # everyone else only ever needs to see plans they could subscribe to.
+        if self.request.user.is_staff:
+            return Plan.objects.all()
+        return Plan.objects.filter(is_active=True)
 
     def get_serializer_class(self):
-        if self.request.user.is_staff:
+        if self.action in ["create", "update", "partial_update"]:
             return PlanWriteSerializer
         return PlanSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            return Response(
+                {
+                    "detail": (
+                        "Este plano não pode ser excluído porque há assinaturas "
+                        "associadas a ele. Desative-o em vez de excluir."
+                    )
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
 
 
 # ---------------------------------------------------------

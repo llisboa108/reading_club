@@ -18,6 +18,7 @@ class PlanSerializer(serializers.ModelSerializer):
             "description",
             "price",
             "is_active",
+            "is_default",
         )
 
 class PlanWriteSerializer(serializers.ModelSerializer):
@@ -28,7 +29,23 @@ class PlanWriteSerializer(serializers.ModelSerializer):
             "description",
             "price",
             "is_active",
+            "is_default",
         )
+
+    def _clear_other_defaults(self, instance):
+        Plan.objects.exclude(pk=instance.pk).update(is_default=False)
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        if instance.is_default:
+            self._clear_other_defaults(instance)
+        return instance
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        if instance.is_default:
+            self._clear_other_defaults(instance)
+        return instance
 
 # Subscription serializer
 class SubscriptionSerializer(serializers.ModelSerializer):

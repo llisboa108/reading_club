@@ -109,6 +109,12 @@ const navItems: NavItem[] = [
     path: "/members",
     admin: true,
   },
+  {
+    icon: <UserCircleIcon />,
+    name: "Planos",
+    path: "/plans",
+    admin: true,
+  },
 ];
 
 // ── Componente principal ─────────────────────────────────────────────────────
