@@ -6,7 +6,6 @@ import CurrentPlanCard from "./Components/CurrentPlanCard";
 import PaymentHistoryTable from "./Components/PaymentHistoryTable";
 
 export default function BillingPage() {
-
   const { showToast } = useToast();
 
   const [subscription, setSubscription] = useState<any>(null);
@@ -14,15 +13,13 @@ export default function BillingPage() {
 
   const loadData = async () => {
     try {
-
       const sub = await BillingService.billingSubscriptionRetrieve();
       const pay = await BillingService.paymentsList();
 
       setSubscription(sub);
       setPayments(pay);
-
     } catch {
-      showToast("error", "Billing error", "Could not load billing data");
+      showToast("error", "Erro de faturação", "Não foi possível carregar os dados de faturação.");
     }
   };
 
@@ -32,11 +29,16 @@ export default function BillingPage() {
 
   return (
     <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Faturação</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Consulta o teu plano e o histórico de pagamentos.
+        </p>
+      </div>
 
       <CurrentPlanCard subscription={subscription} />
 
       <PaymentHistoryTable payments={payments} reload={loadData} />
-
     </div>
   );
 }
