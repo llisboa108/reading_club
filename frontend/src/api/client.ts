@@ -63,8 +63,12 @@ export async function apiRequest<T>(
 
   let response = await makeRequest(access || undefined);
 
+  // 401 from the auth endpoints themselves means bad credentials/refresh
+  // token, not an expired access token — don't try to "refresh" those.
+  const isAuthEndpoint = endpoint === "/auth/login/" || endpoint === "/auth/refresh/";
+
   // If access expired → try refresh
-  if (response.status === 401) {
+  if (response.status === 401 && !isAuthEndpoint) {
     const newAccess = await refreshToken();
 
     if (!newAccess) {
