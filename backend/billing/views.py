@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -20,6 +21,7 @@ from .serializers import (
     PlanWriteSerializer,
     SubscriptionSerializer,
     PaymentSerializer,
+    PaymentAdminSerializer,
     PaymentCreateSerializer,
     PaymentConfirmSerializer,
 )
@@ -95,7 +97,7 @@ class PaymentViewSet(ModelViewSet):
         )
 
     def get_permissions(self):
-        if self.action == "destroy":
+        if self.action in ("destroy", "pending"):
             return [IsAuthenticated(), IsFinancial()]
         return [IsAuthenticated()]
 
@@ -122,6 +124,27 @@ class PaymentViewSet(ModelViewSet):
             )
 
         serializer.save(subscription=subscription)
+
+    @extend_schema(
+        tags=["Billing"],
+        operation_id="paymentsPendingList",
+        summary="List pending payments across all members",
+        description="Only financial staff can list every member's pending payments.",
+        responses={200: PaymentAdminSerializer(many=True)},
+    )
+    @action(detail=False, methods=["get"], url_path="pending")
+    def pending(self, request):
+        payments = (
+            Payment.objects
+            .select_related("subscription__user__profile")
+            .filter(status=PaymentStatus.PENDING)
+            .order_by("due_date")
+        )
+
+        serializer = PaymentAdminSerializer(
+            payments, many=True, context=self.get_serializer_context()
+        )
+        return Response(serializer.data)
 
 
 # ---------------------------------------------------------

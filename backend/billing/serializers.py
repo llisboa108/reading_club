@@ -77,6 +77,50 @@ class PaymentSerializer(serializers.ModelSerializer):
             "paid_at",
         )
 
+class PaymentAdminSerializer(serializers.ModelSerializer):
+    method_display = serializers.CharField(
+        source="get_method_display",
+        read_only=True
+    )
+
+    status_display = serializers.CharField(
+        source="get_status_display",
+        read_only=True
+    )
+
+    member_email = serializers.EmailField(
+        source="subscription.user.email",
+        read_only=True
+    )
+
+    member_name = serializers.CharField(
+        source="subscription.user.profile.full_name",
+        read_only=True,
+        default=""
+    )
+
+    class Meta:
+        model = Payment
+        fields = (
+            "id",
+            "member_email",
+            "member_name",
+            "amount",
+            "method",
+            "method_display",
+            "status",
+            "status_display",
+            "issued_at",
+            "due_date",
+            "paid_at",
+            "notes",
+            "receipt",
+        )
+        read_only_fields = (
+            "status",
+            "paid_at",
+        )
+
 class PaymentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment

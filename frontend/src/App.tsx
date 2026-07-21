@@ -19,6 +19,7 @@ import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import BillingPage from "./pages/Billing/BillingPage";
+import PaymentConfirmationsPage from "./pages/Billing/PaymentConfirmationsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import BooksPage from "./pages/Books/BooksPage";
@@ -45,6 +46,7 @@ export default function App() {
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/billing" element={<BillingPage />} />
+            <Route path="/billing/confirmations" element={<PaymentConfirmationsPage />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
 

@@ -1,77 +1,165 @@
+import { useState } from "react";
 import { apiRequest } from "../../../api/client";
 import { useToast } from "../../../context/ToastContext";
 
+const STATUS_BADGE: Record<string, { label: string; className: string }> = {
+  PENDING:   { label: "Pendente",    className: "bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-400" },
+  CONFIRMED: { label: "Confirmado",  className: "bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-400" },
+  CANCELED:  { label: "Cancelado",   className: "bg-error-100 text-error-700 dark:bg-error-900/30 dark:text-error-400" },
+  FAILED:    { label: "Falhado",     className: "bg-error-100 text-error-700 dark:bg-error-900/30 dark:text-error-400" },
+};
+
+function formatDate(dateStr: string | null | undefined) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("pt-PT", {
+    day: "2-digit", month: "long", year: "numeric",
+  });
+}
+
 export default function PaymentHistoryTable({ payments, reload }: any) {
   const { showToast } = useToast();
+  const [loadingId, setLoadingId] = useState<number | null>(null);
 
-  const handlePay = async (paymentId: number) => {
+  // Mercado Pago / PIX → mark method, stays PENDING until financial staff confirms
+  const handlePix = async (paymentId: number) => {
+    setLoadingId(paymentId);
     try {
-      const res = await apiRequest<{ checkout_url: string }>(
-        `/billing/payments/${paymentId}/confirm/`,
-        "POST"
+      await apiRequest(
+        `/billing/payments/${paymentId}/`,
+        "PATCH",
+        { method: "MP" }
       );
-
-      window.location.href = res.checkout_url;
-
+      showToast("success", "Pagamento registado", "O pagamento via PIX/Mercado Pago foi registado e aguarda confirmação.");
+      reload();
     } catch {
-      showToast("error", "Payment error", "Could not start payment");
+      showToast("error", "Erro", "Não foi possível registar o pagamento.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  // Cash → PATCH method to CASH, stays PENDING for financial to confirm
+  const handleCash = async (paymentId: number) => {
+    setLoadingId(paymentId);
+    try {
+      await apiRequest(
+        `/billing/payments/${paymentId}/`,
+        "PATCH",
+        { method: "CASH" }
+      );
+      showToast("success", "Pagamento registado", "O pagamento em dinheiro foi registado e aguarda confirmação.");
+      reload();
+    } catch {
+      showToast("error", "Erro", "Não foi possível registar o pagamento em dinheiro.");
+    } finally {
+      setLoadingId(null);
     }
   };
 
   return (
-    <div className="p-6 border rounded-xl bg-white dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-theme-xs">
 
-      <h3 className="text-lg text-gray-800 dark:text-white/90 font-semibold mb-4">
-        Payment History
-      </h3>
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+        <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">
+          Histórico de Pagamentos
+        </h3>
+      </div>
 
-      <table className="w-full text-sm">
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
 
-        <thead>
-          <tr className="border-b text-gray-800 dark:text-white/90">
-            <th className="text-left py-2">Date</th>
-            <th className="text-left py-2">Amount</th>
-            <th className="text-left py-2">Status</th>
-            <th></th>
-          </tr>
-        </thead>
-
-        <tbody>
-
-          {payments.map((p: any) => (
-            <tr key={p.id} className="border-b">
-
-              <td className="py-2">
-                {p.paid_at || p.due_date}
-              </td>
-
-              <td>
-                R$ {p.amount}
-              </td>
-
-              <td>
-                {p.status}
-              </td>
-
-              <td>
-
-                {p.status === "PENDING" && (
-                  <button
-                    onClick={() => handlePay(p.id)}
-                    className="px-3 py-1 text-sm bg-brand-500 text-white rounded"
-                  >
-                    Pay
-                  </button>
-                )}
-
-              </td>
-
+          <thead>
+            <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Data
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Valor
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Método
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Estado
+              </th>
+              <th className="px-6 py-3" />
             </tr>
-          ))}
+          </thead>
 
-        </tbody>
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
 
-      </table>
+            {payments.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                  Nenhum pagamento encontrado.
+                </td>
+              </tr>
+            )}
+
+            {payments.map((p: any) => {
+              const badge = STATUS_BADGE[p.status] ?? { label: p.status, className: "bg-gray-100 text-gray-600" };
+              const isLoading = loadingId === p.id;
+              const isPending = p.status === "PENDING";
+
+              return (
+                <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
+
+                  {/* Date */}
+                  <td className="px-6 py-4 text-gray-800 dark:text-white/80">
+                    {formatDate(p.paid_at || p.due_date)}
+                  </td>
+
+                  {/* Amount */}
+                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                    R$ {p.amount}
+                  </td>
+
+                  {/* Method */}
+                  <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
+                    {p.method_display || "—"}
+                  </td>
+
+                  {/* Status badge */}
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.className}`}>
+                      {badge.label}
+                    </span>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="px-6 py-4">
+                    {isPending && (
+                      <div className="flex items-center gap-2 justify-end">
+
+                        <button
+                          onClick={() => handlePix(p.id)}
+                          disabled={isLoading}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 disabled:opacity-50 px-3 py-1.5 text-xs font-medium text-white transition-colors"
+                        >
+                          {isLoading ? "..." : "Mercado Pago / PIX"}
+                        </button>
+
+                        <button
+                          onClick={() => handleCash(p.id)}
+                          disabled={isLoading}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 transition-colors"
+                        >
+                          {isLoading ? "..." : "Dinheiro"}
+                        </button>
+
+                      </div>
+                    )}
+                  </td>
+
+                </tr>
+              );
+            })}
+
+          </tbody>
+        </table>
+      </div>
 
     </div>
   );
