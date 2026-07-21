@@ -29,17 +29,17 @@ export default function SignInForm() {
       await login(email, password);
       showToast(
         "success",
-        "Login success",
-        "Welcome"
+        "Login efetuado",
+        "Bem-vindo(a)"
       );
       navigate("/");
     } catch (err) {
       showToast(
         "error",
-        "Login failed",
-        "Invalid credentials"
+        "Falha no login",
+        "Credenciais inválidas"
       );
-      setError("Invalid email or password.");
+      setError("Email ou senha inválidos.");
     }
   };
 

@@ -45,8 +45,8 @@ export default function SignUpForm() {
 
       showToast(
         "success",
-        "Account created",
-        "You can now sign in"
+        "Conta criada",
+        "Já pode entrar com a sua conta"
       );
       setTimeout(() => {
         window.location.href = "/signin";
@@ -55,10 +55,10 @@ export default function SignUpForm() {
     } catch {
       showToast(
         "error",
-        "Registration failed",
-        "Please check your information"
+        "Falha no cadastro",
+        "Verifique os dados informados"
       );
-      setError("Failed to create account");
+      setError("Não foi possível criar a conta.");
     } finally {
       setLoading(false);
     }

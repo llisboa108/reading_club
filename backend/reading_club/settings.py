@@ -30,6 +30,11 @@ INSTALLED_APPS = [
     # thirds
     'rest_framework',
     "rest_framework.authtoken",
+    # Needed (in addition to the token_blacklist sub-app below) so Django's
+    # translation loader picks up simplejwt's own locale/pt_BR catalog -
+    # otherwise messages like "No active account found..." stay in English
+    # even with LANGUAGE_CODE set to pt-br.
+    "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     'drf_spectacular',
     'corsheaders',
@@ -105,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
 TIME_ZONE = 'UTC'
 

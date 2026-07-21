@@ -3,6 +3,23 @@ import { normalizeApiError } from "../utils/apiErrors";
 
 import { API_HOST, API_PREFIX, getAccessToken } from "./config";
 
+// Carries the HTTP status so callers can branch on specific error
+// cases (e.g. 403 for "no active subscription") without re-parsing.
+export class ApiRequestError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
+interface ApiRequestOptions {
+  // Skip the global "Falha na requisição" toast — use when the caller
+  // wants to handle the error with its own UI instead.
+  silent?: boolean;
+}
+
 async function refreshToken(): Promise<string | null> {
   const refresh = localStorage.getItem("refresh");
   if (!refresh) return null;
@@ -29,7 +46,8 @@ async function refreshToken(): Promise<string | null> {
 export async function apiRequest<T>(
   endpoint: string,
   method: string = "GET",
-  data?: unknown
+  data?: unknown,
+  options?: ApiRequestOptions
 ): Promise<T> {
   let access = getAccessToken();
 
@@ -75,23 +93,25 @@ export async function apiRequest<T>(
       localStorage.removeItem("access");
       localStorage.removeItem("refresh");
       window.location.href = "/signin";
-      throw new Error("Session expired");
+      throw new ApiRequestError("Sessão expirada", 401);
     }
 
     response = await makeRequest(newAccess);
   }
 
   if (!response.ok) {
-    let message = "Unexpected error";
+    let message = "Erro inesperado";
 
     try {
       const data = await response.json();
       message = normalizeApiError(data);
     } catch {}
 
-    triggerToast("error", "Request failed", message);
+    if (!options?.silent) {
+      triggerToast("error", "Falha na requisição", message);
+    }
 
-    throw new Error(message);
+    throw new ApiRequestError(message, response.status);
   }
 
   // Se não houver conteúdo (ex: 204)

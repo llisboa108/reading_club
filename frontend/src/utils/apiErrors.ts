@@ -1,5 +1,5 @@
 export function normalizeApiError(data: unknown): string {
-  if (!data) return "Unknown error";
+  if (!data) return "Erro desconhecido";
 
   // Caso DRF padrão
   if (typeof data === "object" && "detail" in data) {
@@ -23,5 +23,5 @@ export function normalizeApiError(data: unknown): string {
     }
   }
 
-  return "Unexpected error";
+  return "Erro inesperado";
 }

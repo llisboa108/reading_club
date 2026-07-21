@@ -41,8 +41,8 @@ export default function UserInfoCard() {
       
       showToast(
         "success",
-        "Profile saved",
-        "Profile Changed"
+        "Perfil guardado",
+        "As alterações foram guardadas com sucesso."
       );
       await refreshUser();
       closeModal();
