@@ -21,6 +21,8 @@ interface ReadingUser { user: string; joined_at: string; }
 interface MeetPhoto { id: number; image: string; }
 interface MeetParticipant { user: string; joined_at: string; }
 
+interface Member { id: number; email: string; full_name: string; }
+
 interface Meet {
   id: number;
   reading: number;
@@ -38,11 +40,37 @@ interface Meet {
 interface Reading {
   id: number;
   book: Book;
+  suggested_by?: Member | null;
   start_date: string;
   end_date?: string | null;
   status?: ReadingStatus;
   participants: ReadingUser[];
 }
+
+// ── Reading edit form ─────────────────────────────────────────────────────────
+
+interface ReadingForm {
+  book: string;
+  suggested_by: string;
+  users: number[];
+  start_date: string;
+  end_date: string;
+  status: ReadingStatus | "";
+}
+
+const EMPTY_READING_FORM: ReadingForm = {
+  book: "", suggested_by: "", users: [],
+  start_date: "", end_date: "", status: "",
+};
+
+const STATUS_OPTIONS: { value: ReadingStatus; label: string }[] = [
+  { value: "PLANNED",     label: "Planeada" },
+  { value: "IN_PROGRESS", label: "Em andamento" },
+  { value: "FINISHED",    label: "Finalizada" },
+  { value: "CANCELED",    label: "Cancelada" },
+];
+
+// ── Meet form ─────────────────────────────────────────────────────────────────
 
 interface MeetForm {
   meet_date: string;
@@ -51,11 +79,12 @@ interface MeetForm {
   end_page: string;
   meeting_link: string;
   address: string;
+  users: number[];
 }
 
 const EMPTY_MEET_FORM: MeetForm = {
   meet_date: "", meet_type: "", start_page: "", end_page: "",
-  meeting_link: "", address: "",
+  meeting_link: "", address: "", users: [],
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -83,8 +112,6 @@ function formatDateTime(d: string) {
   });
 }
 
-// ── Silent fetch ──────────────────────────────────────────────────────────────
-
 async function silentFetch<T>(path: string): Promise<T | null> {
   try {
     const token = getAccessToken();
@@ -106,9 +133,17 @@ export default function ReadingDetailPage() {
 
   const [reading, setReading] = useState<Reading | null>(null);
   const [meets, setMeets] = useState<Meet[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const [loadingReading, setLoadingReading] = useState(true);
   const [meetsError, setMeetsError] = useState<"forbidden" | "error" | null>(null);
   const [notFound, setNotFound] = useState(false);
+
+  // Reading edit modal
+  const [readingModalOpen, setReadingModalOpen] = useState(false);
+  const [readingForm, setReadingForm] = useState<ReadingForm>(EMPTY_READING_FORM);
+  const [savingReading, setSavingReading] = useState(false);
+  const [readingFormError, setReadingFormError] = useState("");
 
   // Meet modal
   const [meetModalOpen, setMeetModalOpen] = useState(false);
@@ -128,7 +163,6 @@ export default function ReadingDetailPage() {
     if (!id) return;
     setLoadingReading(true);
 
-    // Reading — uses apiRequest (will 404 if not found)
     try {
       const r = await apiRequest<Reading>(`/club/readings/${id}/`);
       setReading(r);
@@ -138,8 +172,12 @@ export default function ReadingDetailPage() {
       return;
     }
 
-    // Meets — silent fetch to handle 403 gracefully
-    const allMeets = await silentFetch<Meet[]>("/club/meets/");
+    const [allMeets, allMembers, allBooks] = await Promise.all([
+      silentFetch<Meet[]>("/club/meets/"),
+      apiRequest<Member[]>("/auth/members/").catch(() => [] as Member[]),
+      apiRequest<Book[]>("/club/books/").catch(() => [] as Book[]),
+    ]);
+
     if (allMeets === null) {
       setMeetsError("forbidden");
     } else {
@@ -147,10 +185,71 @@ export default function ReadingDetailPage() {
       setMeetsError(null);
     }
 
+    setMembers(allMembers as Member[]);
+    setBooks(allBooks as Book[]);
     setLoadingReading(false);
   }
 
   useEffect(() => { fetchData(); }, [id]);
+
+  // ── Reading edit modal ─────────────────────────────────────────────────────
+
+  function openEditReading() {
+    if (!reading) return;
+    setReadingForm({
+      book: String(reading.book.id),
+      suggested_by: reading.suggested_by ? String(reading.suggested_by.id) : "",
+      users: reading.participants.map((p) => {
+        const found = members.find((m) => m.email === p.user);
+        return found ? found.id : -1;
+      }).filter((id) => id !== -1),
+      start_date: reading.start_date,
+      end_date: reading.end_date || "",
+      status: reading.status || "PLANNED",
+    });
+    setReadingFormError("");
+    setReadingModalOpen(true);
+  }
+
+  function closeReadingModal() {
+    setReadingModalOpen(false);
+    setReadingForm(EMPTY_READING_FORM);
+    setReadingFormError("");
+  }
+
+  async function handleSaveReading() {
+    if (!reading) return;
+    if (!readingForm.book)       { setReadingFormError("Selecione um livro."); return; }
+    if (!readingForm.start_date) { setReadingFormError("Data de início é obrigatória."); return; }
+    if (!readingForm.status)     { setReadingFormError("Selecione um estado."); return; }
+
+    setSavingReading(true);
+    setReadingFormError("");
+    try {
+      const payload = {
+        book: Number(readingForm.book),
+        suggested_by: readingForm.suggested_by ? Number(readingForm.suggested_by) : null,
+        users: readingForm.users,
+        start_date: readingForm.start_date,
+        end_date: readingForm.end_date || null,
+        status: readingForm.status,
+      };
+      await apiRequest(`/club/readings/${reading.id}/`, "PATCH", payload);
+      closeReadingModal();
+      await fetchData();
+    } catch {
+      setReadingFormError("Erro ao guardar. Verifica os campos e tenta novamente.");
+    } finally { setSavingReading(false); }
+  }
+
+  function toggleMember(memberId: number) {
+    setReadingForm((prev) => ({
+      ...prev,
+      users: prev.users.includes(memberId)
+        ? prev.users.filter((u) => u !== memberId)
+        : [...prev.users, memberId],
+    }));
+  }
 
   // ── Meet Modal ─────────────────────────────────────────────────────────────
 
@@ -163,9 +262,13 @@ export default function ReadingDetailPage() {
 
   function openEditMeet(meet: Meet) {
     setEditingMeet(meet);
-    // meet_date from API is ISO string — convert to datetime-local format
     const dt = new Date(meet.meet_date);
-    const local = dt.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
+    const local = dt.toISOString().slice(0, 16);
+
+    const meetUserIds = meet.participants
+    .map((p) => members.find((m) => m.email === p.user)?.id ?? -1)
+    .filter((id) => id !== -1);
+
     setMeetForm({
       meet_date: local,
       meet_type: meet.meet_type,
@@ -173,6 +276,7 @@ export default function ReadingDetailPage() {
       end_page: meet.end_page ? String(meet.end_page) : "",
       meeting_link: meet.meeting_link || "",
       address: meet.address || "",
+      users: meetUserIds,
     });
     setMeetFormError("");
     setMeetModalOpen(true);
@@ -206,6 +310,7 @@ export default function ReadingDetailPage() {
         end_page: meetForm.end_page ? Number(meetForm.end_page) : null,
         meeting_link: meetForm.meeting_link || "",
         address: meetForm.address || "",
+        users: meetForm.users,
       };
       if (editingMeet) {
         await apiRequest(`/club/meets/${editingMeet.id}/`, "PATCH", payload);
@@ -217,6 +322,15 @@ export default function ReadingDetailPage() {
     } catch {
       setMeetFormError("Erro ao guardar. Verifica os campos e tenta novamente.");
     } finally { setSavingMeet(false); }
+  }
+
+  function toggleMeetMember(memberId: number) {
+    setMeetForm((prev) => ({
+      ...prev,
+      users: prev.users.includes(memberId)
+        ? prev.users.filter((u) => u !== memberId)
+        : [...prev.users, memberId],
+    }));
   }
 
   async function handleDeleteMeet() {
@@ -291,60 +405,102 @@ export default function ReadingDetailPage() {
 
         {/* Reading header card */}
         <div className="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-gray-900">
-          <div className="flex flex-col gap-5 p-6 sm:flex-row sm:p-8">
-            {/* Book cover */}
-            <div
-              className="flex h-24 w-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-500/10 dark:to-brand-600/20"
-              onClick={() => navigate(`/books/${reading.book.id}`)}
-              title="Ver livro"
-            >
-              {reading.book.cover ? (
-                <img src={reading.book.cover} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-lg font-bold text-brand-400 dark:text-brand-300 select-none">{bookInitials}</span>
-              )}
-            </div>
+          <div className="flex flex-col gap-5 p-6 sm:p-8">
 
-            {/* Info */}
-            <div className="flex flex-1 flex-col justify-between gap-4">
-              <div>
-                <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">{reading.book.title}</h1>
-                  <Badge color={statusColor} size="sm">{statusLabel}</Badge>
-                </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{authorFullName(reading.book.author)} · {reading.book.publisher.name}</p>
+            <div className="flex items-start gap-5">
+              {/* Book cover */}
+              <div
+                className="flex h-24 w-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-500/10 dark:to-brand-600/20"
+                onClick={() => navigate(`/books/${reading.book.id}`)}
+                title="Ver livro"
+              >
+                {reading.book.cover ? (
+                  <img src={reading.book.cover} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-lg font-bold text-brand-400 dark:text-brand-300 select-none">{bookInitials}</span>
+                )}
               </div>
 
-              <div className="flex flex-wrap gap-6 text-sm text-gray-600 dark:text-gray-400">
-                <span className="flex items-center gap-1.5"><CalendarIcon className="h-4 w-4 text-gray-400" />Início: {formatDate(reading.start_date)}</span>
-                {reading.end_date && <span className="flex items-center gap-1.5"><CalendarIcon className="h-4 w-4 text-gray-400" />Fim: {formatDate(reading.end_date)}</span>}
-                <span className="flex items-center gap-1.5">
-                  <UsersIcon className="h-4 w-4 text-gray-400" />
-                  {reading.participants.length} participante{reading.participants.length !== 1 ? "s" : ""}
-                </span>
-                <span className="flex items-center gap-1.5"><BookIcon className="h-4 w-4 text-gray-400" />{reading.book.pages} páginas</span>
-              </div>
+              {/* Info + edit button */}
+              <div className="flex flex-1 flex-col justify-between gap-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      <h1 className="text-xl font-bold text-gray-900 dark:text-white">{reading.book.title}</h1>
+                      <Badge color={statusColor} size="sm">{statusLabel}</Badge>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {authorFullName(reading.book.author)} · {reading.book.publisher.name}
+                    </p>
+                  </div>
 
-              {/* Participants avatars */}
-              {reading.participants.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {reading.participants.slice(0, 8).map((p) => (
-                    <span
-                      key={p.user}
-                      title={p.user}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 text-xs font-medium text-brand-600 dark:bg-brand-500/15 dark:text-brand-400"
+                  {/* Edit button — admins only */}
+                  {isAdmin && (
+                    <button
+                      onClick={openEditReading}
+                      className="flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 shadow-theme-xs transition hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                      title="Editar leitura"
                     >
-                      {p.user.slice(0, 1).toUpperCase()}
-                    </span>
-                  ))}
-                  {reading.participants.length > 8 && (
-                    <span className="inline-flex h-7 items-center justify-center rounded-full bg-gray-100 px-2 text-xs font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                      +{reading.participants.length - 8}
-                    </span>
+                      <EditIcon className="h-3.5 w-3.5" />
+                      Editar
+                    </button>
                   )}
                 </div>
-              )}
+
+                {/* Meta row */}
+                <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-gray-600 dark:text-gray-400">
+                  <span className="flex items-center gap-1.5">
+                    <CalendarIcon className="h-4 w-4 text-gray-400" />Início: {formatDate(reading.start_date)}
+                  </span>
+                  {reading.end_date && (
+                    <span className="flex items-center gap-1.5">
+                      <CalendarIcon className="h-4 w-4 text-gray-400" />Fim: {formatDate(reading.end_date)}
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1.5">
+                    <BookIcon className="h-4 w-4 text-gray-400" />{reading.book.pages} páginas
+                  </span>
+                </div>
+
+                {/* Suggested by */}
+                {reading.suggested_by && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    💡 Sugerido por{" "}
+                    <span className="font-medium text-gray-700 dark:text-gray-200">
+                      {reading.suggested_by.full_name || reading.suggested_by.email}
+                    </span>
+                  </p>
+                )}
+              </div>
             </div>
+
+            {/* Participants list */}
+            {reading.participants.length > 0 && (
+              <div className="border-t border-gray-100 pt-5 dark:border-gray-800">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                  Participantes ({reading.participants.length})
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {reading.participants.map((p) => {
+                    const member = members.find((m) => m.email === p.user);
+                    const displayName = member?.full_name || p.user;
+                    const initial = displayName.slice(0, 1).toUpperCase();
+                    return (
+                      <div
+                        key={p.user}
+                        title={p.user}
+                        className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 py-1 pl-1 pr-3 dark:border-gray-700 dark:bg-gray-800"
+                      >
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-600 dark:bg-brand-500/20 dark:text-brand-400">
+                          {initial}
+                        </span>
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{displayName}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -395,7 +551,140 @@ export default function ReadingDetailPage() {
         </div>
       </div>
 
-      {/* Meet create/edit modal */}
+      {/* ── Reading edit modal ─────────────────────────────────────────────── */}
+      <Modal isOpen={readingModalOpen} onClose={closeReadingModal} className="max-w-lg p-6 sm:p-8">
+        <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">Editar Leitura</h2>
+        <div className="space-y-4">
+
+          {/* Livro */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Livro <span className="text-error-500">*</span>
+            </label>
+            <select
+              value={readingForm.book}
+              onChange={(e) => setReadingForm({ ...readingForm, book: e.target.value })}
+              className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+            >
+              <option value="">Selecionar livro</option>
+              {books.map((b) => (
+                <option key={b.id} value={String(b.id)}>
+                  {b.title} — {authorFullName(b.author)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sugerido por */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Sugerido por</label>
+            <select
+              value={readingForm.suggested_by}
+              onChange={(e) => setReadingForm({ ...readingForm, suggested_by: e.target.value })}
+              className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+            >
+              <option value="">Nenhum</option>
+              {members.map((m) => (
+                <option key={m.id} value={String(m.id)}>
+                  {m.full_name || m.email}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Estado */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Estado <span className="text-error-500">*</span>
+            </label>
+            <select
+              value={readingForm.status}
+              onChange={(e) => setReadingForm({ ...readingForm, status: e.target.value as ReadingStatus })}
+              className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+            >
+              <option value="">Selecionar estado</option>
+              {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </select>
+          </div>
+
+          {/* Datas */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Data de início <span className="text-error-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={readingForm.start_date}
+                onChange={(e) => setReadingForm({ ...readingForm, start_date: e.target.value })}
+                className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Data de fim</label>
+              <input
+                type="date"
+                value={readingForm.end_date}
+                onChange={(e) => setReadingForm({ ...readingForm, end_date: e.target.value })}
+                className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              />
+            </div>
+          </div>
+
+          {/* Participantes */}
+          {members.length > 0 && (
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Participantes
+                <span className="ml-2 text-xs font-normal text-gray-400">
+                  ({readingForm.users.length} selecionado{readingForm.users.length !== 1 ? "s" : ""})
+                </span>
+              </label>
+              <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-300 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-800">
+                {members.map((m) => {
+                  const selected = readingForm.users.includes(m.id);
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => toggleMember(m.id)}
+                      className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                        selected ? "bg-brand-50 dark:bg-brand-500/10" : ""
+                      }`}
+                    >
+                      <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                        selected
+                          ? "bg-brand-500 text-white"
+                          : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                      }`}>
+                        {(m.full_name || m.email).slice(0, 1).toUpperCase()}
+                      </span>
+                      <span className="flex-1 truncate text-gray-700 dark:text-gray-200">
+                        {m.full_name || m.email}
+                      </span>
+                      {selected && <CheckIcon className="h-4 w-4 shrink-0 text-brand-500" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {readingFormError && (
+            <p className="rounded-lg bg-error-50 px-4 py-2.5 text-sm text-error-600 dark:bg-error-500/15 dark:text-error-400">
+              {readingFormError}
+            </p>
+          )}
+        </div>
+        <div className="mt-6 flex justify-end gap-3">
+          <Button variant="outline" onClick={closeReadingModal} disabled={savingReading}>Cancelar</Button>
+          <Button onClick={handleSaveReading} disabled={savingReading}>
+            {savingReading ? "A guardar…" : "Guardar alterações"}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* ── Meet create/edit modal ─────────────────────────────────────────── */}
       <Modal isOpen={meetModalOpen} onClose={closeMeetModal} className="max-w-lg p-6 sm:p-8">
         <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
           {editingMeet ? "Editar Encontro" : "Novo Encontro"}
@@ -438,7 +727,6 @@ export default function ReadingDetailPage() {
             </div>
           </div>
 
-          {/* Conditional field */}
           {meetForm.meet_type === "ONLINE" && (
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -467,6 +755,46 @@ export default function ReadingDetailPage() {
               />
             </div>
           )}
+
+          {/* Participantes do encontro */}
+          {members.length > 0 && (
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Participantes
+                <span className="ml-2 text-xs font-normal text-gray-400">
+                  ({meetForm.users.length} selecionado{meetForm.users.length !== 1 ? "s" : ""})
+                </span>
+              </label>
+              <div className="max-h-44 overflow-y-auto rounded-lg border border-gray-300 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-800">
+                {members.map((m) => {
+                  const selected = meetForm.users.includes(m.id);
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => toggleMeetMember(m.id)}
+                      className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                        selected ? "bg-brand-50 dark:bg-brand-500/10" : ""
+                      }`}
+                    >
+                      <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                        selected
+                          ? "bg-brand-500 text-white"
+                          : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                      }`}>
+                        {(m.full_name || m.email).slice(0, 1).toUpperCase()}
+                      </span>
+                      <span className="flex-1 truncate text-gray-700 dark:text-gray-200">
+                        {m.full_name || m.email}
+                      </span>
+                      {selected && <CheckIcon className="h-4 w-4 shrink-0 text-brand-500" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
 
           {/* Páginas */}
           <div className="grid grid-cols-2 gap-4">
@@ -502,7 +830,7 @@ export default function ReadingDetailPage() {
         </div>
       </Modal>
 
-      {/* Delete meet modal */}
+      {/* ── Delete meet modal ──────────────────────────────────────────────── */}
       <Modal isOpen={deleteMeetModalOpen} onClose={() => setDeleteMeetModalOpen(false)} className="max-w-sm p-6 sm:p-8">
         <div className="flex flex-col items-center text-center">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-error-50 dark:bg-error-500/15">
@@ -528,7 +856,7 @@ export default function ReadingDetailPage() {
   );
 }
 
-// ── MeetCard ─────────────────────────────────────────────────────────────────
+// ── MeetCard ──────────────────────────────────────────────────────────────────
 
 function MeetCard({ meet, index, totalPages, isAdmin, onEdit, onDelete }: {
   meet: Meet; index: number; totalPages: number;
@@ -545,7 +873,7 @@ function MeetCard({ meet, index, totalPages, isAdmin, onEdit, onDelete }: {
   return (
     <div className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs dark:border-gray-800 dark:bg-gray-900">
       <div className="flex items-start justify-between gap-4">
-        {/* Left: number + info */}
+        {/* Left */}
         <div className="flex items-start gap-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">
             {index}
@@ -639,6 +967,7 @@ function MeetCard({ meet, index, totalPages, isAdmin, onEdit, onDelete }: {
 
 function ArrowLeftIcon() { return <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>; }
 function PlusIcon() { return <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>; }
+function CheckIcon({ className }: { className?: string }) { return <svg className={className ?? "h-4 w-4"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>; }
 function CalendarIcon({ className }: { className?: string }) { return <svg className={className ?? "h-4 w-4"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" /></svg>; }
 function UsersIcon({ className }: { className?: string }) { return <svg className={className ?? "h-4 w-4"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" /></svg>; }
 function BookOpenIcon({ className }: { className?: string }) { return <svg className={className ?? "h-6 w-6"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>; }

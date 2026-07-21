@@ -19,9 +19,12 @@ type ReadingStatus = "PLANNED" | "IN_PROGRESS" | "FINISHED" | "CANCELED";
 
 interface ReadingUser { user: string; joined_at: string; }
 
+interface Member { id: number; email: string; full_name: string; }
+
 interface Reading {
   id: number;
   book: Book;
+  suggested_by?: Member | null;
   start_date: string;
   end_date?: string | null;
   status?: ReadingStatus;
@@ -30,12 +33,17 @@ interface Reading {
 
 interface ReadingForm {
   book: string;
+  suggested_by: string;
+  users: number[];
   start_date: string;
   end_date: string;
   status: ReadingStatus | "";
 }
 
-const EMPTY_FORM: ReadingForm = { book: "", start_date: "", end_date: "", status: "" };
+const EMPTY_FORM: ReadingForm = {
+  book: "", suggested_by: "", users: [],
+  start_date: "", end_date: "", status: "",
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -62,8 +70,6 @@ function formatDate(d?: string | null) {
   return new Date(d).toLocaleDateString("pt-PT", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-// ── Silent fetch (no toast on 403) ────────────────────────────────────────────
-
 async function silentFetch<T>(path: string): Promise<T | null> {
   try {
     const token = getAccessToken();
@@ -72,9 +78,7 @@ async function silentFetch<T>(path: string): Promise<T | null> {
     });
     if (!res.ok) return null;
     return res.json();
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
@@ -86,20 +90,19 @@ export default function ReadingsPage() {
 
   const [readings, setReadings] = useState<Reading[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);   // ← novo
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
 
   const [filterStatus, setFilterStatus] = useState<ReadingStatus | "">("");
   const [search, setSearch] = useState("");
 
-  // Modal create/edit
   const [modalOpen, setModalOpen] = useState(false);
   const [editingReading, setEditingReading] = useState<Reading | null>(null);
   const [form, setForm] = useState<ReadingForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
 
-  // Modal delete
   const [deleteReading, setDeleteReading] = useState<Reading | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -108,12 +111,14 @@ export default function ReadingsPage() {
 
   async function fetchAll() {
     setLoading(true);
-    const [r, b] = await Promise.all([
+    const [r, b, m] = await Promise.all([
       silentFetch<Reading[]>("/club/readings/"),
       apiRequest<Book[]>("/club/books/").catch(() => [] as Book[]),
+      apiRequest<Member[]>("/auth/members/").catch(() => [] as Member[]),  // ← novo
     ]);
     if (r === null) { setForbidden(true); } else { setReadings(r); setForbidden(false); }
     setBooks(b as Book[]);
+    setMembers(m as Member[]);
     setLoading(false);
   }
 
@@ -142,6 +147,11 @@ export default function ReadingsPage() {
     setEditingReading(r);
     setForm({
       book: String(r.book.id),
+      suggested_by: r.suggested_by ? String(r.suggested_by.id) : "",
+      users: r.participants.map((p) => {
+        const found = members.find((m) => m.email === p.user);
+        return found ? found.id : -1;
+      }).filter((id) => id !== -1),
       start_date: r.start_date,
       end_date: r.end_date || "",
       status: r.status || "PLANNED",
@@ -150,7 +160,12 @@ export default function ReadingsPage() {
     setModalOpen(true);
   }
 
-  function closeModal() { setModalOpen(false); setEditingReading(null); setForm(EMPTY_FORM); setFormError(""); }
+  function closeModal() {
+    setModalOpen(false);
+    setEditingReading(null);
+    setForm(EMPTY_FORM);
+    setFormError("");
+  }
 
   // ── Save ───────────────────────────────────────────────────────────────────
 
@@ -163,6 +178,8 @@ export default function ReadingsPage() {
     try {
       const payload = {
         book: Number(form.book),
+        suggested_by: form.suggested_by ? Number(form.suggested_by) : null,
+        users: form.users,
         start_date: form.start_date,
         end_date: form.end_date || null,
         status: form.status,
@@ -192,6 +209,17 @@ export default function ReadingsPage() {
     } finally { setDeleting(false); }
   }
 
+  // ── Toggle member selection ────────────────────────────────────────────────
+
+  function toggleMember(id: number) {
+    setForm((prev) => ({
+      ...prev,
+      users: prev.users.includes(id)
+        ? prev.users.filter((u) => u !== id)
+        : [...prev.users, id],
+    }));
+  }
+
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
@@ -200,7 +228,6 @@ export default function ReadingsPage() {
       <div className="mx-auto max-w-screen-xl px-4 py-6 sm:px-6">
         <PageBreadCrumb pageTitle="Leituras" />
 
-        {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Leituras</h1>
@@ -215,14 +242,12 @@ export default function ReadingsPage() {
           )}
         </div>
 
-        {/* Forbidden */}
         {forbidden ? (
           <ForbiddenState />
         ) : loading ? (
           <LoadingSkeleton />
         ) : (
           <>
-            {/* Filters */}
             <div className="mb-5 flex flex-col gap-3 sm:flex-row">
               <div className="relative flex-1">
                 <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400"><SearchIcon /></span>
@@ -244,7 +269,6 @@ export default function ReadingsPage() {
               </select>
             </div>
 
-            {/* List */}
             {filtered.length === 0 ? (
               <EmptyState hasFilter={!!search || !!filterStatus} onClear={() => { setSearch(""); setFilterStatus(""); }} />
             ) : (
@@ -271,6 +295,8 @@ export default function ReadingsPage() {
           {editingReading ? "Editar Leitura" : "Nova Leitura"}
         </h2>
         <div className="space-y-4">
+
+          {/* Livro */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Livro <span className="text-error-500">*</span>
@@ -289,6 +315,26 @@ export default function ReadingsPage() {
             </select>
           </div>
 
+          {/* Sugerido por */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Sugerido por
+            </label>
+            <select
+              value={form.suggested_by}
+              onChange={(e) => setForm({ ...form, suggested_by: e.target.value })}
+              className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+            >
+              <option value="">Nenhum</option>
+              {members.map((m) => (
+                <option key={m.id} value={String(m.id)}>
+                  {m.full_name || m.email}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Estado */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Estado <span className="text-error-500">*</span>
@@ -303,6 +349,7 @@ export default function ReadingsPage() {
             </select>
           </div>
 
+          {/* Datas */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -325,6 +372,48 @@ export default function ReadingsPage() {
               />
             </div>
           </div>
+
+          {/* Participantes */}
+          {members.length > 0 && (
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Participantes
+                <span className="ml-2 text-xs font-normal text-gray-400">
+                  ({form.users.length} selecionado{form.users.length !== 1 ? "s" : ""})
+                </span>
+              </label>
+              <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-300 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-800">
+                {members.map((m) => {
+                  const selected = form.users.includes(m.id);
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => toggleMember(m.id)}
+                      className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                        selected ? "bg-brand-50 dark:bg-brand-500/10" : ""
+                      }`}
+                    >
+                      {/* Avatar */}
+                      <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                        selected
+                          ? "bg-brand-500 text-white"
+                          : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                      }`}>
+                        {(m.full_name || m.email).slice(0, 1).toUpperCase()}
+                      </span>
+                      <span className="flex-1 truncate text-gray-700 dark:text-gray-200">
+                        {m.full_name || m.email}
+                      </span>
+                      {selected && (
+                        <CheckIcon className="h-4 w-4 shrink-0 text-brand-500" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {formError && (
             <p className="rounded-lg bg-error-50 px-4 py-2.5 text-sm text-error-600 dark:bg-error-500/15 dark:text-error-400">{formError}</p>
@@ -364,7 +453,7 @@ export default function ReadingsPage() {
   );
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+// ── Sub-components (mantidos iguais) ──────────────────────────────────────────
 
 function ReadingRow({ reading, isAdmin, onClick, onEdit, onDelete }: {
   reading: Reading; isAdmin: boolean;
@@ -376,7 +465,6 @@ function ReadingRow({ reading, isAdmin, onClick, onEdit, onDelete }: {
   return (
     <div className="group flex cursor-pointer items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs transition hover:shadow-theme-md dark:border-gray-800 dark:bg-gray-900"
       onClick={onClick}>
-      {/* Book cover thumb */}
       <div className="flex h-16 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-500/10 dark:to-brand-600/20">
         {reading.book.cover ? (
           <img src={reading.book.cover} alt="" className="h-full w-full object-cover" />
@@ -386,19 +474,21 @@ function ReadingRow({ reading, isAdmin, onClick, onEdit, onDelete }: {
           </span>
         )}
       </div>
-
-      {/* Info */}
       <div className="flex flex-1 flex-col gap-1 min-w-0">
         <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">{reading.book.title}</p>
         <p className="text-xs text-gray-500 dark:text-gray-400">{authorFullName(reading.book.author)}</p>
+        {/* Sugerido por */}
+        {reading.suggested_by && (
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            💡 Sugerido por <span className="font-medium">{reading.suggested_by.full_name || reading.suggested_by.email}</span>
+          </p>
+        )}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400 dark:text-gray-500">
           <span className="flex items-center gap-1"><CalendarIcon className="h-3 w-3" />{formatDate(reading.start_date)}</span>
           {reading.end_date && <span>→ {formatDate(reading.end_date)}</span>}
           <span className="flex items-center gap-1"><UsersIcon className="h-3 w-3" />{reading.participants.length} participante{reading.participants.length !== 1 ? "s" : ""}</span>
         </div>
       </div>
-
-      {/* Status + actions */}
       <div className="flex shrink-0 items-center gap-2" onClick={(e) => e.stopPropagation()}>
         <Badge color={color} size="sm">{label}</Badge>
         {isAdmin && (
@@ -466,6 +556,7 @@ function EmptyState({ hasFilter, onClear }: { hasFilter: boolean; onClear: () =>
 
 function PlusIcon() { return <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>; }
 function SearchIcon() { return <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" /></svg>; }
+function CheckIcon({ className }: { className?: string }) { return <svg className={className ?? "h-4 w-4"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>; }
 function EditIcon({ className }: { className?: string }) { return <svg className={className ?? "h-4 w-4"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>; }
 function TrashIcon({ className }: { className?: string }) { return <svg className={className ?? "h-4 w-4"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16" /></svg>; }
 function CalendarIcon({ className }: { className?: string }) { return <svg className={className ?? "h-4 w-4"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" /></svg>; }
