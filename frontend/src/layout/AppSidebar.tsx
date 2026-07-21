@@ -115,6 +115,12 @@ const navItems: NavItem[] = [
     path: "/billing/confirmations",
     financial: true,
   },
+  {
+    icon: <UserCircleIcon />,
+    name: "Membros",
+    path: "/members",
+    admin: true,
+  },
 ];
 
 const othersItems: NavItem[] = [
