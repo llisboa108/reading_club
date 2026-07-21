@@ -51,7 +51,7 @@ export default function SignInForm() {
           className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700"
         >
           <ChevronLeftIcon className="size-5" />
-          Back to dashboard
+          Voltar ao início
         </Link>
       </div>
 
@@ -59,10 +59,10 @@ export default function SignInForm() {
         <div>
           <div className="mb-5 sm:mb-8">
             <h1 className="mb-2 font-semibold text-gray-800 dark:text-white/90 text-title-sm">
-              Sign In
+              Entrar
             </h1>
             <p className="text-sm text-gray-500">
-              Enter your email and password to sign in!
+              Informe o seu email e senha para entrar!
             </p>
           </div>
 
@@ -86,12 +86,12 @@ export default function SignInForm() {
 
               <div>
                 <Label>
-                  Password <span className="text-error-500">*</span>
+                  Senha <span className="text-error-500">*</span>
                 </Label>
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
+                    placeholder="Digite a sua senha"
                     value={password}
                     onChange={(e: any) => setPassword(e.target.value)}
                   />
@@ -115,7 +115,7 @@ export default function SignInForm() {
                     onChange={setIsChecked}
                   />
                   <span className="text-sm text-gray-700">
-                    Keep me logged in
+                    Manter-me conectado
                   </span>
                 </div>
 
@@ -123,13 +123,13 @@ export default function SignInForm() {
                   to="/forgot-password"
                   className="text-sm text-brand-500"
                 >
-                  Forgot password?
+                  Esqueceu a senha?
                 </Link>
               </div>
 
               <div>
                 <Button className="w-full" size="sm">
-                  Sign in
+                  Entrar
                 </Button>
               </div>
             </div>
@@ -137,12 +137,12 @@ export default function SignInForm() {
 
           <div className="mt-5">
             <p className="text-sm text-gray-700">
-              Don&apos;t have an account?{" "}
+              Ainda não tem uma conta?{" "}
               <Link
                 to="/signup"
                 className="text-brand-500"
               >
-                Sign Up
+                Registar
               </Link>
             </p>
           </div>

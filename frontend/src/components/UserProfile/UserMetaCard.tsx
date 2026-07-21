@@ -1,19 +1,20 @@
 import { useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { apiRequest } from "../../api/client";
+import { API_HOST } from "../../api/config";
+import { useToast } from "../../context/ToastContext";
 
 
 export default function UserMetaCard() {
   const { user, refreshUser } = useAuth();
+  const { showToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
-
-  const backendUrl = "http://127.0.0.1:8000";
 
   const photoUrl =
     preview ||
     (user?.profile?.photo
-      ? `${backendUrl}${user.profile.photo}`
+      ? `${API_HOST}${user.profile.photo}`
       : null);
 
   const handleAvatarClick = () => {
@@ -40,8 +41,8 @@ export default function UserMetaCard() {
       );
 
       await refreshUser();
-    } catch (err) {
-      console.error("Upload failed", err);
+    } catch {
+      showToast("error", "Erro", "Não foi possível atualizar a foto de perfil.");
     }
   };
 
@@ -69,7 +70,7 @@ export default function UserMetaCard() {
               )}
 
               <div className="absolute inset-0 flex items-center justify-center text-xs text-white bg-black/50 opacity-0 group-hover:opacity-100">
-                Change
+                Alterar
               </div>
             </div>
 
@@ -87,11 +88,11 @@ export default function UserMetaCard() {
               </h4>
               <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {user?.is_financial ? "Financial Staff" : "Member"}
-                </p>
-                <div className="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Arizona, United States
+                  {user?.is_admin
+                    ? "Administrador"
+                    : user?.is_financial
+                    ? "Financeiro"
+                    : "Membro"}
                 </p>
               </div>
             </div>

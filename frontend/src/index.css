@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap")
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap")
 layer(base);
 
 @import "tailwindcss";
@@ -7,7 +7,8 @@ layer(base);
 
 @theme {
   --font-*: initial;
-  --font-outfit: Outfit, sans-serif;
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Libre Baskerville", Georgia, serif;
 
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;
@@ -41,18 +42,21 @@ layer(base);
   --color-white: #ffffff;
   --color-black: #101828;
 
-  --color-brand-25: #f2f7ff;
-  --color-brand-50: #ecf3ff;
-  --color-brand-100: #dde9ff;
-  --color-brand-200: #c2d6ff;
-  --color-brand-300: #9cb9ff;
-  --color-brand-400: #7592ff;
-  --color-brand-500: #465fff;
-  --color-brand-600: #3641f5;
-  --color-brand-700: #2a31d8;
-  --color-brand-800: #252dae;
-  --color-brand-900: #262e89;
-  --color-brand-950: #161950;
+  /* Sonhos Literários brand ramp — anchored on the guide's exact logo
+     color #261B62 at 600 (also used as the large dark panel fill, e.g.
+     the auth page), derived by varying lightness at constant hue/sat. */
+  --color-brand-25: #f4f3fc;
+  --color-brand-50: #eae7f8;
+  --color-brand-100: #d4cff2;
+  --color-brand-200: #b1a7e7;
+  --color-brand-300: #8d7fdc;
+  --color-brand-400: #634fcf;
+  --color-brand-500: #4430b0;
+  --color-brand-600: #261b62;
+  --color-brand-700: #1d154c;
+  --color-brand-800: #160f38;
+  --color-brand-900: #100b28;
+  --color-brand-950: #090718;
 
   --color-blue-light-25: #f5fbff;
   --color-blue-light-50: #f0f9ff;
@@ -107,18 +111,20 @@ layer(base);
   --color-success-900: #054f31;
   --color-success-950: #053321;
 
-  --color-error-25: #fffbfa;
-  --color-error-50: #fef3f2;
-  --color-error-100: #fee4e2;
-  --color-error-200: #fecdca;
-  --color-error-300: #fda29b;
-  --color-error-400: #f97066;
-  --color-error-500: #f04438;
-  --color-error-600: #d92d20;
-  --color-error-700: #b42318;
-  --color-error-800: #912018;
-  --color-error-900: #7a271a;
-  --color-error-950: #55160c;
+  /* Anchored on the guide's crimson accent #D9183B at 500 — already the
+     semantic "error/destructive" slot, so this is a natural fit. */
+  --color-error-25: #fdf1f3;
+  --color-error-50: #fce3e8;
+  --color-error-100: #f9c8d1;
+  --color-error-200: #f49aaa;
+  --color-error-300: #ef6c84;
+  --color-error-400: #ea3e5d;
+  --color-error-500: #d9183b;
+  --color-error-600: #b81432;
+  --color-error-700: #981129;
+  --color-error-800: #770d20;
+  --color-error-900: #570a18;
+  --color-error-950: #37060f;
 
   --color-warning-25: #fffcf5;
   --color-warning-50: #fffaeb;
@@ -186,7 +192,13 @@ layer(base);
     cursor: pointer;
   }
   body {
-    @apply relative font-normal font-outfit z-1 bg-gray-50;
+    @apply relative font-normal font-body z-1 bg-gray-50;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
   }
 }
 

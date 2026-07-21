@@ -58,7 +58,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: Props) {
     setSuccess(null);
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError("As senhas não coincidem.");
       return;
     }
 
@@ -70,7 +70,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: Props) {
         new_password: newPassword,
       });
 
-      setSuccess("Password updated successfully.");
+      setSuccess("Senha atualizada com sucesso.");
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -79,8 +79,8 @@ export default function ChangePasswordModal({ isOpen, onClose }: Props) {
         onClose();
       }, 1500);
 
-    } catch (err) {
-      setError("Failed to update password. Check your current password.");
+    } catch {
+      setError("Não foi possível atualizar a senha. Verifique a senha atual.");
     } finally {
       setLoading(false);
     }
@@ -90,12 +90,12 @@ export default function ChangePasswordModal({ isOpen, onClose }: Props) {
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-[500px] m-4">
       <div className="rounded-2xl bg-white p-6 dark:bg-gray-900">
         <h3 className="text-lg text-gray-800 dark:text-white font-semibold mb-5">
-          Change Password
+          Alterar Senha
         </h3>
 
         <div className="space-y-4">
           <div>
-            <Label>Current Password</Label>
+            <Label>Senha Atual</Label>
             <div className="relative">
               <Input
                 type={showOld ? "text" : "password"}
@@ -116,7 +116,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: Props) {
           </div>
 
           <div>
-            <Label>New Password</Label>
+            <Label>Nova Senha</Label>
             <div className="relative">
               <Input
                 type={showNew ? "text" : "password"}
@@ -138,7 +138,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: Props) {
           </div>
 
           <div>
-            <Label>Confirm New Password</Label>
+            <Label>Confirmar Nova Senha</Label>
             <div className="relative">
               <Input
                 type={showConfirm ? "text" : "password"}
@@ -158,13 +158,13 @@ export default function ChangePasswordModal({ isOpen, onClose }: Props) {
             </div>
             {confirmPassword && newPassword !== confirmPassword && (
               <p className="text-xs text-red-500 mt-1">
-                Passwords do not match
+                As senhas não coincidem
               </p>
             )}
 
             {confirmPassword && newPassword === confirmPassword && (
               <p className="text-xs text-green-500 mt-1">
-                ✓ Passwords match
+                ✓ Senhas coincidem
               </p>
             )}
           </div>
@@ -184,7 +184,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: Props) {
               onClick={onClose}
               disabled={loading}
             >
-              Cancel
+              Cancelar
             </Button>
 
             <Button
@@ -192,7 +192,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: Props) {
               onClick={handleSubmit}
               disabled={loading || !isFormValid}
             >
-              {loading ? "Updating..." : "Update Password"}
+              {loading ? "Atualizando…" : "Atualizar Senha"}
             </Button>
           </div>
         </div>

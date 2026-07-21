@@ -10,13 +10,13 @@ export default function UserProfiles() {
   return (
     <>
       <PageMeta
-        title="React.js Profile Dashboard | TailAdmin - Next.js Admin Dashboard Template"
-        description="This is React.js Profile Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
+        title="Perfil | Sonhos Literários"
+        description="Perfil do membro do clube"
       />
-      <PageBreadcrumb pageTitle="Profile" />
+      <PageBreadcrumb pageTitle="Perfil" />
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         <h3 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7">
-          Profile
+          Perfil
         </h3>
         <div className="space-y-6">
           <UserMetaCard />
@@ -25,7 +25,7 @@ export default function UserProfiles() {
             onClick={openModal}
             className="mb-4 px-4 py-2 rounded-lg border text-gray-800 dark:text-white/90 text-sm"
           >
-            Change Password
+            Alterar Senha
           </button>
         </div>
       </div>

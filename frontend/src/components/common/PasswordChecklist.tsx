@@ -29,9 +29,9 @@ export default function PasswordChecklist({ password }: Props) {
 
   return (
     <div className="mt-3 space-y-1">
-      <Item ok={checks.length} text="At least 8 characters" />
-      <Item ok={checks.number} text="One number" />
-      <Item ok={checks.special} text="One special character" />
+      <Item ok={checks.length} text="Pelo menos 8 caracteres" />
+      <Item ok={checks.number} text="Um número" />
+      <Item ok={checks.special} text="Um caractere especial" />
     </div>
   );
 }
