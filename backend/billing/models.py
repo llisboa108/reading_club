@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-from dateutil.relativedelta import relativedelta
 
 User = settings.AUTH_USER_MODEL
 
@@ -58,14 +57,6 @@ class Subscription(models.Model):
     next_billing_date = models.DateField()
 
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def activate(self):
-        today = timezone.now().date()
-        self.status = SubscriptionStatus.ACTIVE
-        self.start_date = today
-        self.end_date = today + relativedelta(months=1)
-        self.next_billing_date = self.end_date
-        self.save()
 
     def __str__(self):
         return f"{self.user} - {self.plan}"

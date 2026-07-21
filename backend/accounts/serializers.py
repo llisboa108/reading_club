@@ -1,4 +1,6 @@
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import transaction
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
@@ -9,7 +11,7 @@ User = get_user_model()
 
 # Register Serializer
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True)
     invite_code = serializers.CharField(write_only=True)
     full_name = serializers.CharField(write_only=True)
 
@@ -30,21 +32,39 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return invite
 
+    def validate(self, attrs):
+        try:
+            validate_password(
+                attrs["password"],
+                user=User(email=attrs.get("email")),
+            )
+        except DjangoValidationError as e:
+            raise serializers.ValidationError({"password": list(e.messages)})
+
+        return attrs
+
     def create(self, validated_data):
         invite = validated_data.pop("invite_code")
         full_name = validated_data.pop("full_name")
 
-        user = User.objects.create_user(
-            email=validated_data["email"],
-            password=validated_data["password"]
-        )
+        with transaction.atomic():
+            invite = InviteCode.objects.select_for_update().get(pk=invite.pk)
+            if not invite.can_be_used():
+                raise serializers.ValidationError(
+                    {"invite_code": "Invite code is no longer active."}
+                )
 
-        # Update profile automatically
-        profile = user.profile
-        profile.full_name = full_name
-        profile.save()
+            user = User.objects.create_user(
+                email=validated_data["email"],
+                password=validated_data["password"]
+            )
 
-        invite.register_use()
+            # Update profile automatically
+            profile = user.profile
+            profile.full_name = full_name
+            profile.save()
+
+            invite.register_use()
 
         return user
 
@@ -60,6 +80,14 @@ class ProfileSerializer(serializers.ModelSerializer):
             "facebook",
             "instagram",
         )
+
+# Retrive members
+class MemberListSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source="profile.full_name", default="")
+
+    class Meta:
+        model = User
+        fields = ("id", "email", "full_name")
 
 # Loged user
 class MeSerializer(serializers.ModelSerializer):

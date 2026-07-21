@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
-from api.permissions import IsAdmin, IsFinancial
+from api.permissions import IsAdmin, IsAdminOrReadOnly, IsFinancial
 
 from .models import (
     Plan,
@@ -36,7 +36,7 @@ from .serializers import (
 class PlanViewSet(ModelViewSet):
 
     queryset = Plan.objects.filter(is_active=True)
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
 
     def get_serializer_class(self):
         if self.request.user.is_staff:
@@ -93,6 +93,11 @@ class PaymentViewSet(ModelViewSet):
         return Payment.objects.filter(
             subscription__user=self.request.user
         )
+
+    def get_permissions(self):
+        if self.action == "destroy":
+            return [IsAuthenticated(), IsFinancial()]
+        return [IsAuthenticated()]
 
     def get_serializer_class(self):
         if self.action == "create":

@@ -72,6 +72,10 @@ class PaymentSerializer(serializers.ModelSerializer):
             "notes",
             "receipt",
         )
+        read_only_fields = (
+            "status",
+            "paid_at",
+        )
 
 class PaymentCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -105,6 +109,5 @@ class PaymentConfirmSerializer(serializers.Serializer):
             )
 
         payment.confirm(user=user)
-        payment.subscription.activate()
 
         return payment
