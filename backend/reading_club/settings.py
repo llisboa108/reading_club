@@ -14,7 +14,14 @@ load_dotenv(BASE_DIR / ".env")
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-wbb0*6x^bb218h9bsenm=usa=l)6xz3+#(j*e_s*0#spv$nohl'
+# Falls back to the original insecure dev key (its "django-insecure-" prefix
+# is Django's own convention for flagging it as unfit for production) so
+# local development keeps working without a .env; production must set
+# SECRET_KEY in the environment.
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-wbb0*6x^bb218h9bsenm=usa=l)6xz3+#(j*e_s*0#spv$nohl",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -178,11 +185,25 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 
-# Local/dev email: password-reset links are printed to the runserver
-# console instead of actually being sent. Production needs a real
-# EMAIL_BACKEND (SMTP) configured.
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "no-reply@readingclub.local"
+# Email: defaults to printing to the runserver console in dev. Set EMAIL_HOST_USER
+# and EMAIL_HOST_PASSWORD in .env to switch to real delivery - Mailgun's SMTP
+# relay works with Django's built-in SMTP backend, no extra package needed;
+# see .env.example for the exact variables (host/port already default to
+# Mailgun's SMTP endpoint).
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+
+if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.mailgun.org")
+    EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+    EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "true").lower() == "true"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL", "Sonhos Literários <no-reply@readingclub.local>"
+)
 FRONTEND_URL = "http://localhost:5173"
 
 # Mercado Pago (Checkout Pro) - no test credentials configured yet, so
