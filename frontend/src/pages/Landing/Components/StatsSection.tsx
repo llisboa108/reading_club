@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useScrollReveal } from "../../../hooks/useScrollReveal";
+import { loadGsap, prefersReducedMotion } from "../../../lib/landingMotion";
 
 interface ClubStats {
   books_read: number;
@@ -39,6 +40,49 @@ function CountUp({ value, start }: { value?: number; start: boolean }) {
 export default function StatsSection({ stats }: { stats: ClubStats | null }) {
   const { ref, className: revealClass } = useScrollReveal<HTMLDivElement>();
   const visible = revealClass.includes("reveal-visible");
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const bgRef = useRef<HTMLDivElement | null>(null);
+  const reducedMotion = useRef(prefersReducedMotion()).current;
+
+  useEffect(() => {
+    if (reducedMotion || !sectionRef.current) return;
+    let cancelled = false;
+    let revert: (() => void) | undefined;
+
+    loadGsap().then(({ gsap }) => {
+      if (cancelled || !sectionRef.current) return;
+      const ctx = gsap.context(() => {
+        gsap.to(".stat-tile", {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out",
+          scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
+        });
+        if (bgRef.current) {
+          gsap.to(bgRef.current, {
+            yPercent: 10,
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true,
+            },
+          });
+        }
+      }, sectionRef);
+      revert = () => ctx.revert();
+    });
+
+    return () => {
+      cancelled = true;
+      revert?.();
+    };
+  }, [reducedMotion]);
+
+  const tilePending = `stat-tile ${reducedMotion ? "" : "opacity-0 translate-y-4"}`;
 
   const items = [
     { label: "Livros lidos", value: stats?.books_read, icon: <BookIcon /> },
@@ -48,14 +92,17 @@ export default function StatsSection({ stats }: { stats: ClubStats | null }) {
   ];
 
   return (
-    <section id="numeros" className="relative overflow-hidden bg-brand-600 py-20 sm:py-28">
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-500/40 via-transparent to-brand-950/40" />
+    <section id="numeros" ref={sectionRef} className="relative overflow-hidden py-20 sm:py-28">
+      <div ref={bgRef} className="absolute inset-0 scale-110">
+        <img src="/images/landing/stats-img.jpg" alt="" className="h-full w-full object-cover" />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-700/85 via-brand-600/80 to-brand-950/90" />
       <div ref={ref} className={`relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 ${revealClass}`}>
         <div className="mb-14 text-center">
           <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-brand-200">
             O clube em números
           </p>
-          <h2 className="text-3xl font-bold text-white sm:text-4xl">
+          <h2 className="font-heading text-3xl font-medium text-white sm:text-4xl">
             Um pequeno resumo da nossa existência
           </h2>
         </div>
@@ -64,7 +111,7 @@ export default function StatsSection({ stats }: { stats: ClubStats | null }) {
           {items.map((item) => (
             <div
               key={item.label}
-              className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm transition-colors hover:bg-white/10"
+              className={`rounded-2xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm transition-colors hover:bg-white/10 ${tilePending}`}
             >
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white">
                 {item.icon}

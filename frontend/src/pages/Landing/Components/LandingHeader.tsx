@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
+import { useLandingScrollContext } from "../../../context/LandingScrollContext";
+import { loadGsap, prefersReducedMotion } from "../../../lib/landingMotion";
+import { useAuth } from "../../../hooks/useAuth";
 
 const NAV_LINKS = [
   { href: "#sobre", label: "Sobre" },
@@ -7,15 +10,59 @@ const NAV_LINKS = [
   { href: "#numeros", label: "Números" },
   { href: "#membros", label: "Membros" },
   { href: "#parceiros", label: "Parceiros" },
+  { href: "#contato", label: "Contato" },
 ];
 
 export default function LandingHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const headerRef = useRef<HTMLElement | null>(null);
+  const { scrollTo } = useLandingScrollContext();
+  const { user } = useAuth();
+  const reducedMotion = useRef(prefersReducedMotion()).current;
+  const pending = reducedMotion ? "" : "opacity-0 -translate-y-2";
+  const memberCta = user
+    ? { to: "/dashboard", label: "Ir para o Painel" }
+    : { to: "/signin", label: "Área de Membros" };
+
+  useEffect(() => {
+    if (reducedMotion) return;
+    let cancelled = false;
+    let revert: (() => void) | undefined;
+
+    loadGsap().then(({ gsap }) => {
+      if (cancelled || !headerRef.current) return;
+      const ctx = gsap.context(() => {
+        gsap.to(".header-item", {
+          y: 0,
+          opacity: 1,
+          duration: 0.5,
+          stagger: 0.05,
+          ease: "power2.out",
+          delay: 0.2,
+        });
+      }, headerRef);
+      revert = () => ctx.revert();
+    });
+
+    return () => {
+      cancelled = true;
+      revert?.();
+    };
+  }, [reducedMotion]);
+
+  function handleNavClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
+    e.preventDefault();
+    scrollTo(href);
+    setMobileOpen(false);
+  }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/90">
+    <header
+      ref={headerRef}
+      className="sticky top-0 z-50 border-b border-stone-200/70 bg-stone-25/90 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/90"
+    >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <a href="#" className="flex items-center gap-2">
+        <a href="#" className={`header-item flex items-center gap-2 ${pending}`}>
           <img src="/images/logo/logo.png" alt="Sonhos Literários" className="h-9 w-auto dark:hidden" />
           <img
             src="/images/logo/logo-dark.png"
@@ -29,7 +76,8 @@ export default function LandingHeader() {
             <a
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-gray-600 transition-colors hover:text-brand-600 dark:text-gray-300 dark:hover:text-brand-400"
+              onClick={(e) => handleNavClick(e, link.href)}
+              className={`header-item font-body text-sm tracking-wide text-stone-600 transition-colors hover:text-brand-600 dark:text-gray-300 dark:hover:text-brand-400 ${pending}`}
             >
               {link.label}
             </a>
@@ -38,14 +86,14 @@ export default function LandingHeader() {
 
         <div className="flex items-center gap-3">
           <Link
-            to="/signin"
-            className="hidden rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-600 sm:inline-flex"
+            to={memberCta.to}
+            className={`header-item hidden rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-700 sm:inline-flex ${pending}`}
           >
-            Área de Membros
+            {memberCta.label}
           </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 lg:hidden"
+            className={`header-item inline-flex h-10 w-10 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 dark:text-gray-300 dark:hover:bg-gray-800 lg:hidden ${pending}`}
             aria-label="Abrir menu"
           >
             {mobileOpen ? <CloseIcon /> : <MenuIcon />}
@@ -54,22 +102,22 @@ export default function LandingHeader() {
       </div>
 
       {mobileOpen && (
-        <nav className="flex flex-col gap-1 border-t border-gray-100 px-4 py-3 dark:border-gray-800 lg:hidden">
+        <nav className="flex flex-col gap-1 border-t border-stone-200/70 px-4 py-3 dark:border-gray-800 lg:hidden">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              onClick={() => setMobileOpen(false)}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+              onClick={(e) => handleNavClick(e, link.href)}
+              className="rounded-lg px-3 py-2 text-sm font-medium text-stone-600 hover:bg-stone-50 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               {link.label}
             </a>
           ))}
           <Link
-            to="/signin"
-            className="mt-2 rounded-lg bg-brand-500 px-3 py-2 text-center text-sm font-medium text-white hover:bg-brand-600"
+            to={memberCta.to}
+            className="mt-2 rounded-lg bg-brand-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-brand-700"
           >
-            Área de Membros
+            {memberCta.label}
           </Link>
         </nav>
       )}

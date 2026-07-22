@@ -1,4 +1,6 @@
+import { useEffect, useRef } from "react";
 import { useScrollReveal } from "../../../hooks/useScrollReveal";
+import { loadGsap, prefersReducedMotion } from "../../../lib/landingMotion";
 
 const PARAGRAPHS = [
   <>
@@ -35,39 +37,88 @@ const PARAGRAPHS = [
   "Cada livro escolhido, cada encontro realizado e cada projeto construído refletem nosso propósito: fazer da literatura um ponto de encontro entre mundos, histórias e pessoas. No Sonhos Literários, acreditamos que ler é desbravar o desconhecido, mas também é sonhar junto, compartilhar emoções e cultivar laços que vão muito além das páginas.",
 ];
 
-const CLOSING_LINE =
+export const ABOUT_CLOSING_LINE =
   "Seja bem-vindo(a) ao nosso sonho partilhado! Que novos e maravilhosos mundos venham até você, pelas páginas dos livros.";
 
 export default function LandingAbout() {
-  const { ref, className: revealClass } = useScrollReveal<HTMLDivElement>();
+  const { ref: fallbackRef, className: revealClass } = useScrollReveal<HTMLDivElement>();
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const reducedMotion = useRef(prefersReducedMotion()).current;
+
+  useEffect(() => {
+    if (reducedMotion) return;
+    let cancelled = false;
+    let revert: (() => void) | undefined;
+
+    loadGsap().then(({ gsap }) => {
+      if (cancelled || !gridRef.current) return;
+      const ctx = gsap.context(() => {
+        if (imageRef.current) {
+          gsap.fromTo(
+            imageRef.current,
+            { clipPath: "inset(0 100% 0 0)" },
+            {
+              clipPath: "inset(0 0% 0 0)",
+              duration: 1.1,
+              ease: "power3.inOut",
+              scrollTrigger: { trigger: gridRef.current, start: "top 75%" },
+            }
+          );
+        }
+        gsap.to(".about-para", {
+          y: 0,
+          opacity: 1,
+          duration: 0.6,
+          stagger: 0.12,
+          ease: "power2.out",
+          scrollTrigger: { trigger: gridRef.current, start: "top 70%" },
+        });
+      }, gridRef);
+      revert = () => ctx.revert();
+    });
+
+    return () => {
+      cancelled = true;
+      revert?.();
+    };
+  }, [reducedMotion]);
+
+  const paraPending = reducedMotion ? "" : "opacity-0 translate-y-3 about-para";
 
   return (
-    <section id="sobre" className="py-20 sm:py-28">
+    <section id="sobre" className="bg-stone-25 py-20 dark:bg-gray-950 sm:py-28">
       <div
-        ref={ref}
-        className={`mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 ${revealClass}`}
+        ref={(el) => {
+          gridRef.current = el;
+          fallbackRef.current = el;
+        }}
+        className={`mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 ${
+          reducedMotion ? revealClass : ""
+        }`}
       >
         <img
+          ref={imageRef}
           src="/images/landing/about-section.jpg"
           alt="Retrato pintado de uma mulher lendo um livro, em tons quentes"
-          className="w-full rounded-2xl object-cover shadow-theme-lg lg:order-2"
+          className="w-full rounded-2xl object-cover shadow-stone-lg lg:order-2"
         />
         <div className="lg:order-1">
           <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
             Do sonho à realidade
           </p>
-          <h2 className="mb-6 text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
+          <h2 className="mb-6 font-heading text-3xl font-medium text-stone-900 dark:text-white sm:text-4xl">
             Sobre o clube
           </h2>
-          <div className="space-y-4 text-gray-600 dark:text-gray-300">
+          <div className="space-y-4 text-stone-600 dark:text-gray-300">
             {PARAGRAPHS.map((p, i) => (
               <p
                 key={i}
-                className={
+                className={`${paraPending} ${
                   i === 0
                     ? "first-letter:float-left first-letter:mr-2 first-letter:font-heading first-letter:text-6xl first-letter:font-bold first-letter:leading-[0.8] first-letter:text-brand-600 dark:first-letter:text-brand-400"
                     : ""
-                }
+                }`}
               >
                 {p}
               </p>
@@ -81,7 +132,9 @@ export default function LandingAbout() {
             >
               “
             </span>
-            <p className="text-lg italic text-gray-700 dark:text-gray-300">{CLOSING_LINE}</p>
+            <p className="font-heading text-lg italic text-stone-700 dark:text-gray-300">
+              {ABOUT_CLOSING_LINE}
+            </p>
           </blockquote>
         </div>
       </div>
