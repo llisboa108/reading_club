@@ -50,18 +50,44 @@ function formatDateTime(d: string) {
   });
 }
 
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Bom dia";
+  if (hour < 18) return "Boa tarde";
+  return "Boa noite";
+}
+
+function today() {
+  const formatted = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+}
+
+const ACCENT_CLASSES = {
+  brand: "bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400",
+  success: "bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-400",
+  warning: "bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-warning-400",
+  error: "bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-400",
+};
+
 function StatCard({
   label,
   value,
   icon,
+  accent = "brand",
 }: {
   label: string;
   value: number | string;
   icon: React.ReactNode;
+  accent?: keyof typeof ACCENT_CLASSES;
 }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 md:p-6">
-      <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl dark:bg-gray-800">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs transition-shadow hover:shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 md:p-6">
+      <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${ACCENT_CLASSES[accent]}`}>
         {icon}
       </div>
       <div className="mt-5">
@@ -153,6 +179,13 @@ export default function Home() {
         title="Dashboard | Clube de Leitura"
         description="Visão geral do clube de leitura"
       />
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          {greeting()}{user?.profile?.full_name ? `, ${user.profile.full_name.split(" ")[0]}` : ""}
+        </h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{today()}</p>
+      </div>
+
       {subscriptionRequired && (
         <div className="mb-6 flex flex-col items-start gap-4 rounded-2xl border border-warning-200 bg-warning-50 p-6 dark:border-warning-500/20 dark:bg-warning-500/5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-4">
@@ -243,11 +276,13 @@ export default function Home() {
               label="Leituras cadastradas"
               value={readings.length}
               icon={<BookIcon />}
+              accent="brand"
             />
             <StatCard
               label="Leituras ativas/planeadas"
               value={activeReadings}
               icon={<CalendarIcon />}
+              accent="success"
             />
           </>
         )}
@@ -257,6 +292,7 @@ export default function Home() {
             label="Pagamentos pendentes"
             value={pendingPaymentsCount ?? "—"}
             icon={<WalletIcon />}
+            accent="warning"
           />
         )}
 
@@ -265,6 +301,7 @@ export default function Home() {
             label="Membros ativos"
             value={membersCount ?? "—"}
             icon={<UsersIcon />}
+            accent="brand"
           />
         )}
       </div>
@@ -274,9 +311,9 @@ export default function Home() {
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
-function BookIcon() {
+function BookIcon({ className }: { className?: string }) {
   return (
-    <svg className="h-6 w-6 text-gray-800 dark:text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <svg className={className ?? "h-6 w-6"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
     </svg>
@@ -285,7 +322,7 @@ function BookIcon() {
 
 function CalendarIcon({ className }: { className?: string }) {
   return (
-    <svg className={className ?? "h-6 w-6 text-gray-800 dark:text-white/90"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <svg className={className ?? "h-6 w-6"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" />
     </svg>
   );
@@ -293,7 +330,7 @@ function CalendarIcon({ className }: { className?: string }) {
 
 function WalletIcon({ className }: { className?: string }) {
   return (
-    <svg className={className ?? "h-6 w-6 text-gray-800 dark:text-white/90"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <svg className={className ?? "h-6 w-6"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M18 12a2 2 0 0 0 0 4h3v-4h-3z" />
@@ -301,9 +338,9 @@ function WalletIcon({ className }: { className?: string }) {
   );
 }
 
-function UsersIcon() {
+function UsersIcon({ className }: { className?: string }) {
   return (
-    <svg className="h-6 w-6 text-gray-800 dark:text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <svg className={className ?? "h-6 w-6"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
     </svg>
   );

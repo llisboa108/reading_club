@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { useScrollReveal } from "../../../hooks/useScrollReveal";
+
 interface ClubStats {
   books_read: number;
   pages_read: number;
@@ -5,7 +8,38 @@ interface ClubStats {
   meets_held: number;
 }
 
+function CountUp({ value, start }: { value?: number; start: boolean }) {
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (!start || value === undefined) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setDisplay(value);
+      return;
+    }
+
+    const duration = 1200;
+    const startTime = performance.now();
+
+    function tick(now: number) {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(eased * (value as number)));
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+
+    const frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [start, value]);
+
+  if (value === undefined) return <>—</>;
+  return <>{display.toLocaleString("pt-BR")}</>;
+}
+
 export default function StatsSection({ stats }: { stats: ClubStats | null }) {
+  const { ref, className: revealClass } = useScrollReveal<HTMLDivElement>();
+  const visible = revealClass.includes("reveal-visible");
+
   const items = [
     { label: "Livros lidos", value: stats?.books_read, icon: <BookIcon /> },
     { label: "Páginas lidas", value: stats?.pages_read, icon: <PagesIcon /> },
@@ -16,7 +50,7 @@ export default function StatsSection({ stats }: { stats: ClubStats | null }) {
   return (
     <section id="numeros" className="relative overflow-hidden bg-brand-600 py-20 sm:py-28">
       <div className="absolute inset-0 bg-gradient-to-br from-brand-500/40 via-transparent to-brand-950/40" />
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div ref={ref} className={`relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 ${revealClass}`}>
         <div className="mb-14 text-center">
           <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-brand-200">
             O clube em números
@@ -30,13 +64,13 @@ export default function StatsSection({ stats }: { stats: ClubStats | null }) {
           {items.map((item) => (
             <div
               key={item.label}
-              className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm"
+              className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm transition-colors hover:bg-white/10"
             >
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white">
                 {item.icon}
               </div>
-              <div className="text-3xl font-bold text-white sm:text-4xl">
-                {item.value !== undefined ? item.value.toLocaleString("pt-BR") : "—"}
+              <div className="text-3xl font-bold tabular-nums text-white sm:text-4xl">
+                <CountUp value={item.value} start={visible} />
               </div>
               <p className="mt-1 text-sm text-brand-100">{item.label}</p>
             </div>

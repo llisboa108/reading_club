@@ -1,3 +1,5 @@
+import { useScrollReveal } from "../../../hooks/useScrollReveal";
+
 interface Partner {
   name: string;
   image: string;
@@ -22,9 +24,11 @@ const PARTNERS: Partner[] = [
 ];
 
 export default function PartnersSection() {
+  const { ref, className: revealClass } = useScrollReveal<HTMLDivElement>();
+
   return (
     <section id="parceiros" className="bg-gray-50 py-20 dark:bg-gray-900/40 sm:py-28">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <div ref={ref} className={`mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 ${revealClass}`}>
         <div className="mb-14 text-center">
           <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
             Nossos parceiros

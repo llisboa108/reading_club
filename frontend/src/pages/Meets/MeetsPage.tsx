@@ -17,6 +17,7 @@ interface Book {
   id: number;
   title: string;
   author: Author;
+  cover?: string | null;
 }
 interface Reading {
   id: number;
@@ -202,20 +203,35 @@ const MeetRow = forwardRef<
       }`}
       onClick={onClick}
     >
-      <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
-          {reading?.book.title || `Leitura #${meet.reading}`}
-        </p>
-        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400 dark:text-gray-500">
-          <span className="flex items-center gap-1">
-            <CalendarIcon className="h-3 w-3" />
-            {formatDateTime(meet.meet_date)}
-          </span>
-          {meet.moderator && <span>Moderador: {meet.moderator}</span>}
-          <span className="flex items-center gap-1">
-            <UsersIcon className="h-3 w-3" />
-            {meet.participants.length} participante{meet.participants.length !== 1 ? "s" : ""}
-          </span>
+      <div className="flex min-w-0 items-center gap-4">
+        <div className="hidden h-14 w-10 shrink-0 overflow-hidden rounded-md bg-gray-100 shadow-theme-xs dark:bg-gray-800 sm:block">
+          {reading?.book.cover ? (
+            <img
+              src={reading.book.cover}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-gray-300 dark:text-gray-600">
+              <BookSpineIcon className="h-5 w-5" />
+            </div>
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+            {reading?.book.title || `Leitura #${meet.reading}`}
+          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400 dark:text-gray-500">
+            <span className="flex items-center gap-1">
+              <CalendarIcon className="h-3 w-3" />
+              {formatDateTime(meet.meet_date)}
+            </span>
+            {meet.moderator && <span>Moderador: {meet.moderator}</span>}
+            <span className="flex items-center gap-1">
+              <UsersIcon className="h-3 w-3" />
+              {meet.participants.length} participante{meet.participants.length !== 1 ? "s" : ""}
+            </span>
+          </div>
         </div>
       </div>
       <div className="shrink-0">
@@ -261,6 +277,15 @@ function EmptyState() {
 }
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
+
+function BookSpineIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </svg>
+  );
+}
 
 function CalendarIcon({ className }: { className?: string }) {
   return (

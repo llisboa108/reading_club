@@ -1,3 +1,5 @@
+import { useScrollReveal } from "../../../hooks/useScrollReveal";
+
 interface TimelineItem {
   title: string;
   date: string;
@@ -143,19 +145,7 @@ export default function HistoryTimeline() {
 
           <div className="space-y-10">
             {TIMELINE.map((item, i) => (
-              <div
-                key={item.title}
-                className={`relative flex flex-col md:flex-row md:items-center ${
-                  i % 2 === 1 ? "md:flex-row-reverse" : ""
-                }`}
-              >
-                <span className="absolute left-4 top-6 z-10 h-3 w-3 -translate-x-1/2 rounded-full bg-brand-500 ring-4 ring-gray-50 dark:ring-gray-900 md:left-1/2" />
-
-                <div className="w-full pl-10 md:w-1/2 md:px-10 md:pl-10">
-                  <TimelineCard item={item} />
-                </div>
-                <div className="hidden md:block md:w-1/2" />
-              </div>
+              <TimelineEntry key={item.title} item={item} index={i} />
             ))}
           </div>
         </div>
@@ -164,10 +154,37 @@ export default function HistoryTimeline() {
   );
 }
 
+function TimelineEntry({ item, index }: { item: TimelineItem; index: number }) {
+  const { ref, className: revealClass } = useScrollReveal<HTMLDivElement>();
+
+  return (
+    <div
+      ref={ref}
+      className={`relative flex flex-col md:flex-row md:items-center ${
+        index % 2 === 1 ? "md:flex-row-reverse" : ""
+      } ${revealClass}`}
+    >
+      <span className="absolute left-4 top-6 z-10 h-3 w-3 -translate-x-1/2 rounded-full bg-brand-500 ring-4 ring-gray-50 dark:ring-gray-900 md:left-1/2" />
+
+      <div className="w-full pl-10 md:w-1/2 md:px-10 md:pl-10">
+        <TimelineCard item={item} />
+      </div>
+      <div className="hidden md:block md:w-1/2" />
+    </div>
+  );
+}
+
 function TimelineCard({ item }: { item: TimelineItem }) {
   const card = (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-xs transition-shadow hover:shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
-      <img src={item.image} alt={item.title} className="h-40 w-full object-cover" />
+    <div className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-xs transition-shadow hover:shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+      <div className="h-40 overflow-hidden">
+        <img
+          src={item.image}
+          alt={item.title}
+          loading="lazy"
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+      </div>
       <div className="p-4">
         <p className="mb-1 text-xs font-medium text-brand-600 dark:text-brand-400">{item.date}</p>
         <h4 className="mb-1 font-semibold text-gray-900 dark:text-white">{item.title}</h4>
@@ -178,7 +195,7 @@ function TimelineCard({ item }: { item: TimelineItem }) {
 
   if (item.link) {
     return (
-      <a href={item.link} target="_blank" rel="noopener noreferrer" title="Ver publicação">
+      <a href={item.link} target="_blank" rel="noopener noreferrer" aria-label={`Ver publicação: ${item.title}`} title="Ver publicação">
         {card}
       </a>
     );

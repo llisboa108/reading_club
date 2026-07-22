@@ -200,6 +200,36 @@ layer(base);
   h4 {
     font-family: var(--font-heading);
   }
+
+  /* Native checkboxes/radios default to browser blue regardless of theme -
+     accent-color is the one-line fix that makes them follow the brand. */
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: var(--color-brand-500);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Scroll-reveal for landing page sections (see useScrollReveal hook) -
+   opts out entirely under prefers-reduced-motion via the rule above. */
+@utility reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+@utility reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @utility menu-item {

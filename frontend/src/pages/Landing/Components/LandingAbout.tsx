@@ -1,3 +1,5 @@
+import { useScrollReveal } from "../../../hooks/useScrollReveal";
+
 const PARAGRAPHS = [
   <>
     O{" "}
@@ -31,16 +33,23 @@ const PARAGRAPHS = [
   </>,
   "Encerramos nossas atividades sempre em novembro, para que cada um tenha dezembro livre para festas, família, compromissos e até leituras extras. Entramos em “férias literárias” até fevereiro, quando retornamos com novo calendário, novas histórias e novas oportunidades de aprender juntos.",
   "Cada livro escolhido, cada encontro realizado e cada projeto construído refletem nosso propósito: fazer da literatura um ponto de encontro entre mundos, histórias e pessoas. No Sonhos Literários, acreditamos que ler é desbravar o desconhecido, mas também é sonhar junto, compartilhar emoções e cultivar laços que vão muito além das páginas.",
-  "Seja bem-vindo(a) ao nosso sonho partilhado! Que novos e maravilhosos mundos venham até você, pelas páginas dos livros.",
 ];
 
+const CLOSING_LINE =
+  "Seja bem-vindo(a) ao nosso sonho partilhado! Que novos e maravilhosos mundos venham até você, pelas páginas dos livros.";
+
 export default function LandingAbout() {
+  const { ref, className: revealClass } = useScrollReveal<HTMLDivElement>();
+
   return (
     <section id="sobre" className="py-20 sm:py-28">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
+      <div
+        ref={ref}
+        className={`mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 ${revealClass}`}
+      >
         <img
           src="/images/landing/about-section.jpg"
-          alt="Encontro do Clube Sonhos Literários"
+          alt="Retrato pintado de uma mulher lendo um livro, em tons quentes"
           className="w-full rounded-2xl object-cover shadow-theme-lg lg:order-2"
         />
         <div className="lg:order-1">
@@ -52,9 +61,28 @@ export default function LandingAbout() {
           </h2>
           <div className="space-y-4 text-gray-600 dark:text-gray-300">
             {PARAGRAPHS.map((p, i) => (
-              <p key={i}>{p}</p>
+              <p
+                key={i}
+                className={
+                  i === 0
+                    ? "first-letter:float-left first-letter:mr-2 first-letter:font-heading first-letter:text-6xl first-letter:font-bold first-letter:leading-[0.8] first-letter:text-brand-600 dark:first-letter:text-brand-400"
+                    : ""
+                }
+              >
+                {p}
+              </p>
             ))}
           </div>
+
+          <blockquote className="relative mt-8 border-l-2 border-brand-300 pl-6 dark:border-brand-500/40">
+            <span
+              aria-hidden="true"
+              className="absolute -left-1 -top-3 font-heading text-5xl leading-none text-brand-300 dark:text-brand-500/50"
+            >
+              “
+            </span>
+            <p className="text-lg italic text-gray-700 dark:text-gray-300">{CLOSING_LINE}</p>
+          </blockquote>
         </div>
       </div>
     </section>

@@ -1,3 +1,5 @@
+import { useScrollReveal } from "../../../hooks/useScrollReveal";
+
 interface TeamMember {
   name: string;
   role: string;
@@ -51,9 +53,11 @@ const TEAM: TeamMember[] = [
 ];
 
 export default function TeamSection() {
+  const { ref, className: revealClass } = useScrollReveal<HTMLDivElement>();
+
   return (
     <section id="membros" className="py-20 sm:py-28">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div ref={ref} className={`mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 ${revealClass}`}>
         <div className="mb-14 text-center">
           <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
             Membros do clube

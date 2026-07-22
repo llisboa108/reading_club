@@ -50,7 +50,7 @@ export default function BlogPage() {
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Blog</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {posts.length} publicação{posts.length !== 1 ? "ões" : ""}
+            {posts.length} {posts.length === 1 ? "publicação" : "publicações"}
           </p>
         </div>
 
@@ -72,13 +72,11 @@ export default function BlogPage() {
                 onClick={() => navigate(`/blog/${p.slug}`)}
                 className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-xs transition hover:shadow-theme-md dark:border-gray-800 dark:bg-gray-900"
               >
-                <div className="flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-500/10 dark:to-brand-600/20">
+                <div className="relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br from-brand-100 to-brand-200 dark:from-brand-500/15 dark:to-brand-600/25">
                   {p.image ? (
                     <img src={p.image} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <span className="text-3xl font-bold text-brand-400 dark:text-brand-300 select-none">
-                      {p.title.slice(0, 2).toUpperCase()}
-                    </span>
+                    <OpenBookIcon className="h-16 w-16 text-brand-400/70 dark:text-brand-300/60" />
                   )}
                 </div>
                 <div className="p-4">
@@ -98,5 +96,17 @@ export default function BlogPage() {
         )}
       </div>
     </>
+  );
+}
+
+function OpenBookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+      />
+    </svg>
   );
 }
