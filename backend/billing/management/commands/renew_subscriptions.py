@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from datetime import timedelta
 
+from api.emails import send_notification_email
 from billing.models import (
     Subscription,
     SubscriptionStatus,
@@ -41,7 +42,7 @@ class Command(BaseCommand):
             if exists:
                 continue
 
-            Payment.objects.create(
+            payment = Payment.objects.create(
                 subscription=sub,
                 amount=sub.plan.price,
                 due_date=sub.next_billing_date,
@@ -54,6 +55,19 @@ class Command(BaseCommand):
                     "A sua assinatura expira em 10 dias. "
                     "Um novo pagamento foi gerado."
                 ),
+                content_object=payment,
+            )
+
+            send_notification_email(
+                subject="A sua assinatura expira em 10 dias",
+                message=(
+                    "Olá!\n\n"
+                    "A sua assinatura do Clube Sonhos Literários expira em 10 dias. "
+                    f"Um novo pagamento de R$ {sub.plan.price} foi gerado, com vencimento "
+                    f"em {sub.next_billing_date.strftime('%d/%m/%Y')}.\n\n"
+                    "Aceda à sua conta para regularizar o pagamento."
+                ),
+                recipient=sub.user.email,
             )
 
             created += 1
@@ -91,6 +105,18 @@ class Command(BaseCommand):
                 message=(
                     "A sua assinatura expirou por falta de pagamento."
                 ),
+                content_object=sub,
+            )
+
+            send_notification_email(
+                subject="A sua assinatura expirou",
+                message=(
+                    "Olá!\n\n"
+                    "A sua assinatura do Clube Sonhos Literários expirou por falta de "
+                    "pagamento. Aceda à sua conta e regularize o pagamento para "
+                    "reativar o acesso."
+                ),
+                recipient=sub.user.email,
             )
 
             expired += 1

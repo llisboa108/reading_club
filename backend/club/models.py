@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 User = settings.AUTH_USER_MODEL
@@ -184,6 +186,19 @@ class Notification(models.Model):
     message = models.CharField(max_length=255)
 
     is_seen = models.BooleanField(default=False)
+
+    # Optional link to the object this notification is about (a Payment,
+    # Subscription, Meet, ...) so the frontend can navigate straight to it
+    # instead of only routing generically by `type`. Nullable because not
+    # every notification has (or needs) a specific related object.
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = GenericForeignKey("content_type", "object_id")
 
     created_at = models.DateTimeField(auto_now_add=True)
 

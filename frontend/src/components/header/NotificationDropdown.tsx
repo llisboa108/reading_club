@@ -10,13 +10,25 @@ interface Notification {
   message: string;
   is_seen: boolean;
   created_at: string;
+  target_type?: string | null;
+  target_id?: number | null;
 }
 
-// Pages a notification type can link to. Types without an entry here
-// have no single related page yet, so clicking them just marks as seen.
+// Fallback for notification types without a specific related object (or
+// older rows created before target_type/target_id existed).
 const NOTIFICATION_ROUTES: Record<string, string> = {
   PAYMENT: "/billing",
 };
+
+function resolveRoute(notification: Notification): string | null {
+  if (notification.target_type === "meet" && notification.target_id) {
+    return `/meets?highlight=${notification.target_id}`;
+  }
+  if (notification.target_type === "payment" || notification.target_type === "subscription") {
+    return "/billing";
+  }
+  return NOTIFICATION_ROUTES[notification.type] ?? null;
+}
 
 function formatDateTime(d: string) {
   return new Date(d).toLocaleString("pt-PT", {
@@ -70,7 +82,7 @@ export default function NotificationDropdown() {
       }
     }
 
-    const route = NOTIFICATION_ROUTES[notification.type];
+    const route = resolveRoute(notification);
     if (route) {
       navigate(route);
     }

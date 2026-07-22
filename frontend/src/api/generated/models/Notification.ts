@@ -9,5 +9,7 @@ export type Notification = {
     message: string;
     is_seen?: boolean;
     readonly created_at: string;
+    readonly target_type: string | null;
+    readonly target_id: number;
 };
 

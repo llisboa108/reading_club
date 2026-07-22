@@ -81,7 +81,8 @@ def handle_payment_confirmation(sender, instance: Payment, created, **kwargs):
     Notification.objects.create(
         user=subscription.user,
         type=NotificationType.PAYMENT,
-        message="O seu pagamento foi confirmado. A sua assinatura está ativa."
+        message="O seu pagamento foi confirmado. A sua assinatura está ativa.",
+        content_object=instance,
     )
 
 # Create subscription for new user

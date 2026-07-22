@@ -1,9 +1,13 @@
 import hashlib
 import hmac
+from datetime import timedelta
 from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
+from django.core import mail
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework import status
@@ -401,3 +405,63 @@ class MercadoPagoWebhookViewTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         mock_fetch.assert_not_called()
+
+
+class RenewSubscriptionsCommandTests(TestCase):
+    def setUp(self):
+        self.plan = Plan.objects.create(
+            name="Basic", price=50, is_active=True, is_default=True
+        )
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+        self.subscription = self.member.subscriptions.order_by("-created_at").first()
+
+    def test_advance_payment_links_to_new_payment_and_sends_email(self):
+        advance_day = timezone.now().date() + timedelta(days=10)
+        self.subscription.status = SubscriptionStatus.ACTIVE
+        self.subscription.next_billing_date = advance_day
+        self.subscription.save()
+
+        call_command("renew_subscriptions")
+
+        payment = Payment.objects.get(subscription=self.subscription)
+        notification = self.member.notifications.get(type="PAYMENT")
+        payment_content_type = ContentType.objects.get_for_model(Payment)
+
+        self.assertEqual(notification.content_type, payment_content_type)
+        self.assertEqual(notification.object_id, payment.id)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.member.email])
+        self.assertIn("expira em 10 dias", mail.outbox[0].subject)
+
+    def test_advance_payment_does_not_duplicate_on_second_run(self):
+        advance_day = timezone.now().date() + timedelta(days=10)
+        self.subscription.status = SubscriptionStatus.ACTIVE
+        self.subscription.next_billing_date = advance_day
+        self.subscription.save()
+
+        call_command("renew_subscriptions")
+        call_command("renew_subscriptions")
+
+        self.assertEqual(Payment.objects.filter(subscription=self.subscription).count(), 1)
+
+    def test_expired_subscription_links_to_subscription_and_sends_email(self):
+        self.subscription.status = SubscriptionStatus.ACTIVE
+        self.subscription.next_billing_date = timezone.now().date() - timedelta(days=1)
+        self.subscription.save()
+
+        call_command("renew_subscriptions")
+
+        self.subscription.refresh_from_db()
+        self.assertEqual(self.subscription.status, SubscriptionStatus.EXPIRED)
+
+        notification = self.member.notifications.get(type="PAYMENT")
+        subscription_content_type = ContentType.objects.get_for_model(Subscription)
+
+        self.assertEqual(notification.content_type, subscription_content_type)
+        self.assertEqual(notification.object_id, self.subscription.id)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("expirou", mail.outbox[0].subject)

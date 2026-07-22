@@ -138,6 +138,11 @@ class MeetSerializer(serializers.ModelSerializer):
 
 # Noti serializer
 class NotificationSerializer(serializers.ModelSerializer):
+    # Exposes the related object (if any) as a model name + id pair so the
+    # frontend can build a real deep link instead of only routing by `type`.
+    target_type = serializers.SerializerMethodField()
+    target_id = serializers.IntegerField(source="object_id", read_only=True)
+
     class Meta:
         model = Notification
         fields = (
@@ -146,7 +151,12 @@ class NotificationSerializer(serializers.ModelSerializer):
             "message",
             "is_seen",
             "created_at",
+            "target_type",
+            "target_id",
         )
+
+    def get_target_type(self, obj) -> str | None:
+        return obj.content_type.model if obj.content_type_id else None
 
 # Blog serializers
 class BlogCategorySerializer(serializers.ModelSerializer):

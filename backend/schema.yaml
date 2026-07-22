@@ -2380,10 +2380,19 @@ components:
           type: string
           format: date-time
           readOnly: true
+        target_type:
+          type: string
+          nullable: true
+          readOnly: true
+        target_id:
+          type: integer
+          readOnly: true
       required:
       - created_at
       - id
       - message
+      - target_id
+      - target_type
       - type
     PasswordResetConfirmRequest:
       type: object

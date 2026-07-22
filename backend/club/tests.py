@@ -2,6 +2,10 @@ from datetime import timedelta
 from unittest.mock import Mock, patch
 
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
+from django.core import mail
+from django.core.management import call_command
+from django.test import TestCase
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -15,6 +19,7 @@ from .models import (
     Reading,
     ReadingStatus,
     Meet,
+    MeetUser,
     MeetType,
 )
 
@@ -216,3 +221,70 @@ class PublicClubStatsTests(APITestCase):
         # No force_authenticate call - the landing page calls this anonymously.
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class SendMeetRemindersCommandTests(TestCase):
+    def setUp(self):
+        author = Author.objects.create(first_name="Jane", last_name="Austen")
+        publisher = Publisher.objects.create(name="Editora Teste")
+        book = Book.objects.create(
+            title="Emma", isbn="9780000000099", pages=400, author=author, publisher=publisher
+        )
+        self.reading = Reading.objects.create(
+            book=book,
+            start_date=timezone.now().date(),
+            status=ReadingStatus.IN_PROGRESS,
+        )
+        self.participant = User.objects.create_user(
+            email="participant@example.com", password="Str0ng!Passw0rd"
+        )
+        self.non_participant = User.objects.create_user(
+            email="other@example.com", password="Str0ng!Passw0rd"
+        )
+
+    def _create_meet(self, meet_date, **kwargs):
+        meet = Meet.objects.create(reading=self.reading, meet_date=meet_date, **kwargs)
+        MeetUser.objects.create(meet=meet, user=self.participant)
+        return meet
+
+    def test_reminder_created_and_emailed_for_tomorrows_meet(self):
+        tomorrow = timezone.now() + timedelta(days=1)
+        meet = self._create_meet(tomorrow, meet_type=MeetType.ONLINE, meeting_link="https://meet.example/x")
+
+        call_command("send_meet_reminders")
+
+        notification = self.participant.notifications.get(type=NotificationType.MEET)
+        meet_content_type = ContentType.objects.get_for_model(Meet)
+        self.assertEqual(notification.content_type, meet_content_type)
+        self.assertEqual(notification.object_id, meet.id)
+        self.assertIn("Emma", notification.message)
+
+        self.assertFalse(
+            self.non_participant.notifications.filter(type=NotificationType.MEET).exists()
+        )
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.participant.email])
+
+    def test_no_reminder_for_meet_further_out_than_tomorrow(self):
+        next_week = timezone.now() + timedelta(days=7)
+        self._create_meet(next_week)
+
+        call_command("send_meet_reminders")
+
+        self.assertFalse(
+            self.participant.notifications.filter(type=NotificationType.MEET).exists()
+        )
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_reminder_is_not_duplicated_on_second_run(self):
+        tomorrow = timezone.now() + timedelta(days=1)
+        self._create_meet(tomorrow)
+
+        call_command("send_meet_reminders")
+        call_command("send_meet_reminders")
+
+        self.assertEqual(
+            self.participant.notifications.filter(type=NotificationType.MEET).count(), 1
+        )
+        self.assertEqual(len(mail.outbox), 1)

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 import { apiRequest } from "../../api/client";
 import { API_HOST, API_PREFIX, getAccessToken } from "../../api/config";
 import Badge from "../../components/ui/badge/Badge";
@@ -73,12 +73,16 @@ async function silentFetch<T>(path: string): Promise<T | null> {
 
 export default function MeetsPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const highlightId = searchParams.get("highlight") ? Number(searchParams.get("highlight")) : null;
 
   const [meets, setMeets] = useState<Meet[]>([]);
   const [readings, setReadings] = useState<Reading[]>([]);
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
   const [filterReading, setFilterReading] = useState<string>("");
+
+  const rowRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   useEffect(() => {
     async function fetchAll() {
@@ -98,6 +102,12 @@ export default function MeetsPage() {
     }
     fetchAll();
   }, []);
+
+  useEffect(() => {
+    if (!highlightId || loading) return;
+    rowRefs.current[highlightId]?.scrollIntoView({ behavior: "smooth", block: "center" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlightId, loading, meets]);
 
   const readingById = useMemo(() => {
     const map = new Map<number, Reading>();
@@ -158,8 +168,12 @@ export default function MeetsPage() {
                 {sortedMeets.map((m) => (
                   <MeetRow
                     key={m.id}
+                    ref={(el) => {
+                      rowRefs.current[m.id] = el;
+                    }}
                     meet={m}
                     reading={readingById.get(m.reading)}
+                    highlighted={m.id === highlightId}
                     onClick={() => navigate(`/readings/${m.reading}`)}
                   />
                 ))}
@@ -174,18 +188,18 @@ export default function MeetsPage() {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function MeetRow({
-  meet,
-  reading,
-  onClick,
-}: {
-  meet: Meet;
-  reading?: Reading;
-  onClick: () => void;
-}) {
+const MeetRow = forwardRef<
+  HTMLDivElement,
+  { meet: Meet; reading?: Reading; highlighted?: boolean; onClick: () => void }
+>(function MeetRow({ meet, reading, highlighted, onClick }, ref) {
   return (
     <div
-      className="flex cursor-pointer flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs transition hover:shadow-theme-md dark:border-gray-800 dark:bg-gray-900 sm:flex-row sm:items-center sm:justify-between"
+      ref={ref}
+      className={`flex cursor-pointer flex-col gap-3 rounded-2xl border bg-white p-4 shadow-theme-xs transition hover:shadow-theme-md dark:bg-gray-900 sm:flex-row sm:items-center sm:justify-between ${
+        highlighted
+          ? "border-brand-400 ring-2 ring-brand-300 dark:border-brand-500 dark:ring-brand-500/40"
+          : "border-gray-200 dark:border-gray-800"
+      }`}
       onClick={onClick}
     >
       <div className="min-w-0">
@@ -211,7 +225,7 @@ function MeetRow({
       </div>
     </div>
   );
-}
+});
 
 function ForbiddenState() {
   return (
