@@ -76,6 +76,7 @@ export type { TokenRefresh } from './models/TokenRefresh';
 export type { TokenRefreshRequest } from './models/TokenRefreshRequest';
 export { TypeEnum } from './models/TypeEnum';
 
+export { AnalyticsService } from './services/AnalyticsService';
 export { AuthService } from './services/AuthService';
 export { BillingService } from './services/BillingService';
 export { ClubService } from './services/ClubService';

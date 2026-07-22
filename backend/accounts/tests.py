@@ -177,3 +177,184 @@ class LoginRateThrottleTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("access", response.data)
+
+
+class MeAndProfileTests(APITestCase):
+    me_url = "/api/v1/auth/me/"
+    profile_url = "/api/v1/auth/profile/"
+
+    def setUp(self):
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+        self.financial = User.objects.create_user(
+            email="financial@example.com", password="Str0ng!Passw0rd", is_financial=True
+        )
+
+    def test_me_requires_authentication(self):
+        response = self.client.get(self.me_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_me_reflects_role_flags(self):
+        self.client.force_authenticate(self.financial)
+        response = self.client.get(self.me_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["email"], self.financial.email)
+        self.assertFalse(response.data["is_admin"])
+        self.assertTrue(response.data["is_financial"])
+        self.assertIn("profile", response.data)
+
+    def test_profile_update_persists_fields(self):
+        self.client.force_authenticate(self.member)
+        response = self.client.patch(
+            self.profile_url,
+            {"full_name": "Membro Exemplo", "bio": "Adora ler"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.member.profile.refresh_from_db()
+        self.assertEqual(self.member.profile.full_name, "Membro Exemplo")
+        self.assertEqual(self.member.profile.bio, "Adora ler")
+
+
+class ChangePasswordTests(APITestCase):
+    url = "/api/v1/auth/change-password/"
+
+    def setUp(self):
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Old!Passw0rd"
+        )
+
+    def test_wrong_old_password_rejected(self):
+        self.client.force_authenticate(self.member)
+        response = self.client.put(
+            self.url,
+            {"old_password": "not-the-password", "new_password": "Br4nd!NewPassw0rd"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.member.refresh_from_db()
+        self.assertTrue(self.member.check_password("Old!Passw0rd"))
+
+    def test_weak_new_password_rejected(self):
+        self.client.force_authenticate(self.member)
+        response = self.client.put(
+            self.url,
+            {"old_password": "Old!Passw0rd", "new_password": "1234567"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_correct_old_password_changes_it(self):
+        self.client.force_authenticate(self.member)
+        response = self.client.put(
+            self.url,
+            {"old_password": "Old!Passw0rd", "new_password": "Br4nd!NewPassw0rd"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.member.refresh_from_db()
+        self.assertTrue(self.member.check_password("Br4nd!NewPassw0rd"))
+
+    def test_requires_authentication(self):
+        response = self.client.put(
+            self.url,
+            {"old_password": "Old!Passw0rd", "new_password": "Br4nd!NewPassw0rd"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class ValidatePasswordViewTests(APITestCase):
+    url = "/api/v1/auth/validate-password/"
+
+    def setUp(self):
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+
+    def test_valid_password_returns_true(self):
+        self.client.force_authenticate(self.member)
+        response = self.client.post(self.url, {"password": "Another!Str0ngPass"}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["valid"])
+
+    def test_weak_password_returns_errors(self):
+        self.client.force_authenticate(self.member)
+        response = self.client.post(self.url, {"password": "1234567"}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("errors", response.data)
+
+
+class MemberListViewTests(APITestCase):
+    url = "/api/v1/auth/members/"
+
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            email="admin@example.com", password="Str0ng!Passw0rd", is_staff=True
+        )
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+        self.inactive = User.objects.create_user(
+            email="inactive@example.com", password="Str0ng!Passw0rd", is_active=False
+        )
+
+    def test_admin_sees_only_active_members(self):
+        self.client.force_authenticate(self.admin)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        emails = [m["email"] for m in response.data]
+        self.assertIn(self.member.email, emails)
+        self.assertNotIn(self.inactive.email, emails)
+
+    def test_non_admin_forbidden(self):
+        self.client.force_authenticate(self.member)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class InviteCodeViewSetTests(APITestCase):
+    url = "/api/v1/auth/invite-codes/"
+
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            email="admin@example.com", password="Str0ng!Passw0rd", is_staff=True
+        )
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+
+    def test_admin_can_create_invite_code(self):
+        self.client.force_authenticate(self.admin)
+        response = self.client.post(
+            self.url, {"code": "CLUBE2026", "max_uses": 5, "is_active": True}, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(InviteCode.objects.filter(code="CLUBE2026").exists())
+
+    def test_non_admin_cannot_create_invite_code(self):
+        self.client.force_authenticate(self.member)
+        response = self.client.post(
+            self.url, {"code": "CLUBE2026", "max_uses": 5, "is_active": True}, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_non_admin_cannot_list_invite_codes(self):
+        InviteCode.objects.create(code="EXISTING", max_uses=1)
+
+        self.client.force_authenticate(self.member)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

@@ -11,6 +11,9 @@ type NavItem = {
   path?: string;
   admin?: boolean;
   financial?: boolean;
+  // Visible to admins AND financial staff (unlike admin+financial together,
+  // which would require both roles on the same user).
+  adminOrFinancial?: boolean;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
@@ -49,6 +52,15 @@ function BlogIcon() {
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </svg>
+  );
+}
+
+function AnalyticsIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3v18h18" />
+      <path d="M7 15l4-5 3 3 5-7" />
     </svg>
   );
 }
@@ -115,6 +127,12 @@ const navItems: NavItem[] = [
     path: "/plans",
     admin: true,
   },
+  {
+    icon: <AnalyticsIcon />,
+    name: "Analytics",
+    path: "/analytics",
+    adminOrFinancial: true,
+  },
 ];
 
 // ── Componente principal ─────────────────────────────────────────────────────
@@ -127,7 +145,8 @@ const AppSidebar: React.FC = () => {
   const visibleNavItems = navItems.filter(
     (item) =>
       (!item.admin || user?.is_admin) &&
-      (!item.financial || user?.is_financial)
+      (!item.financial || user?.is_financial) &&
+      (!item.adminOrFinancial || user?.is_admin || user?.is_financial)
   );
 
   const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);

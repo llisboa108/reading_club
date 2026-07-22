@@ -5,6 +5,25 @@ info:
   description: API for managing a reading club, including authentication, memberships,
     billing, payments, meetings and blog.
 paths:
+  /api/v1/analytics/:
+    get:
+      operationId: analyticsRetrieve
+      description: |-
+        Admin/financial-only dashboard: revenue, subscriptions, membership
+        and reading-club activity, aggregated from real data.
+      summary: Aggregated analytics for the admin/financial dashboard
+      tags:
+      - Analytics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
   /api/v1/auth/change-password/:
     put:
       operationId: auth_change_password_update

@@ -12,6 +12,7 @@ import BillingPage from "./pages/Billing/BillingPage";
 import PaymentConfirmationsPage from "./pages/Billing/PaymentConfirmationsPage";
 import MembersPage from "./pages/Members/MembersPage";
 import PlansPage from "./pages/Plans/PlansPage";
+import AnalyticsPage from "./pages/Analytics/AnalyticsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import BooksPage from "./pages/Books/BooksPage";
@@ -53,6 +54,7 @@ export default function App() {
             <Route path="/billing/confirmations" element={<PaymentConfirmationsPage />} />
             <Route path="/members" element={<MembersPage />} />
             <Route path="/plans" element={<PlansPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
           </Route>
 
           {/* Auth Layout */}
