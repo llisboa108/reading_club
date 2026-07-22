@@ -61,16 +61,20 @@ export default function StatsSection({ stats }: { stats: ClubStats | null }) {
           scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
         });
         if (bgRef.current) {
-          gsap.to(bgRef.current, {
-            yPercent: 10,
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
-            },
-          });
+          gsap.fromTo(
+            bgRef.current,
+            { yPercent: -5 },
+            {
+              yPercent: 5,
+              ease: "none",
+              scrollTrigger: {
+                trigger: sectionRef.current,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true,
+              },
+            }
+          );
         }
       }, sectionRef);
       revert = () => ctx.revert();
@@ -99,14 +103,19 @@ export default function StatsSection({ stats }: { stats: ClubStats | null }) {
       <div className="absolute inset-0 bg-gradient-to-br from-brand-700/85 via-brand-600/80 to-brand-950/90" />
       <div ref={ref} className={`relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 ${revealClass}`}>
         <div className="mb-14 text-center">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-brand-200">
-            O clube em números
-          </p>
+          <div className="mb-3 flex items-center justify-center gap-3">
+            <span aria-hidden="true" className="h-px w-8 bg-white/25" />
+            <p className="font-body text-sm italic tracking-normal text-brand-100">
+              O clube em números
+            </p>
+            <span aria-hidden="true" className="h-px w-8 bg-white/25" />
+          </div>
           <h2 className="font-heading text-3xl font-medium text-white sm:text-4xl">
             Um pequeno resumo da nossa existência
           </h2>
         </div>
 
+        {/* Fixed 4 tiles: 2-then-4 (no sm:3 step) avoids an orphaned 4th tile at tablet width. */}
         <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
           {items.map((item) => (
             <div

@@ -142,7 +142,7 @@ export default function LandingHero() {
         <div className="hero-ctas mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <a
             href={memberCta.href}
-            className={`w-full rounded-lg bg-white px-8 py-3.5 text-sm font-semibold text-brand-700 shadow-theme-lg transition-transform hover:scale-105 sm:w-auto ${pending}`}
+            className={`w-full rounded-lg bg-white px-8 py-3.5 text-sm font-semibold text-brand-700 shadow-theme-lg transition-transform hover:scale-105 active:scale-[0.98] sm:w-auto ${pending}`}
           >
             {memberCta.label}
           </a>

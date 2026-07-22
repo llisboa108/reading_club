@@ -57,12 +57,18 @@ export default function PartnersSection() {
   const logoPending = `partner-logo ${reducedMotion ? "" : "opacity-0 translate-y-3"}`;
 
   return (
-    <section id="parceiros" ref={sectionRef} className="bg-stone-50 py-20 dark:bg-gray-900/40 sm:py-28">
+    // Background swapped from the stone-50/gray-900/40 pair so this doesn't share a
+    // background with VozesDoClube right above it.
+    <section id="parceiros" ref={sectionRef} className="bg-stone-25 py-20 dark:bg-gray-950 sm:py-28">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="mb-14 text-center">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
-            Aliados que caminham ao nosso lado.
-          </p>
+          <div className="mb-3 flex items-center justify-center gap-3">
+            <span aria-hidden="true" className="h-px w-8 bg-brand-300 dark:bg-brand-500/40" />
+            <p className="font-body text-sm italic tracking-normal text-brand-600 dark:text-brand-400">
+              Aliados que caminham ao nosso lado.
+            </p>
+            <span aria-hidden="true" className="h-px w-8 bg-brand-300 dark:bg-brand-500/40" />
+          </div>
           <h2 className="font-heading text-3xl font-medium text-stone-900 dark:text-white sm:text-4xl">
             Nossos parceiros
           </h2>
@@ -71,11 +77,16 @@ export default function PartnersSection() {
         <div className="flex flex-wrap items-center justify-center gap-12">
           {PARTNERS.map((partner) => {
             const img = (
-              <div className="flex h-16 w-32 items-center justify-center">
+              // Dark chip behind every logo: the illustrator's mark is white artwork on a
+              // transparent background (a reversed/knockout logo meant for dark surfaces), so it
+              // disappears on this section's light background — a light card would make that
+              // worse, not better. A dark chip fixes the reversed logo and still reads fine for
+              // the other, normal-contrast partner logos.
+              <div className="flex h-20 w-36 items-center justify-center rounded-xl bg-stone-800 p-4 ring-1 ring-stone-700/50 transition-transform hover:-translate-y-0.5 dark:bg-gray-800 dark:ring-gray-700/50">
                 <img
                   src={partner.image}
                   alt={partner.name}
-                  className="max-h-16 max-w-32 grayscale opacity-70 transition-all hover:grayscale-0 hover:opacity-100"
+                  className="max-h-12 max-w-28 object-contain grayscale opacity-70 transition-all hover:grayscale-0 hover:opacity-100"
                 />
               </div>
             );

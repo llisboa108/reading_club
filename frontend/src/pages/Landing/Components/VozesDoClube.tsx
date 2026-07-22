@@ -55,10 +55,13 @@ export default function VozesDoClube() {
   const pending = `voice-block ${reducedMotion ? "" : "opacity-0 translate-y-4"}`;
 
   return (
+    // Larger padding than grid sections: an isolated quote reads better with extra vertical space.
+    // Background is swapped from the stone-25/gray-950 pair (unlike neighboring sections) so it
+    // doesn't sit flush against TeamSection's identical background right above it.
     <section
       id="vozes"
       ref={sectionRef}
-      className="relative overflow-hidden bg-stone-25 py-24 dark:bg-gray-950 sm:py-32"
+      className="relative overflow-hidden bg-stone-50 py-24 dark:bg-gray-900/40 sm:py-32"
     >
       <div className={`mx-auto max-w-3xl px-4 text-center sm:px-6 ${pending}`}>
         <p className="mb-10 text-xs font-medium uppercase tracking-widest text-stone-400 dark:text-gray-500">

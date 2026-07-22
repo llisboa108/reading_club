@@ -45,7 +45,10 @@ export default function TeamSection() {
     };
   }, [reducedMotion, team]);
 
-  if (!team || team.length === 0) return null;
+  if (team === null) return null;
+  // Empty (not just unloaded) still renders the anchor so #membros in the nav
+  // never scrolls to a missing element.
+  if (team.length === 0) return <section id="membros" aria-hidden="true" />;
 
   const cardPending = `team-card ${reducedMotion ? "" : "opacity-0 translate-y-4"}`;
 
@@ -53,19 +56,23 @@ export default function TeamSection() {
     <section id="membros" ref={sectionRef} className="bg-stone-25 py-20 dark:bg-gray-950 sm:py-28">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mb-14 text-center">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
-            Rostos que dão vida às nossas leituras.
-          </p>
+          <div className="mb-3 flex items-center justify-center gap-3">
+            <span aria-hidden="true" className="h-px w-8 bg-brand-300 dark:bg-brand-500/40" />
+            <p className="font-body text-sm italic tracking-normal text-brand-600 dark:text-brand-400">
+              Rostos que dão vida às nossas leituras.
+            </p>
+            <span aria-hidden="true" className="h-px w-8 bg-brand-300 dark:bg-brand-500/40" />
+          </div>
           <h2 className="font-heading text-3xl font-medium text-stone-900 dark:text-white sm:text-4xl">
             Membros do clube
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="flex flex-wrap justify-center gap-6">
           {team.map((member) => {
             const content = (
               <>
-                <div className="relative mx-auto mb-4 h-28 w-28 overflow-hidden rounded-full ring-4 ring-transparent transition-all group-hover:ring-brand-200 dark:group-hover:ring-brand-500/30 sm:h-32 sm:w-32">
+                <div className="paper-grain relative mx-auto mb-4 h-28 w-28 overflow-hidden rounded-full ring-4 ring-transparent transition-all group-hover:ring-brand-200 dark:group-hover:ring-brand-500/30 sm:h-32 sm:w-32">
                   <DistortImage src={member.image} alt={member.name} className="h-full w-full rounded-full" />
                 </div>
                 <h4 className="font-heading font-semibold text-stone-900 dark:text-white">{member.name}</h4>
@@ -79,12 +86,15 @@ export default function TeamSection() {
                 href={member.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`group text-center ${cardPending}`}
+                className={`group w-[calc(50%-0.75rem)] text-center sm:w-[calc(33.333%-1rem)] lg:w-[calc(25%-1.125rem)] ${cardPending}`}
               >
                 {content}
               </a>
             ) : (
-              <div key={member.id} className={`group text-center ${cardPending}`}>
+              <div
+                key={member.id}
+                className={`group w-[calc(50%-0.75rem)] text-center sm:w-[calc(33.333%-1rem)] lg:w-[calc(25%-1.125rem)] ${cardPending}`}
+              >
                 {content}
               </div>
             );

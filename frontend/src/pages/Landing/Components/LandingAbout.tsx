@@ -101,12 +101,15 @@ export default function LandingAbout() {
           ref={imageRef}
           src="/images/landing/about-section.jpg"
           alt="Retrato pintado de uma mulher lendo um livro, em tons quentes"
-          className="w-full rounded-2xl object-cover shadow-stone-lg lg:order-2"
+          className="paper-grain w-full rounded-2xl object-cover shadow-stone-lg lg:order-2"
         />
         <div className="lg:order-1">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
-            Do sonho à realidade
-          </p>
+          <div className="mb-2 flex items-center gap-3">
+            <span aria-hidden="true" className="h-px w-8 bg-brand-300 dark:bg-brand-500/40" />
+            <p className="font-body text-sm italic tracking-normal text-brand-600 dark:text-brand-400">
+              Do sonho à realidade
+            </p>
+          </div>
           <h2 className="mb-6 font-heading text-3xl font-medium text-stone-900 dark:text-white sm:text-4xl">
             Sobre o clube
           </h2>
@@ -125,7 +128,7 @@ export default function LandingAbout() {
             ))}
           </div>
 
-          <blockquote className="relative mt-8 border-l-2 border-brand-300 pl-6 dark:border-brand-500/40">
+          <blockquote className="relative mt-8 pl-2">
             <span
               aria-hidden="true"
               className="absolute -left-1 -top-3 font-heading text-5xl leading-none text-brand-300 dark:text-brand-500/50"

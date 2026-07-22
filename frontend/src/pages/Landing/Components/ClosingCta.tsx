@@ -87,6 +87,7 @@ export default function ClosingCta() {
   const pending = `cta-line ${reducedMotion ? "" : "opacity-0 translate-y-4"}`;
 
   return (
+    // Larger padding than other sections: final CTA gets extra breathing room before the footer.
     <section id="contato" ref={sectionRef} className="relative isolate overflow-hidden py-28 sm:py-36">
       <img
         ref={imageRef}
@@ -119,7 +120,7 @@ export default function ClosingCta() {
               placeholder="Seu nome"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/50 backdrop-blur-sm focus:border-white/50 focus:outline-none"
+              className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/50 backdrop-blur-sm focus:border-white/50 focus:outline-hidden focus:ring-3 focus:ring-brand-200/40"
             />
           </div>
           <div>
@@ -132,7 +133,7 @@ export default function ClosingCta() {
               placeholder="Seu e-mail"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/50 backdrop-blur-sm focus:border-white/50 focus:outline-none"
+              className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/50 backdrop-blur-sm focus:border-white/50 focus:outline-hidden focus:ring-3 focus:ring-brand-200/40"
             />
           </div>
           <div>
@@ -145,7 +146,7 @@ export default function ClosingCta() {
               placeholder="Como podemos ajudar?"
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}
-              className="w-full resize-none rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/50 backdrop-blur-sm focus:border-white/50 focus:outline-none"
+              className="w-full resize-none rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/50 backdrop-blur-sm focus:border-white/50 focus:outline-hidden focus:ring-3 focus:ring-brand-200/40"
             />
           </div>
 
@@ -154,7 +155,7 @@ export default function ClosingCta() {
           <button
             type="submit"
             disabled={sending}
-            className="w-full rounded-lg bg-white px-9 py-3.5 text-sm font-semibold text-brand-700 shadow-theme-lg transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-lg bg-white px-9 py-3.5 text-sm font-semibold text-brand-700 shadow-theme-lg transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {sending ? "Enviando..." : "Enviar mensagem"}
           </button>
