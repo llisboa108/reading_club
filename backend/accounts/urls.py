@@ -1,10 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import (
     RegisterView,
@@ -16,6 +13,7 @@ from .views import (
     ChangePasswordView,
     PasswordResetRequestView,
     PasswordResetConfirmView,
+    ThrottledTokenObtainPairView,
 )
 
 router = DefaultRouter()
@@ -31,7 +29,7 @@ urlpatterns = [
     path("password-reset/", PasswordResetRequestView.as_view(), name="password_reset"),
     path("password-reset-confirm/", PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
 
-    path("login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("login/", ThrottledTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]
 

@@ -155,6 +155,12 @@ REST_FRAMEWORK = {
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
     "DEFAULT_VERSION": "v1",
     "ALLOWED_VERSIONS": ["v1"],
+    # Only the "login" scope is used today (api.throttling.LoginRateThrottle,
+    # applied to the /auth/login/ view) - slows down credential brute-forcing
+    # without throttling the rest of the API.
+    "DEFAULT_THROTTLE_RATES": {
+        "login": "5/min",
+    },
 }
 
 SIMPLE_JWT = {

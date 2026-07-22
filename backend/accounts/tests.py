@@ -3,6 +3,7 @@ import re
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core import mail
+from django.core.cache import cache
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework import status
@@ -139,3 +140,40 @@ class PasswordResetTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class LoginRateThrottleTests(APITestCase):
+    url = "/api/v1/auth/login/"
+
+    def setUp(self):
+        # DRF's AnonRateThrottle caches hit counts in the default cache,
+        # which persists across tests in the same process.
+        cache.clear()
+        self.user = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+
+    def test_sixth_attempt_within_a_minute_is_throttled(self):
+        for _ in range(5):
+            response = self.client.post(
+                self.url,
+                {"email": self.user.email, "password": "wrong-password"},
+                format="json",
+            )
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        sixth = self.client.post(
+            self.url,
+            {"email": self.user.email, "password": "wrong-password"},
+            format="json",
+        )
+        self.assertEqual(sixth.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+
+    def test_correct_credentials_still_work_under_the_limit(self):
+        response = self.client.post(
+            self.url,
+            {"email": self.user.email, "password": "Str0ng!Passw0rd"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", response.data)

@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework_simplejwt.views import TokenObtainPairView
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from django.conf import settings
 from django.contrib.auth.password_validation import validate_password
@@ -12,6 +13,9 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
+from api.throttling import LoginRateThrottle
+
 User = get_user_model()
 
 from .models import InviteCode
@@ -48,6 +52,11 @@ class InviteCodeViewSet(ModelViewSet):
     queryset = InviteCode.objects.all().order_by("-created_at")
     serializer_class = InviteCodeSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
+
+# Login view (rate-limited per IP to slow down credential brute-forcing)
+class ThrottledTokenObtainPairView(TokenObtainPairView):
+    throttle_classes = [LoginRateThrottle]
+
 
 # Register view
 class RegisterView(CreateAPIView):
