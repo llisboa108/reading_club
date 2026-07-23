@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { PatchedPaymentRequest } from '../models/PatchedPaymentRequest';
 import type { PatchedPlanWriteRequest } from '../models/PatchedPlanWriteRequest';
+import type { PatchedSubscriptionAdminWriteRequest } from '../models/PatchedSubscriptionAdminWriteRequest';
 import type { Payment } from '../models/Payment';
 import type { PaymentAdmin } from '../models/PaymentAdmin';
 import type { PaymentConfirmRequest } from '../models/PaymentConfirmRequest';
@@ -14,6 +15,8 @@ import type { Plan } from '../models/Plan';
 import type { PlanWrite } from '../models/PlanWrite';
 import type { PlanWriteRequest } from '../models/PlanWriteRequest';
 import type { Subscription } from '../models/Subscription';
+import type { SubscriptionAdmin } from '../models/SubscriptionAdmin';
+import type { SubscriptionAdminWrite } from '../models/SubscriptionAdminWrite';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -272,6 +275,61 @@ export class BillingService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/billing/subscription/',
+        });
+    }
+    /**
+     * Admin-only management of every member's subscription (plan, custom
+     * price, one-off surcharge). Status/dates stay signal/command-driven and
+     * are intentionally not writable here.
+     * @returns SubscriptionAdmin
+     * @throws ApiError
+     */
+    public static subscriptionsAdminList(): CancelablePromise<Array<SubscriptionAdmin>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/billing/subscriptions/',
+        });
+    }
+    /**
+     * Admin-only management of every member's subscription (plan, custom
+     * price, one-off surcharge). Status/dates stay signal/command-driven and
+     * are intentionally not writable here.
+     * @param id Um valor inteiro único que identifica este subscription.
+     * @returns SubscriptionAdmin
+     * @throws ApiError
+     */
+    public static subscriptionsAdminRetrieve(
+        id: number,
+    ): CancelablePromise<SubscriptionAdmin> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/billing/subscriptions/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
+     * Admin-only management of every member's subscription (plan, custom
+     * price, one-off surcharge). Status/dates stay signal/command-driven and
+     * are intentionally not writable here.
+     * @param id Um valor inteiro único que identifica este subscription.
+     * @param requestBody
+     * @returns SubscriptionAdminWrite
+     * @throws ApiError
+     */
+    public static subscriptionsAdminPartialUpdate(
+        id: number,
+        requestBody?: PatchedSubscriptionAdminWriteRequest,
+    ): CancelablePromise<SubscriptionAdminWrite> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/billing/subscriptions/{id}/',
+            path: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 }

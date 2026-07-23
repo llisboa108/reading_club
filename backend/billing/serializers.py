@@ -62,6 +62,59 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             "next_billing_date",
         )
 
+class SubscriptionAdminSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
+    member_email = serializers.EmailField(source="user.email", read_only=True)
+    member_name = serializers.CharField(
+        source="user.profile.full_name", read_only=True, default=""
+    )
+    plan = PlanSerializer(read_only=True)
+    effective_base_price = serializers.DecimalField(
+        max_digits=8, decimal_places=2, read_only=True
+    )
+
+    class Meta:
+        model = Subscription
+        fields = (
+            "id",
+            "user_id",
+            "member_email",
+            "member_name",
+            "status",
+            "plan",
+            "custom_price",
+            "surcharge_amount",
+            "surcharge_reason",
+            "effective_base_price",
+            "start_date",
+            "end_date",
+            "next_billing_date",
+        )
+        read_only_fields = (
+            "status",
+            "start_date",
+            "end_date",
+            "next_billing_date",
+        )
+
+class SubscriptionAdminWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = (
+            "plan",
+            "custom_price",
+            "surcharge_amount",
+            "surcharge_reason",
+        )
+
+    def save(self, **kwargs):
+        instance = super().save(**kwargs)
+        # Limpar o valor também limpa o motivo, evitando um motivo órfão.
+        if instance.surcharge_amount is None and instance.surcharge_reason:
+            instance.surcharge_reason = ""
+            instance.save(update_fields=["surcharge_reason"])
+        return instance
+
 # Payment serializers
 class PaymentSerializer(serializers.ModelSerializer):
     method_display = serializers.CharField(

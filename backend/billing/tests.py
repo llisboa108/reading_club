@@ -465,3 +465,149 @@ class RenewSubscriptionsCommandTests(TestCase):
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("expirou", mail.outbox[0].subject)
+
+
+class SubscriptionAdminManagementTests(APITestCase):
+    url = "/api/v1/billing/subscriptions/"
+
+    def setUp(self):
+        self.plan = Plan.objects.create(
+            name="Basic", price=50, is_active=True, is_default=True
+        )
+        self.other_plan = Plan.objects.create(name="Premium", price=90, is_active=True)
+        self.admin = User.objects.create_user(
+            email="admin@example.com", password="Str0ng!Passw0rd", is_staff=True
+        )
+        self.financial_user = User.objects.create_user(
+            email="financial@example.com",
+            password="Str0ng!Passw0rd",
+            is_financial=True,
+        )
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+        self.subscription = self.member.subscriptions.order_by("-created_at").first()
+
+    def _detail_url(self, sub):
+        return f"{self.url}{sub.id}/"
+
+    def test_non_admin_member_cannot_list_subscriptions(self):
+        self.client.force_authenticate(self.member)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_financial_user_cannot_access_subscription_admin_endpoint(self):
+        # Financial confirms payments but does not assign plans/pricing -
+        # IsFinancial must not be an alternative permission here.
+        self.client.force_authenticate(self.financial_user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_list_all_subscriptions_with_user_identity(self):
+        self.client.force_authenticate(self.admin)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        emails = [s["member_email"] for s in response.data]
+        self.assertIn(self.member.email, emails)
+        row = next(s for s in response.data if s["id"] == self.subscription.id)
+        self.assertEqual(row["effective_base_price"], f"{self.plan.price:.2f}")
+
+    def test_admin_can_change_member_plan(self):
+        self.client.force_authenticate(self.admin)
+        response = self.client.patch(
+            self._detail_url(self.subscription),
+            {"plan": self.other_plan.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.subscription.refresh_from_db()
+        self.assertEqual(self.subscription.plan_id, self.other_plan.id)
+
+    def test_admin_cannot_write_status_or_dates_directly(self):
+        original_status = self.subscription.status
+        original_end_date = self.subscription.end_date
+
+        self.client.force_authenticate(self.admin)
+        response = self.client.patch(
+            self._detail_url(self.subscription),
+            {"status": SubscriptionStatus.ACTIVE, "end_date": "2099-01-01"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.subscription.refresh_from_db()
+        self.assertEqual(self.subscription.status, original_status)
+        self.assertEqual(self.subscription.end_date, original_end_date)
+
+    def test_setting_custom_price_overrides_plan_price_in_generated_payment(self):
+        advance_day = timezone.now().date() + timedelta(days=10)
+        self.subscription.status = SubscriptionStatus.ACTIVE
+        self.subscription.next_billing_date = advance_day
+        self.subscription.custom_price = 75
+        self.subscription.save()
+
+        call_command("renew_subscriptions")
+
+        payment = Payment.objects.get(subscription=self.subscription)
+        self.assertEqual(payment.amount, 75)
+
+        self.subscription.refresh_from_db()
+        self.assertEqual(self.subscription.custom_price, 75)
+
+    def test_surcharge_is_added_once_and_then_cleared(self):
+        advance_day = timezone.now().date() + timedelta(days=10)
+        self.subscription.status = SubscriptionStatus.ACTIVE
+        self.subscription.next_billing_date = advance_day
+        self.subscription.surcharge_amount = 30
+        self.subscription.surcharge_reason = "Projeto X"
+        self.subscription.save()
+
+        call_command("renew_subscriptions")
+
+        payment = Payment.objects.get(subscription=self.subscription)
+        self.assertEqual(payment.amount, self.plan.price + 30)
+        self.assertIn("Projeto X", payment.notes)
+
+        self.subscription.refresh_from_db()
+        self.assertIsNone(self.subscription.surcharge_amount)
+        self.assertEqual(self.subscription.surcharge_reason, "")
+
+    def test_custom_price_and_surcharge_stack_together(self):
+        advance_day = timezone.now().date() + timedelta(days=10)
+        self.subscription.status = SubscriptionStatus.ACTIVE
+        self.subscription.next_billing_date = advance_day
+        self.subscription.custom_price = 75
+        self.subscription.surcharge_amount = 30
+        self.subscription.surcharge_reason = "Projeto X"
+        self.subscription.save()
+
+        call_command("renew_subscriptions")
+
+        payment = Payment.objects.get(subscription=self.subscription)
+        self.assertEqual(payment.amount, 105)
+
+    def test_duplicate_advance_payment_skip_does_not_clear_pending_surcharge(self):
+        advance_day = timezone.now().date() + timedelta(days=10)
+        self.subscription.status = SubscriptionStatus.ACTIVE
+        self.subscription.next_billing_date = advance_day
+        self.subscription.surcharge_amount = 30
+        self.subscription.surcharge_reason = "Projeto X"
+        self.subscription.save()
+
+        # A pending payment for that due_date already exists - the command's
+        # duplicate-skip branch must not touch the surcharge without billing it.
+        Payment.objects.create(
+            subscription=self.subscription,
+            amount=self.plan.price,
+            due_date=advance_day,
+        )
+
+        call_command("renew_subscriptions")
+
+        self.subscription.refresh_from_db()
+        self.assertEqual(self.subscription.surcharge_amount, 30)
+        self.assertEqual(self.subscription.surcharge_reason, "Projeto X")

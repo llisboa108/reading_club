@@ -910,13 +910,13 @@
     "semantic_hash": ""
   },
   "frontend/src/pages/Readings/ReadingDetailPage.tsx": {
-    "mtime": 1784801770.6146936,
-    "ast_hash": "e7ccc0d1380495d851794ef4a5bf9f3c",
+    "mtime": 1784805774.5483408,
+    "ast_hash": "088b28e025ceedb2d4bd5f1a2e388106",
     "semantic_hash": ""
   },
   "frontend/src/pages/Readings/ReadingsPage.tsx": {
-    "mtime": 1784804557.1433866,
-    "ast_hash": "363ab028dcbafd6d63b912726b28a250",
+    "mtime": 1784805762.124941,
+    "ast_hash": "0649ddefeadb358a8dee5cd79f299e25",
     "semantic_hash": ""
   },
   "frontend/src/pages/UserProfiles.tsx": {
@@ -2660,8 +2660,8 @@
     "semantic_hash": ""
   },
   "DESIGN.md": {
-    "mtime": 1784801961.9571083,
-    "ast_hash": "12c7a797bbffc72f661e8dc8a3730981",
+    "mtime": 1784804799.0865967,
+    "ast_hash": "0df209a1762dfdc70b2b7f3912b8a70b",
     "semantic_hash": ""
   }
 }

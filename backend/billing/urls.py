@@ -5,6 +5,7 @@ from .views import (
     PlanViewSet,
     PaymentViewSet,
     SubscriptionView,
+    SubscriptionAdminViewSet,
     PaymentConfirmView,
     MercadoPagoPreferenceView,
     MercadoPagoWebhookView,
@@ -13,6 +14,7 @@ from .views import (
 router = DefaultRouter()
 router.register("plans", PlanViewSet, basename="plans")
 router.register("payments", PaymentViewSet, basename="payments")
+router.register("subscriptions", SubscriptionAdminViewSet, basename="subscriptions")
 
 urlpatterns = [
     path("subscription/", SubscriptionView.as_view(), name="subscription"),

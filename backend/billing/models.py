@@ -56,7 +56,38 @@ class Subscription(models.Model):
     end_date = models.DateField()
     next_billing_date = models.DateField()
 
+    custom_price = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text=(
+            "Preço mensal personalizado, substituindo o preço do plano. "
+            "Vale até ser removido pelo administrador."
+        ),
+    )
+    surcharge_amount = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text=(
+            "Acréscimo pontual somado apenas à próxima cobrança gerada. "
+            "É zerado automaticamente depois de gerar esse pagamento."
+        ),
+    )
+    surcharge_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        help_text="Motivo do acréscimo (ex.: 'Projeto X'). Aparece nas notas do pagamento.",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def effective_base_price(self):
+        return self.custom_price if self.custom_price is not None else self.plan.price
 
     def __str__(self):
         return f"{self.user} - {self.plan}"

@@ -35,6 +35,57 @@ interface InviteForm {
 
 const EMPTY_FORM: InviteForm = { code: "", max_uses: 1 };
 
+type SubscriptionStatus = "PENDING" | "ACTIVE" | "EXPIRED" | "CANCELED";
+
+interface Plan {
+  id: number;
+  name: string;
+  price: string;
+  is_active: boolean;
+}
+
+interface Subscription {
+  id: number;
+  user_id: number;
+  member_email: string;
+  member_name: string;
+  status: SubscriptionStatus;
+  plan: Plan;
+  custom_price: string | null;
+  surcharge_amount: string | null;
+  surcharge_reason: string;
+  effective_base_price: string;
+  next_billing_date: string;
+}
+
+interface SubscriptionForm {
+  plan_id: string;
+  useCustomPrice: boolean;
+  custom_price: string;
+  surcharge_amount: string;
+  surcharge_reason: string;
+}
+
+const EMPTY_SUB_FORM: SubscriptionForm = {
+  plan_id: "",
+  useCustomPrice: false,
+  custom_price: "",
+  surcharge_amount: "",
+  surcharge_reason: "",
+};
+
+const STATUS_LABELS: Record<SubscriptionStatus, { label: string; color: string }> = {
+  PENDING: { label: "Pendente", color: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400" },
+  ACTIVE: { label: "Ativa", color: "bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-400" },
+  EXPIRED: { label: "Expirada", color: "bg-error-100 text-error-700 dark:bg-error-900/30 dark:text-error-400" },
+  CANCELED: { label: "Cancelada", color: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400" },
+};
+
+function formatPrice(value?: string | null) {
+  if (value === undefined || value === null) return "—";
+  return `R$ ${Number(value).toFixed(2)}`;
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatDate(d?: string | null) {
@@ -54,6 +105,8 @@ export default function MembersPage() {
 
   const [members, setMembers] = useState<Member[]>([]);
   const [invites, setInvites] = useState<InviteCode[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -65,15 +118,76 @@ export default function MembersPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const [subModalOpen, setSubModalOpen] = useState(false);
+  const [editingSub, setEditingSub] = useState<Subscription | null>(null);
+  const [subForm, setSubForm] = useState<SubscriptionForm>(EMPTY_SUB_FORM);
+  const [subSaving, setSubSaving] = useState(false);
+  const [subFormError, setSubFormError] = useState("");
+
   async function fetchAll() {
     setLoading(true);
-    const [m, i] = await Promise.all([
+    const [m, i, s, p] = await Promise.all([
       apiRequest<Member[]>("/auth/members/").catch(() => [] as Member[]),
       apiRequest<InviteCode[]>("/auth/invite-codes/").catch(() => [] as InviteCode[]),
+      apiRequest<Subscription[]>("/billing/subscriptions/").catch(() => [] as Subscription[]),
+      apiRequest<Plan[]>("/billing/plans/").catch(() => [] as Plan[]),
     ]);
     setMembers(m);
     setInvites(i);
+    setSubscriptions(s);
+    setPlans(p);
     setLoading(false);
+  }
+
+  const subByUserId = new Map(subscriptions.map((s) => [s.user_id, s]));
+
+  function openEditSubscription(sub: Subscription) {
+    setEditingSub(sub);
+    setSubForm({
+      plan_id: String(sub.plan.id),
+      useCustomPrice: sub.custom_price !== null,
+      custom_price: sub.custom_price ?? "",
+      surcharge_amount: sub.surcharge_amount ?? "",
+      surcharge_reason: sub.surcharge_reason || "",
+    });
+    setSubFormError("");
+    setSubModalOpen(true);
+  }
+
+  function closeSubModal() {
+    setSubModalOpen(false);
+    setEditingSub(null);
+    setSubForm(EMPTY_SUB_FORM);
+    setSubFormError("");
+  }
+
+  async function handleSaveSubscription() {
+    if (!editingSub) return;
+    if (subForm.surcharge_amount && !subForm.surcharge_reason.trim()) {
+      setSubFormError("Informe o motivo do acréscimo.");
+      return;
+    }
+    setSubSaving(true);
+    setSubFormError("");
+    try {
+      await apiRequest(`/billing/subscriptions/${editingSub.id}/`, "PATCH", {
+        plan: Number(subForm.plan_id),
+        custom_price: subForm.useCustomPrice ? subForm.custom_price : null,
+        surcharge_amount: subForm.surcharge_amount || null,
+        surcharge_reason: subForm.surcharge_amount ? subForm.surcharge_reason.trim() : "",
+      });
+      showToast(
+        "success",
+        "Assinatura atualizada",
+        "As alterações entram em vigor na próxima cobrança gerada."
+      );
+      closeSubModal();
+      await fetchAll();
+    } catch {
+      setSubFormError("Não foi possível guardar as alterações.");
+    } finally {
+      setSubSaving(false);
+    }
   }
 
   useEffect(() => {
@@ -183,16 +297,61 @@ export default function MembersPage() {
                   <TableHeader>
                     <Th>Nome</Th>
                     <Th>Email</Th>
+                    <Th>Plano</Th>
+                    <Th>Estado</Th>
+                    <Th>Próxima cobrança</Th>
+                    <Th>Valor mensal</Th>
+                    <Th />
                   </TableHeader>
                   <TableBody>
-                    {members.map((m) => (
-                      <TableRow key={m.id}>
-                        <Td className="text-gray-800 dark:text-white/80">
-                          {m.full_name || "—"}
-                        </Td>
-                        <Td>{m.email}</Td>
-                      </TableRow>
-                    ))}
+                    {members.map((m) => {
+                      const sub = subByUserId.get(m.id);
+                      const statusInfo = sub ? STATUS_LABELS[sub.status] : null;
+                      return (
+                        <TableRow key={m.id}>
+                          <Td className="text-gray-800 dark:text-white/80">
+                            {m.full_name || "—"}
+                          </Td>
+                          <Td>{m.email}</Td>
+                          <Td>{sub?.plan.name ?? "—"}</Td>
+                          <Td>
+                            {statusInfo && (
+                              <span
+                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusInfo.color}`}
+                              >
+                                {statusInfo.label}
+                              </span>
+                            )}
+                          </Td>
+                          <Td>{formatDate(sub?.next_billing_date)}</Td>
+                          <Td>
+                            {sub && (
+                              <>
+                                {formatPrice(sub.effective_base_price)}
+                                {sub.surcharge_amount && (
+                                  <span
+                                    className="ml-1.5 text-xs text-warning-600 dark:text-warning-400"
+                                    title={sub.surcharge_reason}
+                                  >
+                                    + {formatPrice(sub.surcharge_amount)} (pontual)
+                                  </span>
+                                )}
+                              </>
+                            )}
+                          </Td>
+                          <Td>
+                            {sub && (
+                              <button
+                                onClick={() => openEditSubscription(sub)}
+                                className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                              >
+                                Editar assinatura
+                              </button>
+                            )}
+                          </Td>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}
@@ -343,6 +502,106 @@ export default function MembersPage() {
               {deleting ? "A eliminar…" : "Eliminar"}
             </button>
           </div>
+        </div>
+      </Modal>
+
+      {/* Edit Subscription Modal */}
+      <Modal isOpen={subModalOpen} onClose={closeSubModal} className="max-w-lg p-6 sm:p-8">
+        <h2 className="mb-6 font-heading text-xl text-gray-900 dark:text-white">
+          Editar assinatura {editingSub?.member_name || editingSub?.member_email}
+        </h2>
+        <div className="space-y-4 font-ui">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Plano <span className="text-error-500">*</span>
+            </label>
+            <select
+              value={subForm.plan_id}
+              onChange={(e) => setSubForm({ ...subForm, plan_id: e.target.value })}
+              className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+            >
+              {plans.map((p) => (
+                <option key={p.id} value={String(p.id)}>
+                  {p.name} — {formatPrice(p.price)}
+                  {!p.is_active ? " (inativo)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <input
+                type="checkbox"
+                checked={subForm.useCustomPrice}
+                onChange={(e) =>
+                  setSubForm({ ...subForm, useCustomPrice: e.target.checked, custom_price: e.target.checked ? subForm.custom_price : "" })
+                }
+                className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+              />
+              Usar preço personalizado
+            </label>
+            {subForm.useCustomPrice && (
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={subForm.custom_price}
+                onChange={(e) => setSubForm({ ...subForm, custom_price: e.target.value })}
+                placeholder="Ex: 75.00"
+                className="mt-2 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              />
+            )}
+            <p className="mt-1 text-xs text-gray-400">
+              Substitui o preço do plano para este membro, valendo até ser removido.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Acréscimo pontual (R$)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={subForm.surcharge_amount}
+                onChange={(e) => setSubForm({ ...subForm, surcharge_amount: e.target.value })}
+                placeholder="Ex: 30.00"
+                className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Motivo
+              </label>
+              <input
+                type="text"
+                value={subForm.surcharge_reason}
+                onChange={(e) => setSubForm({ ...subForm, surcharge_reason: e.target.value })}
+                placeholder="Ex: Projeto X"
+                className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-gray-400">
+            Soma apenas na próxima cobrança gerada, depois some automaticamente.
+          </p>
+
+          {subFormError && (
+            <p className="rounded-lg bg-error-50 px-4 py-2.5 text-sm text-error-600 dark:bg-error-500/15 dark:text-error-400">
+              {subFormError}
+            </p>
+          )}
+        </div>
+        <div className="mt-6 flex justify-end gap-3">
+          <Button variant="outline" onClick={closeSubModal} disabled={subSaving}>
+            Cancelar
+          </Button>
+          <Button onClick={handleSaveSubscription} disabled={subSaving}>
+            {subSaving ? "A guardar…" : "Guardar alterações"}
+          </Button>
         </div>
       </Modal>
     </>

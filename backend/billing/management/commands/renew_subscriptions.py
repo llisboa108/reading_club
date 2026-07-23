@@ -42,11 +42,27 @@ class Command(BaseCommand):
             if exists:
                 continue
 
+            surcharge = sub.surcharge_amount
+            amount = sub.effective_base_price + (surcharge or 0)
+            notes = (
+                f"Inclui acréscimo de R$ {surcharge}: {sub.surcharge_reason}".strip()
+                if surcharge
+                else ""
+            )
+
             payment = Payment.objects.create(
                 subscription=sub,
-                amount=sub.plan.price,
+                amount=amount,
                 due_date=sub.next_billing_date,
+                notes=notes,
             )
+
+            # Acréscimo pontual: some sozinho depois de ser cobrado uma vez.
+            # custom_price não é limpo aqui - é permanente até o admin remover.
+            if surcharge:
+                sub.surcharge_amount = None
+                sub.surcharge_reason = ""
+                sub.save(update_fields=["surcharge_amount", "surcharge_reason"])
 
             Notification.objects.create(
                 user=sub.user,
@@ -63,7 +79,7 @@ class Command(BaseCommand):
                 message=(
                     "Olá!\n\n"
                     "A sua assinatura do Clube Sonhos Literários expira em 10 dias. "
-                    f"Um novo pagamento de R$ {sub.plan.price} foi gerado, com vencimento "
+                    f"Um novo pagamento de R$ {amount} foi gerado, com vencimento "
                     f"em {sub.next_billing_date.strftime('%d/%m/%Y')}.\n\n"
                     "Aceda à sua conta para regularizar o pagamento."
                 ),

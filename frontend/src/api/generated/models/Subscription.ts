@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Plan } from './Plan';
-import type { SubscriptionStatusEnum } from './SubscriptionStatusEnum';
+import type { StatusB05Enum } from './StatusB05Enum';
 export type Subscription = {
     readonly id: number;
-    status?: SubscriptionStatusEnum;
+    status?: StatusB05Enum;
     plan: Plan;
     start_date: string;
     end_date: string;

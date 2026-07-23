@@ -8,7 +8,7 @@
  * * `EXPIRED` - Expirada
  * * `CANCELED` - Cancelada
  */
-export enum SubscriptionStatusEnum {
+export enum StatusB05Enum {
     PENDING = 'PENDING',
     ACTIVE = 'ACTIVE',
     EXPIRED = 'EXPIRED',

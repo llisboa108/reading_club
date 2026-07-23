@@ -2,7 +2,8 @@ import logging
 
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveAPIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
@@ -26,6 +27,8 @@ from .serializers import (
     PlanSerializer,
     PlanWriteSerializer,
     SubscriptionSerializer,
+    SubscriptionAdminSerializer,
+    SubscriptionAdminWriteSerializer,
     PaymentSerializer,
     PaymentAdminSerializer,
     PaymentCreateSerializer,
@@ -102,6 +105,28 @@ class SubscriptionView(RetrieveAPIView):
             raise Subscription.DoesNotExist()
 
         return subscription
+
+
+@extend_schema_view(
+    list=extend_schema(tags=["Billing"], operation_id="subscriptionsAdminList"),
+    retrieve=extend_schema(tags=["Billing"], operation_id="subscriptionsAdminRetrieve"),
+    partial_update=extend_schema(tags=["Billing"], operation_id="subscriptionsAdminPartialUpdate"),
+)
+class SubscriptionAdminViewSet(
+    ListModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet
+):
+    """Admin-only management of every member's subscription (plan, custom
+    price, one-off surcharge). Status/dates stay signal/command-driven and
+    are intentionally not writable here."""
+
+    permission_classes = [IsAuthenticated, IsAdmin]
+    http_method_names = ["get", "patch", "head", "options"]
+    queryset = Subscription.objects.select_related("user__profile", "plan").order_by("user__email")
+
+    def get_serializer_class(self):
+        if self.action in ("update", "partial_update"):
+            return SubscriptionAdminWriteSerializer
+        return SubscriptionAdminSerializer
 
 
 # ---------------------------------------------------------

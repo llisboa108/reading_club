@@ -1,7 +1,7 @@
 # Graph Report - final  (2026-07-23)
 
 ## Corpus Check
-- 284 files · ~669,869 words
+- 284 files · ~670,057 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -253,8 +253,8 @@ Cohesion: 0.14
 Nodes (14): djangorestframework_simplejwt==5.5.1, PyJWT==2.11.0, POST /api/v1/auth/login/ (auth_login_create), POST /api/v1/auth/refresh/ (auth_refresh_create), ChangePassword schema, InviteCode schema, jwtAuth security scheme, Me schema (+6 more)
 
 ### Community 26 - "Generated API: Reading Models"
-Cohesion: 0.07
-Nodes (9): InviteCode, ChangePasswordTests, InviteCodeViewSetTests, LoginRateThrottleTests, MeAndProfileTests, MemberListViewTests, PasswordResetTests, APITestCase (+1 more)
+Cohesion: 0.06
+Nodes (9): ChangePasswordTests, InviteCodeViewSetTests, LoginRateThrottleTests, MeAndProfileTests, MemberListViewTests, PasswordResetTests, APITestCase, RegisterViewTests (+1 more)
 
 ### Community 27 - "ESLint & Dev Dependencies"
 Cohesion: 0.13
@@ -365,8 +365,8 @@ Cohesion: 0.13
 Nodes (6): IsOwner, AnalyticsViewTests, PermissionClassTests, APITestCase, TestCase, _request()
 
 ### Community 93 - "InviteCode"
-Cohesion: 0.18
-Nodes (9): AbstractUser, InviteCodeAdmin, ProfileAdmin, UserAdmin, Migration, Profile, User, UserManager (+1 more)
+Cohesion: 0.20
+Nodes (8): AbstractUser, InviteCodeAdmin, ProfileAdmin, UserAdmin, Migration, InviteCode, Profile, User
 
 ### Community 99 - "Meet.ts"
 Cohesion: 0.20

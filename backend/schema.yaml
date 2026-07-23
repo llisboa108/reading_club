@@ -820,6 +820,86 @@ paths:
               schema:
                 $ref: '#/components/schemas/Subscription'
           description: ''
+  /api/v1/billing/subscriptions/:
+    get:
+      operationId: subscriptionsAdminList
+      description: |-
+        Admin-only management of every member's subscription (plan, custom
+        price, one-off surcharge). Status/dates stay signal/command-driven and
+        are intentionally not writable here.
+      tags:
+      - Billing
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscriptionAdmin'
+          description: ''
+  /api/v1/billing/subscriptions/{id}/:
+    get:
+      operationId: subscriptionsAdminRetrieve
+      description: |-
+        Admin-only management of every member's subscription (plan, custom
+        price, one-off surcharge). Status/dates stay signal/command-driven and
+        are intentionally not writable here.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este subscription.
+        required: true
+      tags:
+      - Billing
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionAdmin'
+          description: ''
+    patch:
+      operationId: subscriptionsAdminPartialUpdate
+      description: |-
+        Admin-only management of every member's subscription (plan, custom
+        price, one-off surcharge). Status/dates stay signal/command-driven and
+        are intentionally not writable here.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este subscription.
+        required: true
+      tags:
+      - Billing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriptionAdminWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriptionAdminWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriptionAdminWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionAdminWrite'
+          description: ''
   /api/v1/club/authors/:
     get:
       operationId: club_authors_list
@@ -3338,6 +3418,30 @@ components:
           type: array
           items:
             type: integer
+    PatchedSubscriptionAdminWriteRequest:
+      type: object
+      properties:
+        plan:
+          type: integer
+        custom_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Preço mensal personalizado, substituindo o preço do plano.
+            Vale até ser removido pelo administrador.
+        surcharge_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Acréscimo pontual somado apenas à próxima cobrança gerada.
+            É zerado automaticamente depois de gerar esse pagamento.
+        surcharge_reason:
+          type: string
+          description: 'Motivo do acréscimo (ex.: ''Projeto X''). Aparece nas notas
+            do pagamento.'
+          maxLength: 255
     PatchedTeamMemberWriteRequest:
       type: object
       properties:
@@ -3926,6 +4030,18 @@ components:
         * `IN_PROGRESS` - Em andamento
         * `FINISHED` - Finalizada
         * `CANCELED` - Cancelada
+    StatusB05Enum:
+      enum:
+      - PENDING
+      - ACTIVE
+      - EXPIRED
+      - CANCELED
+      type: string
+      description: |-
+        * `PENDING` - Pendente
+        * `ACTIVE` - Ativa
+        * `EXPIRED` - Expirada
+        * `CANCELED` - Cancelada
     Subscription:
       type: object
       properties:
@@ -3933,7 +4049,7 @@ components:
           type: integer
           readOnly: true
         status:
-          $ref: '#/components/schemas/SubscriptionStatusEnum'
+          $ref: '#/components/schemas/StatusB05Enum'
         plan:
           $ref: '#/components/schemas/Plan'
         start_date:
@@ -3951,18 +4067,104 @@ components:
       - next_billing_date
       - plan
       - start_date
-    SubscriptionStatusEnum:
-      enum:
-      - PENDING
-      - ACTIVE
-      - EXPIRED
-      - CANCELED
-      type: string
-      description: |-
-        * `PENDING` - Pendente
-        * `ACTIVE` - Ativa
-        * `EXPIRED` - Expirada
-        * `CANCELED` - Cancelada
+    SubscriptionAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user_id:
+          type: integer
+          readOnly: true
+        member_email:
+          type: string
+          format: email
+          readOnly: true
+        member_name:
+          type: string
+          readOnly: true
+          default: ''
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusB05Enum'
+          readOnly: true
+        plan:
+          allOf:
+          - $ref: '#/components/schemas/Plan'
+          readOnly: true
+        custom_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Preço mensal personalizado, substituindo o preço do plano.
+            Vale até ser removido pelo administrador.
+        surcharge_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Acréscimo pontual somado apenas à próxima cobrança gerada.
+            É zerado automaticamente depois de gerar esse pagamento.
+        surcharge_reason:
+          type: string
+          description: 'Motivo do acréscimo (ex.: ''Projeto X''). Aparece nas notas
+            do pagamento.'
+          maxLength: 255
+        effective_base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+          readOnly: true
+        end_date:
+          type: string
+          format: date
+          readOnly: true
+        next_billing_date:
+          type: string
+          format: date
+          readOnly: true
+      required:
+      - effective_base_price
+      - end_date
+      - id
+      - member_email
+      - member_name
+      - next_billing_date
+      - plan
+      - start_date
+      - status
+      - user_id
+    SubscriptionAdminWrite:
+      type: object
+      properties:
+        plan:
+          type: integer
+        custom_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Preço mensal personalizado, substituindo o preço do plano.
+            Vale até ser removido pelo administrador.
+        surcharge_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Acréscimo pontual somado apenas à próxima cobrança gerada.
+            É zerado automaticamente depois de gerar esse pagamento.
+        surcharge_reason:
+          type: string
+          description: 'Motivo do acréscimo (ex.: ''Projeto X''). Aparece nas notas
+            do pagamento.'
+          maxLength: 255
+      required:
+      - plan
     TeamMember:
       type: object
       properties:

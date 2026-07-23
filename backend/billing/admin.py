@@ -10,10 +10,19 @@ class PlanAdmin(admin.ModelAdmin):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ("user", "plan", "status", "start_date", "end_date", "next_billing_date")
+    list_display = (
+        "user", "plan", "status", "custom_price", "surcharge_amount",
+        "start_date", "end_date", "next_billing_date",
+    )
     list_filter = ("status", "plan")
     search_fields = ("user__email",)
     date_hierarchy = "start_date"
+    fieldsets = (
+        ("Assinatura", {"fields": ("user", "plan", "status")}),
+        ("Preço personalizado", {"fields": ("custom_price",)}),
+        ("Acréscimo pontual", {"fields": ("surcharge_amount", "surcharge_reason")}),
+        ("Datas", {"fields": ("start_date", "end_date", "next_billing_date")}),
+    )
 
 
 @admin.register(Payment)

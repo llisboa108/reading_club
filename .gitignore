@@ -14,3 +14,6 @@ landingpage/
 /node_modules/
 /package.json
 /package-lock.json
+
+# Personal reading list, not project content
+/Livros Lidos.txt
