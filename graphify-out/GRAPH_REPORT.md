@@ -1,16 +1,16 @@
 # Graph Report - final  (2026-07-23)
 
 ## Corpus Check
-- 298 files · ~675,252 words
+- 298 files · ~693,542 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1784 nodes · 5198 edges · 150 communities (80 shown, 70 thin omitted)
-- Extraction: 65% EXTRACTED · 35% INFERRED · 0% AMBIGUOUS · INFERRED: 1801 edges (avg confidence: 0.52)
+- 1785 nodes · 5213 edges · 147 communities (77 shown, 70 thin omitted)
+- Extraction: 65% EXTRACTED · 35% INFERRED · 0% AMBIGUOUS · INFERRED: 1814 edges (avg confidence: 0.52)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `88aa134f`
+- Built from commit: `264fbffa`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -50,7 +50,6 @@
 - Aspect Ratio Demo Components
 - Frontend UI Dependencies
 - OpenAPI Docs & API Config
-- App Bootstrap (main.tsx/App/AuthProvider)
 - Responsive Image Grid Components
 - Dual API Client Architecture (Rationale)
 - NPM Scripts
@@ -84,7 +83,6 @@
 - Migration: club book cover
 - ASGI Config
 - WSGI Config
-- Dependency: eslint
 - Dependency: eslint-plugin-react-hooks
 - RegisterViewTests
 - Dependency: openapi-typescript
@@ -107,7 +105,6 @@
 - ToastContext.tsx
 - RegisterViewTests
 - PaymentConfirmationTests
-- UserManager
 - postcss
 - IsAdmin
 - ._clear_other_defaults
@@ -174,7 +171,7 @@
 - **JWT authentication flow (login/refresh) across simplejwt, schema, and accounts app** — backend_requirements_djangorestframework_simplejwt, backend_schema_tokenobtainpair, backend_schema_tokenrefresh, backend_schema_auth_login, backend_schema_auth_refresh, claude_accounts_app [INFERRED 0.85]
 - **Billing signal-driven subscription lifecycle (billing/signals.py)** — claude_payment_model, claude_payment_signal_mechanism, claude_subscription_model, claude_notification_model, claude_auto_subscription_signal, claude_plan_model [INFERRED 0.85]
 
-## Communities (150 total, 70 thin omitted)
+## Communities (147 total, 70 thin omitted)
 
 ### Community 0 - "DRF Permission Classes & Admin Registration"
 Cohesion: 0.09
@@ -185,8 +182,8 @@ Cohesion: 0.16
 Nodes (31): AnonRateThrottle, ChangePasswordSerializer, InviteCodeSerializer, MemberListSerializer, MeSerializer, Meta, PasswordResetConfirmSerializer, PasswordResetRequestSerializer (+23 more)
 
 ### Community 2 - "TailAdmin Dashboard Widgets"
-Cohesion: 0.07
-Nodes (22): HeaderProps, formatDateTime(), Notification, NOTIFICATION_ROUTES, NotificationDropdown(), UserDropdown(), Dropdown(), DropdownProps (+14 more)
+Cohesion: 0.06
+Nodes (29): ThemeToggleButton(), ThemeTogglerTwo(), HeaderProps, formatDateTime(), Notification, NOTIFICATION_ROUTES, NotificationDropdown(), UserDropdown() (+21 more)
 
 ### Community 3 - "Generated API: Auth/Invite/Password Models"
 Cohesion: 0.06
@@ -197,8 +194,8 @@ Cohesion: 0.17
 Nodes (27): PaymentStatus, Plan, Meta, PaymentAdminSerializer, PaymentConfirmSerializer, PaymentCreateSerializer, PaymentSerializer, PlanSerializer (+19 more)
 
 ### Community 5 - "Ecommerce Dashboard Demo Widgets"
-Cohesion: 0.11
-Nodes (20): apiRequest(), ApiRequestError, ApiRequestOptions, refreshToken(), ChangePasswordModal(), UserMetaCard(), usePasswordValidation(), BlogCategory (+12 more)
+Cohesion: 0.25
+Nodes (3): PatchedTimelineEntryWriteRequest, TimelineEntryWrite, TimelineEntryWriteRequest
 
 ### Community 6 - "Frontend NPM Dependencies"
 Cohesion: 0.29
@@ -229,8 +226,8 @@ Cohesion: 0.19
 Nodes (7): _build_schedule(), Command, _in_season(), _next_tuesday_on_or_after(), BaseCommand, _skip_to_season(), _to_utc()
 
 ### Community 13 - "UI Component Kit (Forms/Cards)"
-Cohesion: 0.07
-Nodes (26): Card(), CardProps, PADDING_CLASSES, ACCENT_CLASSES, StatCard(), StatCardProps, Analytics, AnalyticsPage() (+18 more)
+Cohesion: 0.06
+Nodes (27): ApiRequestError, Card(), CardProps, PADDING_CLASSES, ACCENT_CLASSES, StatCard(), StatCardProps, Analytics (+19 more)
 
 ### Community 14 - "Readings List Page"
 Cohesion: 0.08
@@ -241,8 +238,8 @@ Cohesion: 0.08
 Nodes (23): compilerOptions, allowImportingTsExtensions, isolatedModules, jsx, lib, module, moduleDetection, moduleResolution (+15 more)
 
 ### Community 16 - "Auth Forms & Toast System"
-Cohesion: 0.07
-Nodes (34): EmptyStateProps, BreadcrumbProps, PageBreadcrumb(), PageHeaderProps, Modal(), ModalProps, Table(), TableBody() (+26 more)
+Cohesion: 0.05
+Nodes (59): EmptyStateProps, BreadcrumbProps, PageBreadcrumb(), PageHeaderProps, Modal(), ModalProps, Table(), TableBody() (+51 more)
 
 ### Community 17 - "TS Node Config"
 Cohesion: 0.10
@@ -251,10 +248,6 @@ Nodes (19): compilerOptions, allowImportingTsExtensions, isolatedModules, lib, m
 ### Community 18 - "Billing/Payment API Endpoints & Schemas"
 Cohesion: 0.15
 Nodes (19): POST /api/v1/billing/payments/{payment_id}/confirm/ (paymentsConfirm), MethodEnum (PIX/CASH/MP), Payment schema, PaymentCreate schema, PaymentStatusEnum, Plan schema, Subscription schema, SubscriptionStatusEnum (PENDING/ACTIVE/EXPIRED/CANCELED) (+11 more)
-
-### Community 19 - "Auth Pages & Form Inputs"
-Cohesion: 0.14
-Nodes (13): EMPTY_FORM, EMPTY_SUB_FORM, formatDate(), formatPrice(), InviteCode, InviteForm, Member, MembersPage() (+5 more)
 
 ### Community 20 - "Books Page"
 Cohesion: 0.12
@@ -282,7 +275,7 @@ Nodes (9): InviteCode, ChangePasswordTests, InviteCodeViewSetTests, LoginRateThr
 
 ### Community 27 - "ESLint & Dev Dependencies"
 Cohesion: 0.13
-Nodes (15): @eslint/js, eslint-plugin-react-refresh, devDependencies, @eslint/js, eslint-plugin-react-refresh, openapi-typescript, @types/react-dom, @types/three (+7 more)
+Nodes (15): eslint-plugin-react-refresh, devDependencies, eslint-plugin-react-refresh, openapi-typescript, openapi-typescript-codegen, @types/react-dom, @types/three, typescript (+7 more)
 
 ### Community 28 - "Project Metadata & Tech Stack"
 Cohesion: 0.18
@@ -290,7 +283,7 @@ Nodes (11): Django==6.0.1, django-cors-headers==4.9.0, djangorestframework==3.16
 
 ### Community 29 - "User Dropdown, Profile & Auth Context"
 Cohesion: 0.06
-Nodes (41): ThemeToggleButton(), ThemeTogglerTwo(), DistortImage(), DistortImageProps, LandingScrollContext, useLandingScrollContext(), Theme, ThemeContext (+33 more)
+Nodes (36): DistortImage(), DistortImageProps, LandingScrollContext, useLandingScrollContext(), LandingScroll, useLandingScroll(), useScrollReveal(), GsapBundle (+28 more)
 
 ### Community 30 - "Blog/Book Schemas & Pillow"
 Cohesion: 0.20
@@ -312,13 +305,9 @@ Nodes (9): overrides, react-helmet-async, @react-jvectormap/core, @react-jvector
 Cohesion: 0.25
 Nodes (8): drf-spectacular==0.29.0, PyYAML==6.0.3, OpenAPI schema document (backend/schema.yaml), api Django app (cross-cutting), src/api/config.ts (API_HOST/API_PREFIX), API docs served via drf-spectacular (/api/schema/, /api/docs/, /api/redoc/), Shared permission classes (api/permissions.py), reading_club/urls.py -> api/urls.py -> api/v1/urls.py routing chain
 
-### Community 35 - "App Bootstrap (main.tsx/App/AuthProvider)"
-Cohesion: 0.12
-Nodes (23): ForgotPasswordForm(), ResetPasswordForm(), SignInForm(), SignUpForm(), useToast(), useAuth(), BillingPage(), formatDate() (+15 more)
-
 ### Community 36 - "Responsive Image Grid Components"
-Cohesion: 0.13
-Nodes (17): App(), AppWrapper(), PageMeta(), ScrollToTop(), ProtectedRoute(), AuthContext, AuthContextType, AuthProvider() (+9 more)
+Cohesion: 0.09
+Nodes (26): App(), AppWrapper(), PageMeta(), ScrollToTop(), ProtectedRoute(), AuthContext, AuthContextType, AuthProvider() (+18 more)
 
 ### Community 37 - "Dual API Client Architecture (Rationale)"
 Cohesion: 0.29
@@ -360,10 +349,6 @@ Nodes (3): BlogPostWrite, BlogPostWriteRequest, PatchedBlogPostWriteRequest
 Cohesion: 0.17
 Nodes (11): Accessibility & Inclusion, Brand Commitments, Capabilities and Constraints, Evidence on Hand, Operating Context, Platform, Positioning, Product (+3 more)
 
-### Community 70 - "Dependency: eslint"
-Cohesion: 0.25
-Nodes (3): PatchedQuoteWriteRequest, QuoteWrite, QuoteWriteRequest
-
 ### Community 73 - "Dependency: openapi-typescript"
 Cohesion: 0.22
 Nodes (7): Authentication pages, Palette, Shared components (`frontend/src/components/`), Sidebar, Typography — three fonts, three jobs, What's intentionally not covered, Where this system comes from
@@ -397,8 +382,8 @@ Cohesion: 0.29
 Nodes (9): create_payment_preference(), fetch_mp_payment(), MercadoPagoNotConfigured, Exception, Create a Checkout Pro preference for a pending Payment.      external_reference, Fetch the authoritative payment record from Mercado Pago's API.      We never tr, Validate the x-signature header per Mercado Pago's webhook docs.      Format: "t, _sdk() (+1 more)
 
 ### Community 111 - "ToastContext.tsx"
-Cohesion: 0.12
-Nodes (18): PasswordChecklist(), Props, CheckboxProps, InputProps, Label(), LabelProps, Button(), ButtonProps (+10 more)
+Cohesion: 0.08
+Nodes (37): apiRequest(), ApiRequestOptions, refreshToken(), ForgotPasswordForm(), ResetPasswordForm(), SignInForm(), SignUpForm(), PasswordChecklist() (+29 more)
 
 ## Ambiguous Edges - Review These
 - `ReadingStatus choices` → `Status8ecEnum (PLANNED/IN_PROGRESS/FINISHED/CANCELED, auto-named)`  [AMBIGUOUS]

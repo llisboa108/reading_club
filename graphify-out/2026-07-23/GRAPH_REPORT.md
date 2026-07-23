@@ -1,16 +1,16 @@
 # Graph Report - final  (2026-07-23)
 
 ## Corpus Check
-- 287 files · ~672,699 words
+- 298 files · ~675,252 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1719 nodes · 5051 edges · 121 communities (75 shown, 46 thin omitted)
-- Extraction: 65% EXTRACTED · 35% INFERRED · 0% AMBIGUOUS · INFERRED: 1768 edges (avg confidence: 0.52)
+- 1784 nodes · 5198 edges · 150 communities (80 shown, 70 thin omitted)
+- Extraction: 65% EXTRACTED · 35% INFERRED · 0% AMBIGUOUS · INFERRED: 1801 edges (avg confidence: 0.52)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c7d062e5`
+- Built from commit: `88aa134f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -84,11 +84,15 @@
 - Migration: club book cover
 - ASGI Config
 - WSGI Config
+- Dependency: eslint
 - Dependency: eslint-plugin-react-hooks
+- RegisterViewTests
 - Dependency: openapi-typescript
 - Dependency: postcss
 - swiper
 - typescript-eslint
+- RegisterSerializer
+- CommunicationsConfig
 - 0008_seed_initial_quotes.py
 - SVG Module Type Declaration
 - api/tests.py (empty)
@@ -113,6 +117,30 @@
 - react-dropzone
 - react-helmet-async
 - @react-jvectormap/world
+- communications/migrations/0001_initial.py
+- flatpickr
+- @fullcalendar/daygrid
+- @fullcalendar/interaction
+- @fullcalendar/list
+- @fullcalendar/react
+- @fullcalendar/timegrid
+- gsap
+- lenis
+- react
+- react-apexcharts
+- react-dnd
+- react-dnd-html5-backend
+- react-dom
+- react-dropzone
+- react-helmet-async
+- @react-jvectormap/world
+- react-router
+- swiper
+- tailwind-merge
+- three
+- @tiptap/extension-link
+- @tiptap/react
+- @tiptap/starter-kit
 
 ## God Nodes (most connected - your core abstractions)
 1. `CancelablePromise` - 120 edges
@@ -146,19 +174,19 @@
 - **JWT authentication flow (login/refresh) across simplejwt, schema, and accounts app** — backend_requirements_djangorestframework_simplejwt, backend_schema_tokenobtainpair, backend_schema_tokenrefresh, backend_schema_auth_login, backend_schema_auth_refresh, claude_accounts_app [INFERRED 0.85]
 - **Billing signal-driven subscription lifecycle (billing/signals.py)** — claude_payment_model, claude_payment_signal_mechanism, claude_subscription_model, claude_notification_model, claude_auto_subscription_signal, claude_plan_model [INFERRED 0.85]
 
-## Communities (121 total, 46 thin omitted)
+## Communities (150 total, 70 thin omitted)
 
 ### Community 0 - "DRF Permission Classes & Admin Registration"
 Cohesion: 0.09
-Nodes (103): IsMemberWithActiveSubscription, IsNotificationOwner, ContactMessageRateThrottle, Limits public contact-form submissions per IP address to slow down spam., AuthorAdmin, BlogCategoryAdmin, BlogPostAdmin, BookAdmin (+95 more)
+Nodes (102): IsNotificationOwner, ContactMessageRateThrottle, Limits public contact-form submissions per IP address to slow down spam., AuthorAdmin, BlogCategoryAdmin, BlogPostAdmin, BookAdmin, ContactMessageAdmin (+94 more)
 
 ### Community 1 - "User Auth Models & Admin"
-Cohesion: 0.15
-Nodes (32): AnonRateThrottle, ChangePasswordSerializer, InviteCodeSerializer, MemberListSerializer, MeSerializer, Meta, PasswordResetConfirmSerializer, PasswordResetRequestSerializer (+24 more)
+Cohesion: 0.16
+Nodes (31): AnonRateThrottle, ChangePasswordSerializer, InviteCodeSerializer, MemberListSerializer, MeSerializer, Meta, PasswordResetConfirmSerializer, PasswordResetRequestSerializer (+23 more)
 
 ### Community 2 - "TailAdmin Dashboard Widgets"
-Cohesion: 0.06
-Nodes (28): ThemeToggleButton(), ThemeTogglerTwo(), HeaderProps, formatDateTime(), Notification, NOTIFICATION_ROUTES, NotificationDropdown(), UserDropdown() (+20 more)
+Cohesion: 0.07
+Nodes (22): HeaderProps, formatDateTime(), Notification, NOTIFICATION_ROUTES, NotificationDropdown(), UserDropdown(), Dropdown(), DropdownProps (+14 more)
 
 ### Community 3 - "Generated API: Auth/Invite/Password Models"
 Cohesion: 0.06
@@ -166,43 +194,43 @@ Nodes (21): ChangePassword, ChangePasswordRequest, InviteCode, InviteCodeRequest
 
 ### Community 4 - "Billing Permissions & Admin"
 Cohesion: 0.17
-Nodes (28): Payment, PaymentStatus, Plan, Meta, PaymentAdminSerializer, PaymentConfirmSerializer, PaymentCreateSerializer, PaymentSerializer (+20 more)
+Nodes (27): PaymentStatus, Plan, Meta, PaymentAdminSerializer, PaymentConfirmSerializer, PaymentCreateSerializer, PaymentSerializer, PlanSerializer (+19 more)
 
 ### Community 5 - "Ecommerce Dashboard Demo Widgets"
-Cohesion: 0.20
-Nodes (12): apiRequest(), ApiRequestOptions, refreshToken(), ChangePasswordModal(), usePasswordValidation(), AuthLayout(), formatDate(), PaymentHistoryTable() (+4 more)
+Cohesion: 0.11
+Nodes (20): apiRequest(), ApiRequestError, ApiRequestOptions, refreshToken(), ChangePasswordModal(), UserMetaCard(), usePasswordValidation(), BlogCategory (+12 more)
 
 ### Community 6 - "Frontend NPM Dependencies"
-Cohesion: 0.04
-Nodes (49): apexcharts, clsx, flatpickr, dependencies, apexcharts, clsx, flatpickr, @fullcalendar/core (+41 more)
+Cohesion: 0.29
+Nodes (7): clsx, dependencies, clsx, @fullcalendar/core, @react-jvectormap/core, @fullcalendar/core, @react-jvectormap/core
 
 ### Community 7 - "Generated API: CancelablePromise Core"
-Cohesion: 0.05
-Nodes (13): CancelablePromise, Author, BlogPostWrite, BookWrite, ContactMessage, Notification, Publisher, QuoteWrite (+5 more)
+Cohesion: 0.06
+Nodes (13): CancelablePromise, Author, AuthorRequest, Book, Meet, Notification, PatchedAuthorRequest, Quote (+5 more)
 
 ### Community 8 - "Generated API: Payment/Plan Models"
 Cohesion: 0.09
-Nodes (20): MethodEnum, PatchedPaymentRequest, PatchedPlanWriteRequest, PatchedSubscriptionAdminWriteRequest, Payment, PaymentAdmin, PaymentConfirmRequest, PaymentCreate (+12 more)
+Nodes (21): OpenAPI, MethodEnum, PatchedPaymentRequest, PatchedPlanWriteRequest, PatchedSubscriptionAdminWriteRequest, Payment, PaymentAdmin, PaymentConfirmRequest (+13 more)
 
 ### Community 9 - "Generated API: Author/Blog Models"
-Cohesion: 0.04
-Nodes (31): AuthorRequest, BlogCategory, BlogPostDetail, BlogPostList, BlogPostWriteRequest, Book, BookWriteRequest, ClubStats (+23 more)
+Cohesion: 0.06
+Nodes (18): BookWrite, BookWriteRequest, ClubStats, ContactMessage, ContactMessageCreate, ContactMessageCreateRequest, ContactMessageRequest, PatchedBookWriteRequest (+10 more)
 
 ### Community 10 - "Reading Detail Page"
 Cohesion: 0.06
 Nodes (22): Author, authorFullName(), Book, EMPTY_MEET_FORM, EMPTY_READING_FORM, formatDate(), formatDateTime(), Meet (+14 more)
 
 ### Community 11 - "Generated API: Core Error/Request Types"
-Cohesion: 0.11
-Nodes (28): ApiError, ApiRequestOptions, ApiResult, CancelError, OnCancel, Headers, OpenAPI, OpenAPIConfig (+20 more)
+Cohesion: 0.12
+Nodes (26): ApiError, ApiRequestOptions, ApiResult, CancelError, OnCancel, Headers, OpenAPIConfig, Resolver (+18 more)
 
 ### Community 12 - "App Routing & Chart Demo Pages"
 Cohesion: 0.19
 Nodes (7): _build_schedule(), Command, _in_season(), _next_tuesday_on_or_after(), BaseCommand, _skip_to_season(), _to_utc()
 
 ### Community 13 - "UI Component Kit (Forms/Cards)"
-Cohesion: 0.11
-Nodes (16): Card(), CardProps, PADDING_CLASSES, ACCENT_CLASSES, StatCard(), StatCardProps, formatDate(), formatDateTime() (+8 more)
+Cohesion: 0.07
+Nodes (26): Card(), CardProps, PADDING_CLASSES, ACCENT_CLASSES, StatCard(), StatCardProps, Analytics, AnalyticsPage() (+18 more)
 
 ### Community 14 - "Readings List Page"
 Cohesion: 0.08
@@ -214,7 +242,7 @@ Nodes (23): compilerOptions, allowImportingTsExtensions, isolatedModules, jsx, l
 
 ### Community 16 - "Auth Forms & Toast System"
 Cohesion: 0.07
-Nodes (31): EmptyStateProps, PageHeaderProps, Modal(), ModalProps, Table(), TableBody(), TableHeader(), TableRow() (+23 more)
+Nodes (34): EmptyStateProps, BreadcrumbProps, PageBreadcrumb(), PageHeaderProps, Modal(), ModalProps, Table(), TableBody() (+26 more)
 
 ### Community 17 - "TS Node Config"
 Cohesion: 0.10
@@ -241,8 +269,8 @@ Cohesion: 0.27
 Nodes (7): AnalyticsView, _fill_month_series(), _months_back(), APIView, First-of-month boundary n months ago, e.g. n=11 -> 12 months inclusive., Turn a sparse {month: value} queryset into a dense 12-month series,     so a mon, Admin/financial-only dashboard: revenue, subscriptions, membership     and readi
 
 ### Community 24 - "Generated API: Meet Models"
-Cohesion: 0.16
-Nodes (10): Analytics, AnalyticsPage(), formatMoney(), formatMonthLabel(), METHOD_LABELS, MethodBreakdown, MonthPoint, READING_LABELS (+2 more)
+Cohesion: 0.12
+Nodes (9): PaymentAdmin, PlanAdmin, SubscriptionAdmin, Payment, Subscription, MercadoPagoSignatureTests, TestCase, Unit tests for the HMAC manifest check itself, no network involved. (+1 more)
 
 ### Community 25 - "JWT Auth Endpoints & Schemas"
 Cohesion: 0.14
@@ -250,7 +278,7 @@ Nodes (14): djangorestframework_simplejwt==5.5.1, PyJWT==2.11.0, POST /api/v1/au
 
 ### Community 26 - "Generated API: Reading Models"
 Cohesion: 0.07
-Nodes (8): InviteCodeViewSetTests, LoginRateThrottleTests, MeAndProfileTests, MemberListViewTests, PasswordResetTests, APITestCase, RegisterViewTests, ValidatePasswordViewTests
+Nodes (9): InviteCode, ChangePasswordTests, InviteCodeViewSetTests, LoginRateThrottleTests, MeAndProfileTests, MemberListViewTests, PasswordResetTests, APITestCase (+1 more)
 
 ### Community 27 - "ESLint & Dev Dependencies"
 Cohesion: 0.13
@@ -262,15 +290,15 @@ Nodes (11): Django==6.0.1, django-cors-headers==4.9.0, djangorestframework==3.16
 
 ### Community 29 - "User Dropdown, Profile & Auth Context"
 Cohesion: 0.06
-Nodes (37): ApiRequestError, DistortImage(), DistortImageProps, LandingScrollContext, useLandingScrollContext(), LandingScroll, useLandingScroll(), useScrollReveal() (+29 more)
+Nodes (41): ThemeToggleButton(), ThemeTogglerTwo(), DistortImage(), DistortImageProps, LandingScrollContext, useLandingScrollContext(), Theme, ThemeContext (+33 more)
 
 ### Community 30 - "Blog/Book Schemas & Pillow"
 Cohesion: 0.20
 Nodes (10): pillow==12.1.0, BlogPostDetail schema, BlogPostList schema, Book schema, MeetPhoto schema, BlogPost model, Book model, Media uploads (profiles/, books/covers/, meetings/, blog/, receipts/) (+2 more)
 
 ### Community 31 - "Auth Page Layout"
-Cohesion: 0.08
-Nodes (16): PaymentAdmin, PlanAdmin, SubscriptionAdmin, PaymentMethod, Subscription, SubscriptionStatus, handle_payment_confirmation(), store_previous_payment_status() (+8 more)
+Cohesion: 0.11
+Nodes (7): PaymentMethod, SubscriptionStatus, MercadoPagoPreferenceViewTests, MercadoPagoWebhookViewTests, PendingPaymentsQueueTests, PlanManagementTests, APITestCase
 
 ### Community 32 - "Aspect Ratio Demo Components"
 Cohesion: 0.67
@@ -285,12 +313,12 @@ Cohesion: 0.25
 Nodes (8): drf-spectacular==0.29.0, PyYAML==6.0.3, OpenAPI schema document (backend/schema.yaml), api Django app (cross-cutting), src/api/config.ts (API_HOST/API_PREFIX), API docs served via drf-spectacular (/api/schema/, /api/docs/, /api/redoc/), Shared permission classes (api/permissions.py), reading_club/urls.py -> api/urls.py -> api/v1/urls.py routing chain
 
 ### Community 35 - "App Bootstrap (main.tsx/App/AuthProvider)"
-Cohesion: 0.15
-Nodes (18): ForgotPasswordForm(), ResetPasswordForm(), SignInForm(), SignUpForm(), UserMetaCard(), useToast(), useAuth(), BillingPage() (+10 more)
+Cohesion: 0.12
+Nodes (23): ForgotPasswordForm(), ResetPasswordForm(), SignInForm(), SignUpForm(), useToast(), useAuth(), BillingPage(), formatDate() (+15 more)
 
 ### Community 36 - "Responsive Image Grid Components"
-Cohesion: 0.09
-Nodes (27): App(), BreadcrumbProps, PageBreadcrumb(), AppWrapper(), PageMeta(), ScrollToTop(), ProtectedRoute(), AuthContext (+19 more)
+Cohesion: 0.13
+Nodes (17): App(), AppWrapper(), PageMeta(), ScrollToTop(), ProtectedRoute(), AuthContext, AuthContextType, AuthProvider() (+9 more)
 
 ### Community 37 - "Dual API Client Architecture (Rationale)"
 Cohesion: 0.29
@@ -301,8 +329,12 @@ Cohesion: 0.33
 Nodes (6): scripts, build, dev, generate-api, lint, preview
 
 ### Community 40 - "package.json Metadata"
+Cohesion: 0.06
+Nodes (29): Send a plain-text email, logging (not raising) on failure.      Used for interna, Render a branded HTML email (emails/{template_name}.html) and send it,     loggi, send_notification_email(), send_template_email(), Command, BaseCommand, handle_payment_confirmation(), store_previous_payment_status() (+21 more)
+
+### Community 41 - "@fullcalendar/interaction"
 Cohesion: 0.20
-Nodes (6): Send a plain-text email, logging (not raising) on failure.      Used by schedule, send_notification_email(), Command, BaseCommand, Command, BaseCommand
+Nodes (6): Member, PatchedReadingWriteRequest, ReadingUser, ReadingWrite, ReadingWriteRequest, Status8ecEnum
 
 ### Community 43 - "billing App Config"
 Cohesion: 0.29
@@ -316,9 +348,21 @@ Nodes (4): Reading schema, Status8ecEnum (PLANNED/IN_PROGRESS/FINISHED/CANCELED,
 Cohesion: 0.50
 Nodes (4): App.tsx routing via react-router v7, AuthContext (src/context/AuthContext.tsx), ProtectedRoute component, React Router integration
 
+### Community 51 - "Notification Type Enum"
+Cohesion: 0.24
+Nodes (3): BlogCategory, BlogPostDetail, BlogPostList
+
+### Community 52 - "Form Component"
+Cohesion: 0.25
+Nodes (3): BlogPostWrite, BlogPostWriteRequest, PatchedBlogPostWriteRequest
+
 ### Community 54 - "Aspect Ratio Video Component"
 Cohesion: 0.17
 Nodes (11): Accessibility & Inclusion, Brand Commitments, Capabilities and Constraints, Evidence on Hand, Operating Context, Platform, Positioning, Product (+3 more)
+
+### Community 70 - "Dependency: eslint"
+Cohesion: 0.25
+Nodes (3): PatchedQuoteWriteRequest, QuoteWrite, QuoteWriteRequest
 
 ### Community 73 - "Dependency: openapi-typescript"
 Cohesion: 0.22
@@ -334,15 +378,15 @@ Nodes (4): name, private, type, version
 
 ### Community 90 - "api/tests.py (empty)"
 Cohesion: 0.09
-Nodes (10): IsAdmin, IsAdminOrReadOnly, IsFinancial, IsOwner, AnalyticsViewTests, PermissionClassTests, APITestCase, TestCase (+2 more)
+Nodes (11): IsAdmin, IsAdminOrReadOnly, IsFinancial, IsMemberWithActiveSubscription, IsOwner, AnalyticsViewTests, PermissionClassTests, APITestCase (+3 more)
 
 ### Community 93 - "InviteCode"
-Cohesion: 0.20
-Nodes (8): AbstractUser, InviteCodeAdmin, ProfileAdmin, UserAdmin, Migration, InviteCode, Profile, User
+Cohesion: 0.18
+Nodes (9): AbstractUser, InviteCodeAdmin, ProfileAdmin, UserAdmin, Migration, Profile, User, UserManager (+1 more)
 
 ### Community 99 - "Meet.ts"
-Cohesion: 0.19
-Nodes (7): Meet, MeetPhoto, MeetTypeEnum, MeetUser, MeetWrite, MeetWriteRequest, PatchedMeetWriteRequest
+Cohesion: 0.20
+Nodes (6): MeetPhoto, MeetTypeEnum, MeetUser, MeetWrite, MeetWriteRequest, PatchedMeetWriteRequest
 
 ### Community 109 - "AnalyticsPage.tsx"
 Cohesion: 0.05
@@ -361,21 +405,21 @@ Nodes (18): PasswordChecklist(), Props, CheckboxProps, InputProps, Label(), Labe
   backend/schema.yaml · relation: shares_data_with
 
 ## Knowledge Gaps
-- **337 isolated node(s):** `Migration`, `Migration`, `Migration`, `Migration`, `Migration` (+332 more)
+- **344 isolated node(s):** `Migration`, `Migration`, `Migration`, `Migration`, `Migration` (+339 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **46 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **70 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `ReadingStatus choices` and `Status8ecEnum (PLANNED/IN_PROGRESS/FINISHED/CANCELED, auto-named)`?**
   _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
-- **Why does `useLandingScroll()` connect `User Dropdown, Profile & Auth Context` to `Frontend NPM Dependencies`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `Frontend NPM Dependencies` to `typescript-eslint`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
-- **Why does `lenis` connect `Frontend NPM Dependencies` to `User Dropdown, Profile & Auth Context`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `Frontend NPM Dependencies` to `@fullcalendar/list`, `@fullcalendar/react`, `@fullcalendar/timegrid`, `gsap`, `lenis`, `react`, `react-apexcharts`, `react-dnd`, `react-dnd-html5-backend`, `react-dom`, `react-dropzone`, `react-helmet-async`, `@react-jvectormap/world`, `react-router`, `swiper`, `tailwind-merge`, `three`, `@tiptap/extension-link`, `@tiptap/react`, `@tiptap/starter-kit`, `typescript-eslint`, `@react-jvectormap/world`, `flatpickr`, `@fullcalendar/daygrid`, `@fullcalendar/interaction`?**
+  _High betweenness centrality (0.075) - this node is a cross-community bridge._
+- **Why does `useLandingScroll()` connect `User Dropdown, Profile & Auth Context` to `lenis`?**
+  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+- **Why does `lenis` connect `lenis` to `User Dropdown, Profile & Auth Context`, `Frontend NPM Dependencies`?**
+  _High betweenness centrality (0.071) - this node is a cross-community bridge._
 - **Are the 65 inferred relationships involving `Meet` (e.g. with `AuthorAdmin` and `BlogCategoryAdmin`) actually correct?**
   _`Meet` has 65 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 63 inferred relationships involving `Notification` (e.g. with `AuthorAdmin` and `BlogCategoryAdmin`) actually correct?**

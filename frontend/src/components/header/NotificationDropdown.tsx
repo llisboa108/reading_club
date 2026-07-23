@@ -27,6 +27,9 @@ function resolveRoute(notification: Notification): string | null {
   if (notification.target_type === "payment" || notification.target_type === "subscription") {
     return "/billing";
   }
+  if (notification.target_type === "contactmessage") {
+    return "/contact-messages";
+  }
   return NOTIFICATION_ROUTES[notification.type] ?? null;
 }
 

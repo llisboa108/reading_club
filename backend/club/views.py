@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.utils import timezone
 from rest_framework.views import APIView
@@ -31,6 +32,7 @@ from .models import (
     ReadingStatus,
     Meet,
     Notification,
+    NotificationType,
     BlogCategory,
     BlogPost,
     Quote,
@@ -427,6 +429,15 @@ class ContactMessageViewSet(ModelViewSet):
             ),
             recipient=settings.CLUB_CONTACT_EMAIL,
         )
+
+        User = get_user_model()
+        for admin in User.objects.filter(is_staff=True, is_active=True):
+            Notification.objects.create(
+                user=admin,
+                type=NotificationType.SYSTEM,
+                message=f"Nova mensagem de contato de {message.name}",
+                content_object=message,
+            )
 
 
 # Landing page team grid — admin manages (with photo upload) via the React

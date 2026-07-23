@@ -250,8 +250,8 @@
     "semantic_hash": ""
   },
   "backend/club/tests.py": {
-    "mtime": 1784716682.672554,
-    "ast_hash": "66433e76573f3ba82c45f30609f7673f",
+    "mtime": 1784839486.6365867,
+    "ast_hash": "570219dd30e0ea48b2cb6461d8128562",
     "semantic_hash": ""
   },
   "backend/club/urls.py": {
@@ -260,8 +260,8 @@
     "semantic_hash": ""
   },
   "backend/club/views.py": {
-    "mtime": 1784716373.2066002,
-    "ast_hash": "140b219b7bdf34b8f5396cd3028b9a61",
+    "mtime": 1784839459.7368884,
+    "ast_hash": "0a92a6bb75a11490d5b545d1cd4d103f",
     "semantic_hash": ""
   },
   "backend/manage.py": {
@@ -750,8 +750,8 @@
     "semantic_hash": "c5f9c6fcdb5c7bebcfc1b239c3d4152e"
   },
   "frontend/src/components/header/NotificationDropdown.tsx": {
-    "mtime": 1784800290.9425511,
-    "ast_hash": "8faad865774e0e02c57cd838fbd2095a",
+    "mtime": 1784839474.4756734,
+    "ast_hash": "183393589bf3af0512a1c52fa8e1bf08",
     "semantic_hash": ""
   },
   "frontend/src/components/header/UserDropdown.tsx": {
@@ -960,8 +960,8 @@
     "semantic_hash": "b7225963a870c580e869151fb481ee8c"
   },
   "CLAUDE.md": {
-    "mtime": 1784819423.4796157,
-    "ast_hash": "400e5fca895f664cd2ee13f7f0faa0b6",
+    "mtime": 1784839588.8813968,
+    "ast_hash": "d7a51442490e46e80228cab7791dddfb",
     "semantic_hash": ""
   },
   "backend/requirements.txt": {
@@ -2927,6 +2927,91 @@
   "backend/communications/templates/emails/welcome.html": {
     "mtime": 1784818315.403354,
     "ast_hash": "11c58d803352eccb64f4134a645feb0e",
+    "semantic_hash": ""
+  },
+  "backend/media/team/WhatsApp_Image_2026-03-24_at_19.40.38.jpeg": {
+    "mtime": 1784838778.2346969,
+    "ast_hash": "1e6b18668bc7cb498ecd4cb739db39ba",
+    "semantic_hash": ""
+  },
+  "backend/media/team/test_2lXwbPN.gif": {
+    "mtime": 1784839550.9486847,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/team/test_3DlXGBI.gif": {
+    "mtime": 1784839550.4740655,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/team/test_GJ2VSLM.gif": {
+    "mtime": 1784839550.948959,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/team/test_JrCY8q1.gif": {
+    "mtime": 1784839551.3999841,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/team/test_TU5aFeM.gif": {
+    "mtime": 1784839551.8426027,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/team/test_TVDwZGs.gif": {
+    "mtime": 1784839551.3996964,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/team/test_hWhnOoV.gif": {
+    "mtime": 1784839550.5079973,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/team/test_lAc5mgj.gif": {
+    "mtime": 1784839551.8423114,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/team/test_vOVsAlc.gif": {
+    "mtime": 1784839550.4736657,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/timeline/test_BQGSUDk.gif": {
+    "mtime": 1784839552.2899113,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/timeline/test_EVvO2NP.gif": {
+    "mtime": 1784839552.291524,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/timeline/test_GuBqBq2.gif": {
+    "mtime": 1784839553.246339,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/timeline/test_UsIJ0pw.gif": {
+    "mtime": 1784839552.7321215,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/timeline/test_eP715KZ.gif": {
+    "mtime": 1784839552.2902458,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/timeline/test_qroeIn9.gif": {
+    "mtime": 1784839552.7324128,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
+    "semantic_hash": ""
+  },
+  "backend/media/timeline/test_vUpZIme.gif": {
+    "mtime": 1784839553.2458596,
+    "ast_hash": "a5098c60b3b0c879a2c7af6c68b7b53f",
     "semantic_hash": ""
   }
 }

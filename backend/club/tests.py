@@ -345,6 +345,22 @@ class ContactMessageTests(APITestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("Visitante", mail.outbox[0].subject)
 
+    def test_submitting_contact_message_notifies_admins_in_app(self):
+        self.client.post(
+            self.url,
+            {"name": "Visitante", "email": "visitante@example.com", "message": "Quero saber mais."},
+            format="json",
+        )
+
+        message = ContactMessage.objects.get()
+        notification = Notification.objects.get(user=self.admin, type=NotificationType.SYSTEM)
+        self.assertEqual(notification.content_object, message)
+
+        # A regular member is not an admin and should not be notified.
+        self.assertFalse(
+            Notification.objects.filter(user=self.member, type=NotificationType.SYSTEM).exists()
+        )
+
     def test_non_admin_cannot_list_contact_messages(self):
         ContactMessage.objects.create(
             name="Visitante", email="visitante@example.com", message="Oi"
