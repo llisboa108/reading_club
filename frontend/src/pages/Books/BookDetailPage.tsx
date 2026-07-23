@@ -151,8 +151,8 @@ export default function BookDetailPage() {
         <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
           <BookOpenIcon className="h-10 w-10 text-gray-400" />
         </div>
-        <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">Livro não encontrado</h2>
-        <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+        <h2 className="mb-2 font-heading text-xl text-gray-900 dark:text-white">Livro não encontrado</h2>
+        <p className="mb-6 font-ui text-sm text-gray-500 dark:text-gray-400">
           O livro que procuras não existe ou foi removido.
         </p>
         <Button onClick={() => navigate("/books")}>Voltar ao catálogo</Button>
@@ -173,7 +173,7 @@ export default function BookDetailPage() {
         {/* Back link */}
         <button
           onClick={() => navigate("/books")}
-          className="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
+          className="mb-6 inline-flex items-center gap-2 font-ui text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
         >
           <ArrowLeftIcon />
           Voltar ao catálogo
@@ -181,7 +181,7 @@ export default function BookDetailPage() {
 
         {/* Book card */}
         <div className="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-gray-900">
-          <div className="flex flex-col gap-6 p-6 sm:flex-row sm:p-8">
+          <div className="flex flex-col gap-6 p-6 font-ui sm:flex-row sm:p-8">
 
             {/* Cover */}
             <div className="flex h-52 w-36 shrink-0 items-center justify-center self-start overflow-hidden rounded-xl bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-500/10 dark:to-brand-600/20">
@@ -201,7 +201,7 @@ export default function BookDetailPage() {
             {/* Info */}
             <div className="flex flex-1 flex-col">
               <div className="mb-4">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="font-heading text-2xl text-gray-900 dark:text-white">
                   {book.title}
                 </h1>
                 {book.subtitle && (
@@ -228,8 +228,8 @@ export default function BookDetailPage() {
         </div>
 
         {/* Readings section */}
-        <div>
-          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="font-ui">
+          <h2 className="mb-4 font-heading text-lg text-gray-900 dark:text-white">
             Leituras {readingsError === null && `(${readings.length})`}
           </h2>
 

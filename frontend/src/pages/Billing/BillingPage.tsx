@@ -36,8 +36,8 @@ export default function BillingPage() {
         <PageBreadCrumb pageTitle="Faturação" />
 
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Faturação</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <h1 className="font-heading text-2xl text-gray-900 dark:text-white">Faturação</h1>
+          <p className="mt-1 font-ui text-sm text-gray-500 dark:text-gray-400">
             Consulta o teu plano e o histórico de pagamentos.
           </p>
         </div>

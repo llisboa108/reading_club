@@ -1286,6 +1286,148 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/v1/club/contact-messages/:
+    get:
+      operationId: club_contact_messages_list
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContactMessage'
+          description: ''
+    post:
+      operationId: club_contact_messages_create
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactMessageCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ContactMessageCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ContactMessageCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactMessageCreate'
+          description: ''
+  /api/v1/club/contact-messages/{id}/:
+    get:
+      operationId: club_contact_messages_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este contact message.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactMessage'
+          description: ''
+    put:
+      operationId: club_contact_messages_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este contact message.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactMessageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ContactMessageRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ContactMessageRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactMessage'
+          description: ''
+    patch:
+      operationId: club_contact_messages_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este contact message.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedContactMessageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedContactMessageRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedContactMessageRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactMessage'
+          description: ''
+    delete:
+      operationId: club_contact_messages_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este contact message.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/club/meets/:
     get:
       operationId: club_meets_list
@@ -1641,6 +1783,149 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/club/quotes/:
+    get:
+      operationId: club_quotes_list
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+          description: ''
+    post:
+      operationId: club_quotes_create
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuoteWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuoteWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteWrite'
+          description: ''
+  /api/v1/club/quotes/{id}/:
+    get:
+      operationId: club_quotes_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este quote.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+          description: ''
+    put:
+      operationId: club_quotes_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este quote.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuoteWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuoteWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteWrite'
+          description: ''
+    patch:
+      operationId: club_quotes_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este quote.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedQuoteWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedQuoteWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedQuoteWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteWrite'
+          description: ''
+    delete:
+      operationId: club_quotes_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este quote.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/club/readings/:
     get:
       operationId: club_readings_list
@@ -1774,6 +2059,274 @@ paths:
         schema:
           type: integer
         description: Um valor inteiro único que identifica este reading.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/club/team-members/:
+    get:
+      operationId: club_team_members_list
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamMember'
+          description: ''
+    post:
+      operationId: club_team_members_create
+      tags:
+      - Club
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TeamMemberWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TeamMemberWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamMemberWrite'
+          description: ''
+  /api/v1/club/team-members/{id}/:
+    get:
+      operationId: club_team_members_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este team member.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamMember'
+          description: ''
+    put:
+      operationId: club_team_members_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este team member.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TeamMemberWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TeamMemberWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamMemberWrite'
+          description: ''
+    patch:
+      operationId: club_team_members_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este team member.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTeamMemberWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTeamMemberWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamMemberWrite'
+          description: ''
+    delete:
+      operationId: club_team_members_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este team member.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/club/timeline-entries/:
+    get:
+      operationId: club_timeline_entries_list
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineEntry'
+          description: ''
+    post:
+      operationId: club_timeline_entries_create
+      tags:
+      - Club
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TimelineEntryWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TimelineEntryWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineEntryWrite'
+          description: ''
+  /api/v1/club/timeline-entries/{id}/:
+    get:
+      operationId: club_timeline_entries_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este timeline entry.
+        required: true
+      tags:
+      - Club
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineEntry'
+          description: ''
+    put:
+      operationId: club_timeline_entries_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este timeline entry.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TimelineEntryWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TimelineEntryWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineEntryWrite'
+          description: ''
+    patch:
+      operationId: club_timeline_entries_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este timeline entry.
+        required: true
+      tags:
+      - Club
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTimelineEntryWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTimelineEntryWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineEntryWrite'
+          description: ''
+    delete:
+      operationId: club_timeline_entries_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Um valor inteiro único que identifica este timeline entry.
         required: true
       tags:
       - Club
@@ -2108,6 +2661,89 @@ components:
       - meets_held
       - pages_read
       - reading_hours
+    ContactMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        message:
+          type: string
+        is_read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - id
+      - message
+      - name
+    ContactMessageCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        message:
+          type: string
+      required:
+      - email
+      - message
+      - name
+    ContactMessageCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        message:
+          type: string
+          minLength: 1
+      required:
+      - email
+      - message
+      - name
+    ContactMessageRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        message:
+          type: string
+          minLength: 1
+        is_read:
+          type: boolean
+      required:
+      - email
+      - message
+      - name
     InviteCode:
       type: object
       properties:
@@ -2528,6 +3164,23 @@ components:
         new_password:
           type: string
           minLength: 8
+    PatchedContactMessageRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        message:
+          type: string
+          minLength: 1
+        is_read:
+          type: boolean
     PatchedInviteCodeRequest:
       type: object
       properties:
@@ -2646,6 +3299,24 @@ components:
           type: string
           minLength: 1
           maxLength: 100
+    PatchedQuoteWriteRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+        attribution:
+          type: string
+          description: 'Ex.: uma data ou ''Sonhos Literários''. Não usar o nome de
+            uma pessoa a menos que ela tenha realmente dito essa frase.'
+          maxLength: 150
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
     PatchedReadingWriteRequest:
       type: object
       properties:
@@ -2667,6 +3338,60 @@ components:
           type: array
           items:
             type: integer
+    PatchedTeamMemberWriteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        role:
+          type: string
+          maxLength: 150
+        image:
+          type: string
+          format: binary
+        instagram:
+          type: string
+          format: uri
+          maxLength: 200
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
+    PatchedTimelineEntryWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        date:
+          type: string
+          minLength: 1
+          description: Texto livre — ex. 'Dezembro de 2018' quando não há um dia exato.
+          maxLength: 100
+        description:
+          type: string
+          minLength: 1
+        image:
+          type: string
+          format: binary
+        link:
+          type: string
+          format: uri
+          description: 'Ex.: publicação do Instagram sobre o marco.'
+          maxLength: 200
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
     Payment:
       type: object
       properties:
@@ -2988,6 +3713,68 @@ components:
           maxLength: 100
       required:
       - name
+    Quote:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        text:
+          type: string
+        attribution:
+          type: string
+          description: 'Ex.: uma data ou ''Sonhos Literários''. Não usar o nome de
+            uma pessoa a menos que ela tenha realmente dito essa frase.'
+          maxLength: 150
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
+      required:
+      - id
+      - text
+    QuoteWrite:
+      type: object
+      properties:
+        text:
+          type: string
+        attribution:
+          type: string
+          description: 'Ex.: uma data ou ''Sonhos Literários''. Não usar o nome de
+            uma pessoa a menos que ela tenha realmente dito essa frase.'
+          maxLength: 150
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
+      required:
+      - text
+    QuoteWriteRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+        attribution:
+          type: string
+          description: 'Ex.: uma data ou ''Sonhos Literários''. Não usar o nome de
+            uma pessoa a menos que ela tenha realmente dito essa frase.'
+          maxLength: 150
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
+      required:
+      - text
     Reading:
       type: object
       properties:
@@ -3176,6 +3963,192 @@ components:
         * `ACTIVE` - Ativa
         * `EXPIRED` - Expirada
         * `CANCELED` - Cancelada
+    TeamMember:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        role:
+          type: string
+          maxLength: 150
+        image:
+          type: string
+          format: uri
+        instagram:
+          type: string
+          format: uri
+          maxLength: 200
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
+      required:
+      - id
+      - image
+      - name
+    TeamMemberWrite:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        role:
+          type: string
+          maxLength: 150
+        image:
+          type: string
+          format: uri
+        instagram:
+          type: string
+          format: uri
+          maxLength: 200
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
+      required:
+      - image
+      - name
+    TeamMemberWriteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        role:
+          type: string
+          maxLength: 150
+        image:
+          type: string
+          format: binary
+        instagram:
+          type: string
+          format: uri
+          maxLength: 200
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
+      required:
+      - image
+      - name
+    TimelineEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        date:
+          type: string
+          description: Texto livre — ex. 'Dezembro de 2018' quando não há um dia exato.
+          maxLength: 100
+        description:
+          type: string
+        image:
+          type: string
+          format: uri
+        link:
+          type: string
+          format: uri
+          description: 'Ex.: publicação do Instagram sobre o marco.'
+          maxLength: 200
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
+      required:
+      - date
+      - description
+      - id
+      - image
+      - title
+    TimelineEntryWrite:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        date:
+          type: string
+          description: Texto livre — ex. 'Dezembro de 2018' quando não há um dia exato.
+          maxLength: 100
+        description:
+          type: string
+        image:
+          type: string
+          format: uri
+        link:
+          type: string
+          format: uri
+          description: 'Ex.: publicação do Instagram sobre o marco.'
+          maxLength: 200
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
+      required:
+      - date
+      - description
+      - image
+      - title
+    TimelineEntryWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        date:
+          type: string
+          minLength: 1
+          description: Texto livre — ex. 'Dezembro de 2018' quando não há um dia exato.
+          maxLength: 100
+        description:
+          type: string
+          minLength: 1
+        image:
+          type: string
+          format: binary
+        link:
+          type: string
+          format: uri
+          description: 'Ex.: publicação do Instagram sobre o marco.'
+          maxLength: 200
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
+      required:
+      - date
+      - description
+      - image
+      - title
     TokenObtainPair:
       type: object
       properties:

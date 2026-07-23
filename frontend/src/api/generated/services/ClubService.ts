@@ -13,6 +13,10 @@ import type { Book } from '../models/Book';
 import type { BookWrite } from '../models/BookWrite';
 import type { BookWriteRequest } from '../models/BookWriteRequest';
 import type { ClubStats } from '../models/ClubStats';
+import type { ContactMessage } from '../models/ContactMessage';
+import type { ContactMessageCreate } from '../models/ContactMessageCreate';
+import type { ContactMessageCreateRequest } from '../models/ContactMessageCreateRequest';
+import type { ContactMessageRequest } from '../models/ContactMessageRequest';
 import type { Meet } from '../models/Meet';
 import type { MeetWrite } from '../models/MeetWrite';
 import type { MeetWriteRequest } from '../models/MeetWriteRequest';
@@ -20,14 +24,27 @@ import type { Notification } from '../models/Notification';
 import type { PatchedAuthorRequest } from '../models/PatchedAuthorRequest';
 import type { PatchedBlogPostWriteRequest } from '../models/PatchedBlogPostWriteRequest';
 import type { PatchedBookWriteRequest } from '../models/PatchedBookWriteRequest';
+import type { PatchedContactMessageRequest } from '../models/PatchedContactMessageRequest';
 import type { PatchedMeetWriteRequest } from '../models/PatchedMeetWriteRequest';
 import type { PatchedPublisherRequest } from '../models/PatchedPublisherRequest';
+import type { PatchedQuoteWriteRequest } from '../models/PatchedQuoteWriteRequest';
 import type { PatchedReadingWriteRequest } from '../models/PatchedReadingWriteRequest';
+import type { PatchedTeamMemberWriteRequest } from '../models/PatchedTeamMemberWriteRequest';
+import type { PatchedTimelineEntryWriteRequest } from '../models/PatchedTimelineEntryWriteRequest';
 import type { Publisher } from '../models/Publisher';
 import type { PublisherRequest } from '../models/PublisherRequest';
+import type { Quote } from '../models/Quote';
+import type { QuoteWrite } from '../models/QuoteWrite';
+import type { QuoteWriteRequest } from '../models/QuoteWriteRequest';
 import type { Reading } from '../models/Reading';
 import type { ReadingWrite } from '../models/ReadingWrite';
 import type { ReadingWriteRequest } from '../models/ReadingWriteRequest';
+import type { TeamMember } from '../models/TeamMember';
+import type { TeamMemberWrite } from '../models/TeamMemberWrite';
+import type { TeamMemberWriteRequest } from '../models/TeamMemberWriteRequest';
+import type { TimelineEntry } from '../models/TimelineEntry';
+import type { TimelineEntryWrite } from '../models/TimelineEntryWrite';
+import type { TimelineEntryWriteRequest } from '../models/TimelineEntryWriteRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -362,6 +379,103 @@ export class ClubService {
         });
     }
     /**
+     * @returns ContactMessage
+     * @throws ApiError
+     */
+    public static clubContactMessagesList(): CancelablePromise<Array<ContactMessage>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/club/contact-messages/',
+        });
+    }
+    /**
+     * @param requestBody
+     * @returns ContactMessageCreate
+     * @throws ApiError
+     */
+    public static clubContactMessagesCreate(
+        requestBody: ContactMessageCreateRequest,
+    ): CancelablePromise<ContactMessageCreate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/club/contact-messages/',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este contact message.
+     * @returns ContactMessage
+     * @throws ApiError
+     */
+    public static clubContactMessagesRetrieve(
+        id: number,
+    ): CancelablePromise<ContactMessage> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/club/contact-messages/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este contact message.
+     * @param requestBody
+     * @returns ContactMessage
+     * @throws ApiError
+     */
+    public static clubContactMessagesUpdate(
+        id: number,
+        requestBody: ContactMessageRequest,
+    ): CancelablePromise<ContactMessage> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/club/contact-messages/{id}/',
+            path: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este contact message.
+     * @param requestBody
+     * @returns ContactMessage
+     * @throws ApiError
+     */
+    public static clubContactMessagesPartialUpdate(
+        id: number,
+        requestBody?: PatchedContactMessageRequest,
+    ): CancelablePromise<ContactMessage> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/club/contact-messages/{id}/',
+            path: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este contact message.
+     * @returns void
+     * @throws ApiError
+     */
+    public static clubContactMessagesDestroy(
+        id: number,
+    ): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/club/contact-messages/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
      * @returns Meet
      * @throws ApiError
      */
@@ -610,6 +724,103 @@ export class ClubService {
         });
     }
     /**
+     * @returns Quote
+     * @throws ApiError
+     */
+    public static clubQuotesList(): CancelablePromise<Array<Quote>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/club/quotes/',
+        });
+    }
+    /**
+     * @param requestBody
+     * @returns QuoteWrite
+     * @throws ApiError
+     */
+    public static clubQuotesCreate(
+        requestBody: QuoteWriteRequest,
+    ): CancelablePromise<QuoteWrite> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/club/quotes/',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este quote.
+     * @returns Quote
+     * @throws ApiError
+     */
+    public static clubQuotesRetrieve(
+        id: number,
+    ): CancelablePromise<Quote> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/club/quotes/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este quote.
+     * @param requestBody
+     * @returns QuoteWrite
+     * @throws ApiError
+     */
+    public static clubQuotesUpdate(
+        id: number,
+        requestBody: QuoteWriteRequest,
+    ): CancelablePromise<QuoteWrite> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/club/quotes/{id}/',
+            path: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este quote.
+     * @param requestBody
+     * @returns QuoteWrite
+     * @throws ApiError
+     */
+    public static clubQuotesPartialUpdate(
+        id: number,
+        requestBody?: PatchedQuoteWriteRequest,
+    ): CancelablePromise<QuoteWrite> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/club/quotes/{id}/',
+            path: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este quote.
+     * @returns void
+     * @throws ApiError
+     */
+    public static clubQuotesDestroy(
+        id: number,
+    ): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/club/quotes/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
      * @returns Reading
      * @throws ApiError
      */
@@ -701,6 +912,200 @@ export class ClubService {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/club/readings/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
+     * @returns TeamMember
+     * @throws ApiError
+     */
+    public static clubTeamMembersList(): CancelablePromise<Array<TeamMember>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/club/team-members/',
+        });
+    }
+    /**
+     * @param formData
+     * @returns TeamMemberWrite
+     * @throws ApiError
+     */
+    public static clubTeamMembersCreate(
+        formData: TeamMemberWriteRequest,
+    ): CancelablePromise<TeamMemberWrite> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/club/team-members/',
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este team member.
+     * @returns TeamMember
+     * @throws ApiError
+     */
+    public static clubTeamMembersRetrieve(
+        id: number,
+    ): CancelablePromise<TeamMember> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/club/team-members/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este team member.
+     * @param formData
+     * @returns TeamMemberWrite
+     * @throws ApiError
+     */
+    public static clubTeamMembersUpdate(
+        id: number,
+        formData: TeamMemberWriteRequest,
+    ): CancelablePromise<TeamMemberWrite> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/club/team-members/{id}/',
+            path: {
+                'id': id,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este team member.
+     * @param formData
+     * @returns TeamMemberWrite
+     * @throws ApiError
+     */
+    public static clubTeamMembersPartialUpdate(
+        id: number,
+        formData?: PatchedTeamMemberWriteRequest,
+    ): CancelablePromise<TeamMemberWrite> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/club/team-members/{id}/',
+            path: {
+                'id': id,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este team member.
+     * @returns void
+     * @throws ApiError
+     */
+    public static clubTeamMembersDestroy(
+        id: number,
+    ): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/club/team-members/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
+     * @returns TimelineEntry
+     * @throws ApiError
+     */
+    public static clubTimelineEntriesList(): CancelablePromise<Array<TimelineEntry>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/club/timeline-entries/',
+        });
+    }
+    /**
+     * @param formData
+     * @returns TimelineEntryWrite
+     * @throws ApiError
+     */
+    public static clubTimelineEntriesCreate(
+        formData: TimelineEntryWriteRequest,
+    ): CancelablePromise<TimelineEntryWrite> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/club/timeline-entries/',
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este timeline entry.
+     * @returns TimelineEntry
+     * @throws ApiError
+     */
+    public static clubTimelineEntriesRetrieve(
+        id: number,
+    ): CancelablePromise<TimelineEntry> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/club/timeline-entries/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este timeline entry.
+     * @param formData
+     * @returns TimelineEntryWrite
+     * @throws ApiError
+     */
+    public static clubTimelineEntriesUpdate(
+        id: number,
+        formData: TimelineEntryWriteRequest,
+    ): CancelablePromise<TimelineEntryWrite> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/club/timeline-entries/{id}/',
+            path: {
+                'id': id,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este timeline entry.
+     * @param formData
+     * @returns TimelineEntryWrite
+     * @throws ApiError
+     */
+    public static clubTimelineEntriesPartialUpdate(
+        id: number,
+        formData?: PatchedTimelineEntryWriteRequest,
+    ): CancelablePromise<TimelineEntryWrite> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/club/timeline-entries/{id}/',
+            path: {
+                'id': id,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
+     * @param id Um valor inteiro único que identifica este timeline entry.
+     * @returns void
+     * @throws ApiError
+     */
+    public static clubTimelineEntriesDestroy(
+        id: number,
+    ): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/club/timeline-entries/{id}/',
             path: {
                 'id': id,
             },

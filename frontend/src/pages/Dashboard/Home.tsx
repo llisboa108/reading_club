@@ -4,6 +4,8 @@ import PageMeta from "../../components/common/PageMeta";
 import { apiRequest, ApiRequestError } from "../../api/client";
 import { useAuth } from "../../hooks/useAuth";
 import Button from "../../components/ui/button/Button";
+import Card from "../../components/ui/card/Card";
+import StatCard from "../../components/ui/card/StatCard";
 
 type ReadingStatus = "PLANNED" | "IN_PROGRESS" | "FINISHED" | "CANCELED";
 
@@ -65,39 +67,6 @@ function today() {
     year: "numeric",
   });
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-}
-
-const ACCENT_CLASSES = {
-  brand: "bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400",
-  success: "bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-400",
-  warning: "bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-warning-400",
-  error: "bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-400",
-};
-
-function StatCard({
-  label,
-  value,
-  icon,
-  accent = "brand",
-}: {
-  label: string;
-  value: number | string;
-  icon: React.ReactNode;
-  accent?: keyof typeof ACCENT_CLASSES;
-}) {
-  return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs transition-shadow hover:shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 md:p-6">
-      <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${ACCENT_CLASSES[accent]}`}>
-        {icon}
-      </div>
-      <div className="mt-5">
-        <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-        <h4 className="mt-1 text-2xl font-bold text-gray-800 dark:text-white/90">
-          {value}
-        </h4>
-      </div>
-    </div>
-  );
 }
 
 export default function Home() {
@@ -180,23 +149,26 @@ export default function Home() {
         description="Visão geral do clube de leitura"
       />
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="font-heading text-2xl text-gray-900 dark:text-white">
           {greeting()}{user?.profile?.full_name ? `, ${user.profile.full_name.split(" ")[0]}` : ""}
         </h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{today()}</p>
+        <p className="mt-1 font-ui text-sm text-gray-500 dark:text-gray-400">{today()}</p>
       </div>
 
       {subscriptionRequired && (
-        <div className="mb-6 flex flex-col items-start gap-4 rounded-2xl border border-warning-200 bg-warning-50 p-6 dark:border-warning-500/20 dark:bg-warning-500/5 sm:flex-row sm:items-center sm:justify-between">
+        <Card
+          padding="lg"
+          className="mb-6 flex flex-col items-start gap-4 !border-warning-200 !bg-warning-50 dark:!border-warning-500/20 dark:!bg-warning-500/5 sm:flex-row sm:items-center sm:justify-between"
+        >
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-warning-100 dark:bg-warning-500/15">
               <LockIcon className="h-6 w-6 text-warning-600 dark:text-warning-400" />
             </div>
             <div>
-              <h3 className="mb-1 text-base font-semibold text-warning-700 dark:text-warning-400">
+              <h3 className="mb-1 font-heading text-base text-warning-700 dark:text-warning-400">
                 Assinatura necessária
               </h3>
-              <p className="text-sm text-warning-600 dark:text-warning-500">
+              <p className="font-ui text-sm text-warning-600 dark:text-warning-500">
                 A sua assinatura não está ativa, por isso algumas áreas do clube (Leituras, Encontros)
                 ainda não estão disponíveis. Regularize o pagamento na página de Assinatura para
                 liberar o acesso completo — em breve você poderá pagar diretamente por lá.
@@ -206,20 +178,23 @@ export default function Home() {
           <Button onClick={() => navigate("/billing")} className="shrink-0">
             Ir para Assinatura
           </Button>
-        </div>
+        </Card>
       )}
 
       {myPendingPayments.length > 0 && (
-        <div className="mb-6 flex flex-col items-start gap-4 rounded-2xl border border-warning-200 bg-warning-50 p-6 dark:border-warning-500/20 dark:bg-warning-500/5 sm:flex-row sm:items-center sm:justify-between">
+        <Card
+          padding="lg"
+          className="mb-6 flex flex-col items-start gap-4 !border-warning-200 !bg-warning-50 dark:!border-warning-500/20 dark:!bg-warning-500/5 sm:flex-row sm:items-center sm:justify-between"
+        >
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-warning-100 dark:bg-warning-500/15">
               <WalletIcon className="h-6 w-6 text-warning-600 dark:text-warning-400" />
             </div>
             <div>
-              <h3 className="mb-1 text-base font-semibold text-warning-700 dark:text-warning-400">
+              <h3 className="mb-1 font-heading text-base text-warning-700 dark:text-warning-400">
                 Pagamento pendente
               </h3>
-              <p className="text-sm text-warning-600 dark:text-warning-500">
+              <p className="font-ui text-sm text-warning-600 dark:text-warning-500">
                 {myPendingPayments.length === 1 ? (
                   <>
                     Tens um pagamento de <strong>R$ {myPendingPayments[0].amount}</strong> com
@@ -234,20 +209,20 @@ export default function Home() {
           <Button onClick={() => navigate("/billing")} className="shrink-0">
             Ver pagamentos
           </Button>
-        </div>
+        </Card>
       )}
 
       {myUpcomingMeets.length > 0 && (
-        <div className="mb-6 rounded-2xl border border-brand-200 bg-brand-25 p-6 dark:border-brand-500/20 dark:bg-brand-500/5">
+        <Card padding="lg" className="mb-6 !border-brand-200 !bg-brand-25 dark:!border-brand-500/20 dark:!bg-brand-500/5">
           <div className="mb-4 flex items-center gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-100 dark:bg-brand-500/15">
               <CalendarIcon className="h-6 w-6 text-brand-600 dark:text-brand-400" />
             </div>
-            <h3 className="text-base font-semibold text-brand-700 dark:text-brand-400">
+            <h3 className="font-heading text-base text-brand-700 dark:text-brand-400">
               Próximos encontros
             </h3>
           </div>
-          <ul className="space-y-2">
+          <ul className="space-y-2 font-ui">
             {myUpcomingMeets.map((meet) => (
               <li
                 key={meet.id}
@@ -266,7 +241,7 @@ export default function Home() {
           <Button variant="outline" onClick={() => navigate("/meets")} className="mt-4">
             Ver todos os encontros
           </Button>
-        </div>
+        </Card>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-4">
@@ -277,12 +252,14 @@ export default function Home() {
               value={readings.length}
               icon={<BookIcon />}
               accent="brand"
+              to="/readings"
             />
             <StatCard
               label="Leituras ativas/planeadas"
               value={activeReadings}
               icon={<CalendarIcon />}
               accent="success"
+              to="/readings"
             />
           </>
         )}
@@ -293,6 +270,7 @@ export default function Home() {
             value={pendingPaymentsCount ?? "—"}
             icon={<WalletIcon />}
             accent="warning"
+            to="/billing/confirmations"
           />
         )}
 
@@ -302,6 +280,7 @@ export default function Home() {
             value={membersCount ?? "—"}
             icon={<UsersIcon />}
             accent="brand"
+            to="/members"
           />
         )}
       </div>

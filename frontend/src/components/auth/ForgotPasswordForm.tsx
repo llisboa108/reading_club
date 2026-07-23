@@ -39,7 +39,7 @@ export default function ForgotPasswordForm() {
       <div className="w-full max-w-md pt-10 mx-auto">
         <Link
           to="/signin"
-          className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700"
+          className="inline-flex items-center font-ui text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
           <ChevronLeftIcon className="size-5" />
           Voltar ao login
@@ -49,16 +49,16 @@ export default function ForgotPasswordForm() {
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 dark:text-white/90 text-title-sm">
+            <h1 className="mb-2 font-heading text-gray-800 dark:text-white/90 text-title-sm">
               Esqueci minha senha
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="font-ui text-sm text-gray-500 dark:text-gray-400">
               Informe o seu e-mail e enviaremos um link para redefinir a senha.
             </p>
           </div>
 
           {sent ? (
-            <div className="rounded-lg bg-success-50 px-4 py-3 text-sm text-success-700 dark:bg-success-500/15 dark:text-success-400">
+            <div className="rounded-lg bg-success-50 px-4 py-3 font-ui text-sm text-success-700 dark:bg-success-500/15 dark:text-success-400">
               Se o e-mail <strong>{email}</strong> existir na nossa base, um link de
               redefinição foi enviado. Verifique a caixa de entrada.
             </div>

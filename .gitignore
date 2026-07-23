@@ -6,3 +6,11 @@ identidade/
 # already rebuilt as frontend/src/pages/Landing/ and assets copied into
 # frontend/public/images/landing/.
 landingpage/
+
+# Local MCP server config (shadcn mcp init)
+.mcp.json
+
+# Local shadcn MCP install artifacts at repo root (not part of the app)
+/node_modules/
+/package.json
+/package-lock.json

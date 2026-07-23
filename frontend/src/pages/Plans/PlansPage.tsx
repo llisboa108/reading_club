@@ -5,6 +5,9 @@ import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button/Button";
 import PageBreadCrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
+import PageHeader from "../../components/common/PageHeader";
+import EmptyState from "../../components/common/EmptyState";
+import { Table, TableHeader, TableBody, TableRow, Th, Td } from "../../components/ui/table/Table";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../../context/ToastContext";
 
@@ -181,55 +184,46 @@ export default function PlansPage() {
           </div>
         ) : (
           <section>
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Planos de assinatura</h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  O plano padrão é atribuído automaticamente a novos membros no cadastro.
-                </p>
-              </div>
-              <Button onClick={openCreate} startIcon={<PlusIcon />}>
-                Novo plano
-              </Button>
-            </div>
+            <PageHeader
+              title="Planos de assinatura"
+              description="O plano padrão é atribuído automaticamente a novos membros no cadastro."
+              actions={
+                <Button onClick={openCreate} startIcon={<PlusIcon />}>
+                  Novo plano
+                </Button>
+              }
+            />
 
-            <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50">
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                      Nome
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                      Preço
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                      Padrão
-                    </th>
-                    <th className="px-6 py-3" />
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {plans.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                        Nenhum plano criado.
-                      </td>
-                    </tr>
-                  )}
+            {plans.length === 0 ? (
+              <EmptyState
+                title="Nenhum plano criado"
+                description="Crie o primeiro plano de assinatura para começar a receber membros."
+                action={
+                  <Button onClick={openCreate} startIcon={<PlusIcon />}>
+                    Novo plano
+                  </Button>
+                }
+              />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <Th>Nome</Th>
+                  <Th>Preço</Th>
+                  <Th>Estado</Th>
+                  <Th>Padrão</Th>
+                  <Th />
+                </TableHeader>
+                <TableBody>
                   {plans.map((plan) => (
-                    <tr key={plan.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                      <td className="px-6 py-3">
+                    <TableRow key={plan.id}>
+                      <Td>
                         <div className="font-medium text-gray-900 dark:text-white">{plan.name}</div>
                         {plan.description && (
                           <div className="text-xs text-gray-500 dark:text-gray-400">{plan.description}</div>
                         )}
-                      </td>
-                      <td className="px-6 py-3 text-gray-700 dark:text-gray-300">{formatPrice(plan.price)}</td>
-                      <td className="px-6 py-3">
+                      </Td>
+                      <Td>{formatPrice(plan.price)}</Td>
+                      <Td>
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                             plan.is_active
@@ -239,15 +233,15 @@ export default function PlansPage() {
                         >
                           {plan.is_active ? "Ativo" : "Inativo"}
                         </span>
-                      </td>
-                      <td className="px-6 py-3">
+                      </Td>
+                      <Td>
                         {plan.is_default && (
                           <span className="inline-flex items-center rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-500/15 dark:text-brand-300">
                             Padrão
                           </span>
                         )}
-                      </td>
-                      <td className="px-6 py-3">
+                      </Td>
+                      <Td>
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => openEdit(plan)}
@@ -267,22 +261,22 @@ export default function PlansPage() {
                             <TrashIcon className="h-4 w-4" />
                           </button>
                         </div>
-                      </td>
-                    </tr>
+                      </Td>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            )}
           </section>
         )}
       </div>
 
       {/* Create/Edit Modal */}
       <Modal isOpen={modalOpen} onClose={closeModal} className="max-w-md p-6 sm:p-8">
-        <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
+        <h2 className="mb-6 font-heading text-xl text-gray-900 dark:text-white">
           {editingPlan ? "Editar plano" : "Novo plano"}
         </h2>
-        <div className="space-y-4">
+        <div className="space-y-4 font-ui">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Nome <span className="text-error-500">*</span>
@@ -362,11 +356,11 @@ export default function PlansPage() {
 
       {/* Delete Modal */}
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} className="max-w-sm p-6 sm:p-8">
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center font-ui">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-error-50 dark:bg-error-500/15">
             <TrashIcon className="h-7 w-7 text-error-500" />
           </div>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Eliminar plano?</h2>
+          <h2 className="mb-2 font-heading text-lg text-gray-900 dark:text-white">Eliminar plano?</h2>
           <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
             O plano <strong>"{deletePlan?.name}"</strong> será eliminado permanentemente.
           </p>

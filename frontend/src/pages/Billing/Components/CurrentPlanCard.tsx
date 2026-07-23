@@ -16,7 +16,7 @@ export default function CurrentPlanCard({ subscription }: any) {
   if (!subscription) {
     return (
       <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-theme-xs">
-        <p className="text-sm text-gray-500 dark:text-gray-400">Nenhuma subscrição ativa.</p>
+        <p className="font-ui text-sm text-gray-500 dark:text-gray-400">Nenhuma subscrição ativa.</p>
       </div>
     );
   }
@@ -27,11 +27,11 @@ export default function CurrentPlanCard({ subscription }: any) {
   };
 
   return (
-    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-theme-xs">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-theme-xs font-ui">
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">
+        <h3 className="font-heading text-base text-gray-800 dark:text-white/90">
           O Meu Plano
         </h3>
         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.className}`}>
@@ -42,7 +42,7 @@ export default function CurrentPlanCard({ subscription }: any) {
       {/* Plan name + price */}
       <div className="flex items-end justify-between mb-6">
         <div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="font-heading text-2xl text-gray-900 dark:text-white">
             {subscription.plan.name}
           </p>
           {subscription.plan.description && (
@@ -52,7 +52,7 @@ export default function CurrentPlanCard({ subscription }: any) {
           )}
         </div>
         <div className="text-right">
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">
+          <p className="font-heading text-3xl text-gray-900 dark:text-white">
             R$ {subscription.plan.price}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">por mês</p>

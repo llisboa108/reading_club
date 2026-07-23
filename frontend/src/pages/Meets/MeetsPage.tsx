@@ -5,6 +5,7 @@ import { API_HOST, API_PREFIX, getAccessToken } from "../../api/config";
 import Badge from "../../components/ui/badge/Badge";
 import PageBreadCrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
+import PageHeader from "../../components/common/PageHeader";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -82,6 +83,7 @@ export default function MeetsPage() {
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
   const [filterReading, setFilterReading] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<"recent" | "old">("recent");
 
   const rowRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
@@ -120,8 +122,12 @@ export default function MeetsPage() {
     () =>
       meets
         .filter((m) => !filterReading || String(m.reading) === filterReading)
-        .sort((a, b) => a.meet_date.localeCompare(b.meet_date)),
-    [meets, filterReading]
+        .sort((a, b) =>
+          sortOrder === "recent"
+            ? b.meet_date.localeCompare(a.meet_date)
+            : a.meet_date.localeCompare(b.meet_date)
+        ),
+    [meets, filterReading, sortOrder]
   );
 
   return (
@@ -130,14 +136,14 @@ export default function MeetsPage() {
       <div className="mx-auto max-w-screen-xl px-4 py-6 sm:px-6">
         <PageBreadCrumb pageTitle="Encontros" />
 
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Encontros</h1>
-          {!forbidden && (
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {meets.length} encontro{meets.length !== 1 ? "s" : ""} agendado{meets.length !== 1 ? "s" : ""}
-            </p>
-          )}
-        </div>
+        <PageHeader
+          title="Encontros"
+          description={
+            !forbidden
+              ? `${meets.length} encontro${meets.length !== 1 ? "s" : ""} agendado${meets.length !== 1 ? "s" : ""}`
+              : undefined
+          }
+        />
 
         {forbidden ? (
           <ForbiddenState />
@@ -145,8 +151,8 @@ export default function MeetsPage() {
           <LoadingSkeleton />
         ) : (
           <>
-            {readings.length > 0 && (
-              <div className="mb-5">
+            <div className="mb-5 flex flex-col gap-3 font-ui sm:flex-row">
+              {readings.length > 0 && (
                 <select
                   value={filterReading}
                   onChange={(e) => setFilterReading(e.target.value)}
@@ -159,8 +165,16 @@ export default function MeetsPage() {
                     </option>
                   ))}
                 </select>
-              </div>
-            )}
+              )}
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as "recent" | "old")}
+                className="h-11 rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              >
+                <option value="recent">Mais recentes</option>
+                <option value="old">Mais antigos</option>
+              </select>
+            </div>
 
             {sortedMeets.length === 0 ? (
               <EmptyState />
@@ -217,8 +231,8 @@ const MeetRow = forwardRef<
             </div>
           )}
         </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+        <div className="min-w-0 font-ui">
+          <p className="truncate font-heading text-base text-gray-900 dark:text-white">
             {reading?.book.title || `Leitura #${meet.reading}`}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400 dark:text-gray-500">
@@ -249,7 +263,7 @@ function ForbiddenState() {
       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-warning-100 dark:bg-warning-500/15">
         <LockIcon className="h-7 w-7 text-warning-600 dark:text-warning-400" />
       </div>
-      <h3 className="mb-1 text-base font-semibold text-warning-700 dark:text-warning-400">Subscrição necessária</h3>
+      <h3 className="mb-1 font-heading text-base text-warning-700 dark:text-warning-400">Subscrição necessária</h3>
       <p className="text-sm text-warning-600 dark:text-warning-500">É necessária uma subscrição ativa para aceder aos encontros.</p>
     </div>
   );
@@ -268,7 +282,7 @@ function LoadingSkeleton() {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white py-20 text-center dark:border-gray-700 dark:bg-gray-900">
-      <h3 className="mb-1 text-base font-semibold text-gray-900 dark:text-white">Nenhum encontro agendado</h3>
+      <h3 className="mb-1 font-heading text-base text-gray-900 dark:text-white">Nenhum encontro agendado</h3>
       <p className="text-sm text-gray-500 dark:text-gray-400">
         Encontros são criados a partir da página de uma leitura.
       </p>

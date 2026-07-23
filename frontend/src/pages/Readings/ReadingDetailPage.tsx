@@ -186,7 +186,7 @@ export default function ReadingDetailPage() {
     }
 
     setMembers(allMembers as Member[]);
-    setBooks(allBooks as Book[]);
+    setBooks((allBooks as Book[]).slice().sort((x, y) => y.id - x.id));
     setLoadingReading(false);
   }
 
@@ -255,7 +255,10 @@ export default function ReadingDetailPage() {
 
   function openCreateMeet() {
     setEditingMeet(null);
-    setMeetForm(EMPTY_MEET_FORM);
+    const readingUserIds = (reading?.participants ?? [])
+      .map((p) => members.find((m) => m.email === p.user)?.id ?? -1)
+      .filter((id) => id !== -1);
+    setMeetForm({ ...EMPTY_MEET_FORM, users: readingUserIds });
     setMeetFormError("");
     setMeetModalOpen(true);
   }
@@ -352,7 +355,7 @@ export default function ReadingDetailPage() {
         <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
           <BookOpenIcon className="h-10 w-10 text-gray-400" />
         </div>
-        <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">Leitura não encontrada</h2>
+        <h2 className="mb-2 font-heading text-xl text-gray-900 dark:text-white">Leitura não encontrada</h2>
         <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">A leitura que procuras não existe ou foi removida.</p>
         <Button onClick={() => navigate("/readings")}>Voltar às leituras</Button>
       </div>
@@ -426,7 +429,7 @@ export default function ReadingDetailPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <div className="mb-1 flex flex-wrap items-center gap-2">
-                      <h1 className="text-xl font-bold text-gray-900 dark:text-white">{reading.book.title}</h1>
+                      <h1 className="font-heading text-xl text-gray-900 dark:text-white">{reading.book.title}</h1>
                       <Badge color={statusColor} size="sm">{statusLabel}</Badge>
                     </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -505,9 +508,9 @@ export default function ReadingDetailPage() {
         </div>
 
         {/* Meets section */}
-        <div>
+        <div className="font-ui">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h2 className="font-heading text-lg text-gray-900 dark:text-white">
               Encontros {meetsError === null && `(${meets.length})`}
             </h2>
             {isAdmin && meetsError === null && (
@@ -553,8 +556,8 @@ export default function ReadingDetailPage() {
 
       {/* ── Reading edit modal ─────────────────────────────────────────────── */}
       <Modal isOpen={readingModalOpen} onClose={closeReadingModal} className="max-w-lg p-6 sm:p-8">
-        <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">Editar Leitura</h2>
-        <div className="space-y-4">
+        <h2 className="mb-6 font-heading text-xl text-gray-900 dark:text-white">Editar Leitura</h2>
+        <div className="space-y-4 font-ui">
 
           {/* Livro */}
           <div>
@@ -686,10 +689,10 @@ export default function ReadingDetailPage() {
 
       {/* ── Meet create/edit modal ─────────────────────────────────────────── */}
       <Modal isOpen={meetModalOpen} onClose={closeMeetModal} className="max-w-lg p-6 sm:p-8">
-        <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
+        <h2 className="mb-6 font-heading text-xl text-gray-900 dark:text-white">
           {editingMeet ? "Editar Encontro" : "Novo Encontro"}
         </h2>
-        <div className="space-y-4">
+        <div className="space-y-4 font-ui">
           {/* Data/hora */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -832,11 +835,11 @@ export default function ReadingDetailPage() {
 
       {/* ── Delete meet modal ──────────────────────────────────────────────── */}
       <Modal isOpen={deleteMeetModalOpen} onClose={() => setDeleteMeetModalOpen(false)} className="max-w-sm p-6 sm:p-8">
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center font-ui">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-error-50 dark:bg-error-500/15">
             <TrashIcon className="h-7 w-7 text-error-500" />
           </div>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Eliminar encontro?</h2>
+          <h2 className="mb-2 font-heading text-lg text-gray-900 dark:text-white">Eliminar encontro?</h2>
           <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
             O encontro de <strong>{deleteMeet ? formatDateTime(deleteMeet.meet_date) : ""}</strong> será eliminado. Esta ação não pode ser desfeita.
           </p>
@@ -880,7 +883,7 @@ function MeetCard({ meet, index, totalPages, isAdmin, onEdit, onDelete }: {
           </div>
           <div>
             <div className="mb-1 flex flex-wrap items-center gap-2">
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">
+              <span className="font-heading text-base text-gray-900 dark:text-white">
                 {formatDateTime(meet.meet_date)}
               </span>
               <Badge color={isPast ? "light" : "info"} size="sm">

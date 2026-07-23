@@ -257,3 +257,80 @@ class BlogPost(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# Landing page — admin-managed quotes carousel
+class Quote(models.Model):
+    text = models.TextField()
+    attribution = models.CharField(
+        max_length=150,
+        blank=True,
+        help_text="Ex.: uma data ou 'Sonhos Literários'. Não usar o nome de "
+        "uma pessoa a menos que ela tenha realmente dito essa frase.",
+    )
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["order", "created_at"]
+
+    def __str__(self):
+        return self.text[:60]
+
+
+# Landing page — public contact/inquiry form submissions
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=150)
+    email = models.EmailField()
+    message = models.TextField()
+
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name} <{self.email}>"
+
+
+# Landing page — admin-managed team grid
+class TeamMember(models.Model):
+    name = models.CharField(max_length=150)
+    role = models.CharField(max_length=150, blank=True)
+    image = models.ImageField(upload_to="team/")
+    instagram = models.URLField(blank=True)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["order", "created_at"]
+
+    def __str__(self):
+        return self.name
+
+
+# Landing page — admin-managed club history timeline
+class TimelineEntry(models.Model):
+    title = models.CharField(max_length=200)
+    date = models.CharField(
+        max_length=100,
+        help_text="Texto livre — ex. 'Dezembro de 2018' quando não há um dia exato.",
+    )
+    description = models.TextField()
+    image = models.ImageField(upload_to="timeline/")
+    link = models.URLField(blank=True, help_text="Ex.: publicação do Instagram sobre o marco.")
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["order", "created_at"]
+
+    def __str__(self):
+        return self.title

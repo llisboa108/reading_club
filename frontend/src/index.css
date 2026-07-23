@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap")
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap")
 layer(base);
 
 @import "tailwindcss";
@@ -9,6 +9,10 @@ layer(base);
   --font-*: initial;
   --font-heading: "Playfair Display", serif;
   --font-body: "Libre Baskerville", Georgia, serif;
+  /* Interface workhorse — nav, tables, forms, badges, buttons. Reserved for
+     UI chrome; editorial prose (blog, quotes, empty-state copy) stays on
+     font-body. Serif at data density fights legibility, see DESIGN.md. */
+  --font-ui: "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;

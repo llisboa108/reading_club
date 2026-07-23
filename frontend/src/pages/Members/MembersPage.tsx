@@ -5,6 +5,9 @@ import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button/Button";
 import PageBreadCrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
+import PageHeader from "../../components/common/PageHeader";
+import EmptyState from "../../components/common/EmptyState";
+import { Table, TableHeader, TableBody, TableRow, Th, Td } from "../../components/ui/table/Table";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../../context/ToastContext";
 
@@ -168,95 +171,72 @@ export default function MembersPage() {
           <div className="space-y-8">
             {/* ── Membros ─────────────────────────────────────────────── */}
             <section>
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Membros</h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  {members.length} membro{members.length !== 1 ? "s" : ""} ativo{members.length !== 1 ? "s" : ""}
-                </p>
-              </div>
+              <PageHeader
+                title="Membros"
+                description={`${members.length} membro${members.length !== 1 ? "s" : ""} ativo${members.length !== 1 ? "s" : ""}`}
+              />
 
-              <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50">
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Nome
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Email
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {members.length === 0 && (
-                      <tr>
-                        <td colSpan={2} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                          Nenhum membro encontrado.
-                        </td>
-                      </tr>
-                    )}
+              {members.length === 0 ? (
+                <EmptyState title="Nenhum membro encontrado" />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <Th>Nome</Th>
+                    <Th>Email</Th>
+                  </TableHeader>
+                  <TableBody>
                     {members.map((m) => (
-                      <tr key={m.id}>
-                        <td className="px-6 py-3 text-gray-800 dark:text-white/80">
+                      <TableRow key={m.id}>
+                        <Td className="text-gray-800 dark:text-white/80">
                           {m.full_name || "—"}
-                        </td>
-                        <td className="px-6 py-3 text-gray-500 dark:text-gray-400">{m.email}</td>
-                      </tr>
+                        </Td>
+                        <Td>{m.email}</Td>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              )}
             </section>
 
             {/* ── Códigos de convite ──────────────────────────────────── */}
             <section>
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Códigos de convite</h2>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Gere e controla os códigos usados no cadastro de novos membros.
-                  </p>
-                </div>
-                <Button onClick={openCreate} startIcon={<PlusIcon />}>
-                  Novo código
-                </Button>
-              </div>
+              <PageHeader
+                title="Códigos de convite"
+                description="Gere e controla os códigos usados no cadastro de novos membros."
+                actions={
+                  <Button onClick={openCreate} startIcon={<PlusIcon />}>
+                    Novo código
+                  </Button>
+                }
+              />
 
-              <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50">
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Código
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Usos
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Criado em
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Estado
-                      </th>
-                      <th className="px-6 py-3" />
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {invites.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                          Nenhum código de convite criado.
-                        </td>
-                      </tr>
-                    )}
+              {invites.length === 0 ? (
+                <EmptyState
+                  title="Nenhum código de convite criado"
+                  action={
+                    <Button onClick={openCreate} startIcon={<PlusIcon />}>
+                      Novo código
+                    </Button>
+                  }
+                />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <Th>Código</Th>
+                    <Th>Usos</Th>
+                    <Th>Criado em</Th>
+                    <Th>Estado</Th>
+                    <Th />
+                  </TableHeader>
+                  <TableBody>
                     {invites.map((inv) => (
-                      <tr key={inv.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                        <td className="px-6 py-3 font-mono text-gray-900 dark:text-white">{inv.code}</td>
-                        <td className="px-6 py-3 text-gray-500 dark:text-gray-400">
+                      <TableRow key={inv.id}>
+                        <Td className="font-mono text-gray-900 dark:text-white">{inv.code}</Td>
+                        <Td>
                           {inv.used_count} / {inv.max_uses}
-                        </td>
-                        <td className="px-6 py-3 text-gray-500 dark:text-gray-400">{formatDate(inv.created_at)}</td>
-                        <td className="px-6 py-3">
+                        </Td>
+                        <Td>{formatDate(inv.created_at)}</Td>
+                        <Td>
                           <span
                             className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                               inv.is_active
@@ -266,8 +246,8 @@ export default function MembersPage() {
                           >
                             {inv.is_active ? "Ativo" : "Inativo"}
                           </span>
-                        </td>
-                        <td className="px-6 py-3">
+                        </Td>
+                        <Td>
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => toggleActive(inv)}
@@ -286,12 +266,12 @@ export default function MembersPage() {
                               <TrashIcon className="h-4 w-4" />
                             </button>
                           </div>
-                        </td>
-                      </tr>
+                        </Td>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              )}
             </section>
           </div>
         )}
@@ -299,8 +279,8 @@ export default function MembersPage() {
 
       {/* Create Modal */}
       <Modal isOpen={modalOpen} onClose={closeModal} className="max-w-md p-6 sm:p-8">
-        <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">Novo código de convite</h2>
-        <div className="space-y-4">
+        <h2 className="mb-6 font-heading text-xl text-gray-900 dark:text-white">Novo código de convite</h2>
+        <div className="space-y-4 font-ui">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Código <span className="text-error-500">*</span>
@@ -343,11 +323,11 @@ export default function MembersPage() {
 
       {/* Delete Modal */}
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} className="max-w-sm p-6 sm:p-8">
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center font-ui">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-error-50 dark:bg-error-500/15">
             <TrashIcon className="h-7 w-7 text-error-500" />
           </div>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Eliminar código?</h2>
+          <h2 className="mb-2 font-heading text-lg text-gray-900 dark:text-white">Eliminar código?</h2>
           <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
             O código <strong>"{deleteInvite?.code}"</strong> será eliminado permanentemente.
           </p>

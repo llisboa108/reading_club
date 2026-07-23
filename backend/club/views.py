@@ -33,6 +33,10 @@ from .models import (
     Notification,
     BlogCategory,
     BlogPost,
+    Quote,
+    ContactMessage,
+    TeamMember,
+    TimelineEntry,
 )
 
 from .serializers import (
@@ -50,7 +54,18 @@ from .serializers import (
     ReadingWriteSerializer,
     MeetWriteSerializer,
     ClubStatsSerializer,
+    QuoteSerializer,
+    QuoteWriteSerializer,
+    ContactMessageSerializer,
+    ContactMessageCreateSerializer,
+    TeamMemberSerializer,
+    TeamMemberWriteSerializer,
+    TimelineEntrySerializer,
+    TimelineEntryWriteSerializer,
 )
+from api.throttling import ContactMessageRateThrottle
+from api.emails import send_notification_email
+from django.conf import settings
 
 # No Meet.duration field exists yet, so "reading hours" is estimated from
 # pages actually read at a typical book-club reading pace rather than
@@ -345,3 +360,128 @@ class PublicClubStatsView(APIView):
         }
 
         return Response(ClubStatsSerializer(data).data)
+
+
+# Landing page quotes carousel — admin manages via the React panel, public
+# landing page reads only the active ones (same admin-writes/public-reads
+# split as PublicBlogPostViewSet above).
+@extend_schema_view(
+    list=extend_schema(tags=["Club"]),
+    retrieve=extend_schema(tags=["Club"]),
+    create=extend_schema(tags=["Club"]),
+    update=extend_schema(tags=["Club"]),
+    partial_update=extend_schema(tags=["Club"]),
+    destroy=extend_schema(tags=["Club"]),
+)
+class QuoteViewSet(ModelViewSet):
+    def get_queryset(self):
+        if self.request.user.is_authenticated and self.request.user.is_staff:
+            return Quote.objects.all()
+        return Quote.objects.filter(is_active=True)
+
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsAdmin()]
+        return [AllowAny()]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return QuoteWriteSerializer
+        return QuoteSerializer
+
+
+# Public contact/inquiry form (landing page) — anyone can submit, only
+# admins can list/read/mark-as-read/delete via the React panel.
+@extend_schema_view(
+    list=extend_schema(tags=["Club"]),
+    retrieve=extend_schema(tags=["Club"]),
+    create=extend_schema(tags=["Club"]),
+    update=extend_schema(tags=["Club"]),
+    partial_update=extend_schema(tags=["Club"]),
+    destroy=extend_schema(tags=["Club"]),
+)
+class ContactMessageViewSet(ModelViewSet):
+    queryset = ContactMessage.objects.all()
+    # AnonRateThrottle only throttles unauthenticated requests, so this only
+    # ever affects the public `create` action, never the admin-only actions.
+    throttle_classes = [ContactMessageRateThrottle]
+
+    def get_permissions(self):
+        if self.action == "create":
+            return [AllowAny()]
+        return [IsAdmin()]
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return ContactMessageCreateSerializer
+        return ContactMessageSerializer
+
+    def perform_create(self, serializer):
+        message = serializer.save()
+        send_notification_email(
+            subject=f"Nova mensagem de contato de {message.name}",
+            message=(
+                f"Nome: {message.name}\n"
+                f"E-mail: {message.email}\n\n"
+                f"{message.message}"
+            ),
+            recipient=settings.CLUB_CONTACT_EMAIL,
+        )
+
+
+# Landing page team grid — admin manages (with photo upload) via the React
+# panel, public landing page reads only the active ones.
+@extend_schema_view(
+    list=extend_schema(tags=["Club"]),
+    retrieve=extend_schema(tags=["Club"]),
+    create=extend_schema(tags=["Club"]),
+    update=extend_schema(tags=["Club"]),
+    partial_update=extend_schema(tags=["Club"]),
+    destroy=extend_schema(tags=["Club"]),
+)
+class TeamMemberViewSet(ModelViewSet):
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated and self.request.user.is_staff:
+            return TeamMember.objects.all()
+        return TeamMember.objects.filter(is_active=True)
+
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsAdmin()]
+        return [AllowAny()]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return TeamMemberWriteSerializer
+        return TeamMemberSerializer
+
+
+# Landing page history timeline — same admin-writes/public-reads split, also
+# with photo upload.
+@extend_schema_view(
+    list=extend_schema(tags=["Club"]),
+    retrieve=extend_schema(tags=["Club"]),
+    create=extend_schema(tags=["Club"]),
+    update=extend_schema(tags=["Club"]),
+    partial_update=extend_schema(tags=["Club"]),
+    destroy=extend_schema(tags=["Club"]),
+)
+class TimelineEntryViewSet(ModelViewSet):
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated and self.request.user.is_staff:
+            return TimelineEntry.objects.all()
+        return TimelineEntry.objects.filter(is_active=True)
+
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsAdmin()]
+        return [AllowAny()]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return TimelineEntryWriteSerializer
+        return TimelineEntrySerializer

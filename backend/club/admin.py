@@ -12,6 +12,10 @@ from .models import (
     Notification,
     BlogCategory,
     BlogPost,
+    Quote,
+    ContactMessage,
+    TeamMember,
+    TimelineEntry,
 )
 
 # Admin Books
@@ -92,4 +96,37 @@ class BlogPostAdmin(admin.ModelAdmin):
         )
 
     publish_posts.short_description = "Publish selected posts"
+
+
+# Admin — landing page quotes carousel
+@admin.register(Quote)
+class QuoteAdmin(admin.ModelAdmin):
+    list_display = ("__str__", "attribution", "order", "is_active")
+    list_filter = ("is_active",)
+    search_fields = ("text", "attribution")
+
+
+# Admin — landing page contact/inquiry submissions
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ("name", "email", "is_read", "created_at")
+    list_filter = ("is_read",)
+    search_fields = ("name", "email", "message")
+    readonly_fields = ("created_at",)
+
+
+# Admin — landing page team grid
+@admin.register(TeamMember)
+class TeamMemberAdmin(admin.ModelAdmin):
+    list_display = ("name", "role", "order", "is_active")
+    list_filter = ("is_active",)
+    search_fields = ("name", "role")
+
+
+# Admin — landing page history timeline
+@admin.register(TimelineEntry)
+class TimelineEntryAdmin(admin.ModelAdmin):
+    list_display = ("title", "date", "order", "is_active")
+    list_filter = ("is_active",)
+    search_fields = ("title", "description")
 

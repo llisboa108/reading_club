@@ -65,73 +65,173 @@ function AnalyticsIcon() {
   );
 }
 
-// ── Itens de navegação do clube ──────────────────────────────────────────────
+function TeamIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9" cy="8" r="3" />
+      <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
+      <circle cx="17" cy="8" r="2.5" />
+      <path d="M15.5 14.2c2.5.4 4.5 2.7 4.5 5.8" />
+    </svg>
+  );
+}
 
-const navItems: NavItem[] = [
+function TimelineIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="6" y1="3" x2="6" y2="21" />
+      <circle cx="6" cy="7" r="1.6" fill="currentColor" stroke="none" />
+      <circle cx="6" cy="14" r="1.6" fill="currentColor" stroke="none" />
+      <circle cx="6" cy="21" r="1.6" fill="currentColor" stroke="none" />
+      <path d="M10 7h9M10 14h9" />
+    </svg>
+  );
+}
+
+function QuoteIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 8c-2.5 1.5-4 3.8-4 6.5C3 17 4.8 19 7 19c1.8 0 3-1.3 3-3s-1.2-3-3-3c-.3 0-.6 0-.9.1C6.5 11 8 9.2 9.5 8L7 8z" />
+      <path d="M16 8c-2.5 1.5-4 3.8-4 6.5 0 2.5 1.8 4.5 4 4.5 1.8 0 3-1.3 3-3s-1.2-3-3-3c-.3 0-.6 0-.9.1C15.5 11 17 9.2 18.5 8L16 8z" />
+    </svg>
+  );
+}
+
+function MailIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m4 7 8 6 8-6" />
+    </svg>
+  );
+}
+
+// ── Itens de navegação do clube, agrupados por categoria ─────────────────────
+
+type NavGroup = {
+  label: string | null;
+  items: NavItem[];
+};
+
+const navGroups: NavGroup[] = [
   {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/dashboard",
+    label: null,
+    items: [
+      {
+        icon: <GridIcon />,
+        name: "Dashboard",
+        path: "/dashboard",
+      },
+    ],
   },
   {
-    icon: <BookIcon />,
-    name: "Livros",
-    path: "/books",
+    label: "Clube de Leitura",
+    items: [
+      {
+        icon: <BookIcon />,
+        name: "Livros",
+        path: "/books",
+      },
+      {
+        icon: <BookIcon />,
+        name: "Autores e Editoras",
+        path: "/catalog",
+        admin: true,
+      },
+      {
+        icon: <ReadingIcon />,
+        name: "Leituras",
+        path: "/readings",
+      },
+      {
+        icon: <MeetIcon />,
+        name: "Encontros",
+        path: "/meets",
+      },
+      {
+        icon: <BlogIcon />,
+        name: "Blog",
+        path: "/blog",
+      },
+    ],
   },
   {
-    icon: <BookIcon />,
-    name: "Autores e Editoras",
-    path: "/catalog",
-    admin: true,
+    label: "Minha Conta",
+    items: [
+      {
+        icon: <UserCircleIcon />,
+        name: "Perfil",
+        path: "/profile",
+      },
+      {
+        icon: <UserCircleIcon />,
+        name: "Subscrição",
+        path: "/billing",
+      },
+    ],
   },
   {
-    icon: <ReadingIcon />,
-    name: "Leituras",
-    path: "/readings",
+    label: "Financeiro",
+    items: [
+      {
+        icon: <UserCircleIcon />,
+        name: "Confirmações",
+        path: "/billing/confirmations",
+        financial: true,
+      },
+      {
+        icon: <UserCircleIcon />,
+        name: "Planos",
+        path: "/plans",
+        admin: true,
+      },
+    ],
   },
   {
-    icon: <MeetIcon />,
-    name: "Encontros",
-    path: "/meets",
+    label: "Site Público",
+    items: [
+      {
+        icon: <TeamIcon />,
+        name: "Equipe",
+        path: "/team-members",
+        admin: true,
+      },
+      {
+        icon: <TimelineIcon />,
+        name: "Linha do Tempo",
+        path: "/timeline-entries",
+        admin: true,
+      },
+      {
+        icon: <QuoteIcon />,
+        name: "Citações",
+        path: "/quotes",
+        admin: true,
+      },
+      {
+        icon: <MailIcon />,
+        name: "Mensagens",
+        path: "/contact-messages",
+        admin: true,
+      },
+    ],
   },
   {
-    icon: <BlogIcon />,
-    name: "Blog",
-    path: "/blog",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Perfil",
-    path: "/profile",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Subscrição",
-    path: "/billing",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Confirmações",
-    path: "/billing/confirmations",
-    financial: true,
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Membros",
-    path: "/members",
-    admin: true,
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Planos",
-    path: "/plans",
-    admin: true,
-  },
-  {
-    icon: <AnalyticsIcon />,
-    name: "Analytics",
-    path: "/analytics",
-    adminOrFinancial: true,
+    label: "Administração",
+    items: [
+      {
+        icon: <UserCircleIcon />,
+        name: "Membros",
+        path: "/members",
+        admin: true,
+      },
+      {
+        icon: <AnalyticsIcon />,
+        name: "Analytics",
+        path: "/analytics",
+        adminOrFinancial: true,
+      },
+    ],
   },
 ];
 
@@ -142,16 +242,21 @@ const AppSidebar: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
 
-  const visibleNavItems = navItems.filter(
-    (item) =>
+  const canSee = useCallback(
+    (item: NavItem) =>
       (!item.admin || user?.is_admin) &&
       (!item.financial || user?.is_financial) &&
-      (!item.adminOrFinancial || user?.is_admin || user?.is_financial)
+      (!item.adminOrFinancial || user?.is_admin || user?.is_financial),
+    [user?.is_admin, user?.is_financial]
   );
 
-  const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<number, number>>({});
-  const subMenuRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const visibleNavGroups = navGroups
+    .map((group) => ({ ...group, items: group.items.filter(canSee) }))
+    .filter((group) => group.items.length > 0);
+
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
+  const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const isActive = useCallback(
     (path: string) => location.pathname === path,
@@ -160,15 +265,17 @@ const AppSidebar: React.FC = () => {
 
   useEffect(() => {
     let submenuMatched = false;
-    visibleNavItems.forEach((nav, index) => {
-      if (nav.subItems) {
-        nav.subItems.forEach((subItem) => {
-          if (isActive(subItem.path)) {
-            setOpenSubmenu(index);
-            submenuMatched = true;
-          }
-        });
-      }
+    visibleNavGroups.forEach((group) => {
+      group.items.forEach((nav) => {
+        if (nav.subItems) {
+          nav.subItems.forEach((subItem) => {
+            if (isActive(subItem.path)) {
+              setOpenSubmenu(nav.name);
+              submenuMatched = true;
+            }
+          });
+        }
+      });
     });
 
     if (!submenuMatched) {
@@ -188,37 +295,37 @@ const AppSidebar: React.FC = () => {
     }
   }, [openSubmenu]);
 
-  const handleSubmenuToggle = (index: number) => {
-    setOpenSubmenu((prev) => (prev === index ? null : index));
+  const handleSubmenuToggle = (name: string) => {
+    setOpenSubmenu((prev) => (prev === name ? null : name));
   };
 
   const renderMenuItems = (items: NavItem[]) => (
-    <ul className="flex flex-col gap-4">
-      {items.map((nav, index) => (
+    <ul className="flex flex-col gap-1.5">
+      {items.map((nav) => (
         <li key={nav.name}>
           {nav.subItems ? (
             <button
-              onClick={() => handleSubmenuToggle(index)}
+              onClick={() => handleSubmenuToggle(nav.name)}
               className={`menu-item group ${
-                openSubmenu === index ? "menu-item-active" : "menu-item-inactive"
+                openSubmenu === nav.name ? "menu-item-active" : "menu-item-inactive"
               } cursor-pointer ${
                 !isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"
               }`}
             >
               <span
                 className={`menu-item-icon-size ${
-                  openSubmenu === index ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                  openSubmenu === nav.name ? "menu-item-icon-active" : "menu-item-icon-inactive"
                 }`}
               >
                 {nav.icon}
               </span>
               {(isExpanded || isHovered || isMobileOpen) && (
-                <span className="menu-item-text">{nav.name}</span>
+                <span className="menu-item-text font-ui">{nav.name}</span>
               )}
               {(isExpanded || isHovered || isMobileOpen) && (
                 <ChevronDownIcon
                   className={`ml-auto w-5 h-5 transition-transform duration-200 ${
-                    openSubmenu === index ? "rotate-180 text-brand-500" : ""
+                    openSubmenu === nav.name ? "rotate-180 text-brand-500" : ""
                   }`}
                 />
               )}
@@ -241,7 +348,7 @@ const AppSidebar: React.FC = () => {
                   {nav.icon}
                 </span>
                 {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className="menu-item-text">{nav.name}</span>
+                  <span className="menu-item-text font-ui">{nav.name}</span>
                 )}
               </Link>
             )
@@ -249,11 +356,11 @@ const AppSidebar: React.FC = () => {
           {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
             <div
               ref={(el) => {
-                subMenuRefs.current[index] = el;
+                subMenuRefs.current[nav.name] = el;
               }}
               className="overflow-hidden transition-all duration-300"
               style={{
-                height: openSubmenu === index ? `${subMenuHeight[index]}px` : "0px",
+                height: openSubmenu === nav.name ? `${subMenuHeight[nav.name]}px` : "0px",
               }}
             >
               <ul className="mt-2 space-y-1 ml-9">
@@ -281,7 +388,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen shadow-theme-xs transition-all duration-300 ease-in-out z-50 border-r border-gray-200
         ${
           isExpanded || isMobileOpen
             ? "w-[290px]"
@@ -324,21 +431,25 @@ const AppSidebar: React.FC = () => {
       </div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
-          <div className="flex flex-col gap-4">
-            <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Clube"
-                ) : (
-                  <HorizontaLDots className="size-6" />
+          <div className="flex flex-col gap-6">
+            {visibleNavGroups.map((group, groupIndex) => (
+              <div key={group.label ?? `group-${groupIndex}`}>
+                {group.label && (
+                  <h2
+                    className={`mb-3 flex font-ui text-xs font-semibold uppercase tracking-wider leading-[20px] text-gray-400 dark:text-gray-500 ${
+                      !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+                    }`}
+                  >
+                    {isExpanded || isHovered || isMobileOpen ? (
+                      group.label
+                    ) : (
+                      <HorizontaLDots className="size-6" />
+                    )}
+                  </h2>
                 )}
-              </h2>
-              {renderMenuItems(visibleNavItems)}
-            </div>
+                {renderMenuItems(group.items)}
+              </div>
+            ))}
           </div>
         </nav>
       </div>

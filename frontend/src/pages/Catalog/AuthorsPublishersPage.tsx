@@ -5,6 +5,9 @@ import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button/Button";
 import PageBreadCrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
+import PageHeader from "../../components/common/PageHeader";
+import EmptyState from "../../components/common/EmptyState";
+import { Table, TableHeader, TableBody, TableRow, Th, Td } from "../../components/ui/table/Table";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../../context/ToastContext";
 
@@ -229,40 +232,36 @@ export default function AuthorsPublishersPage() {
           <div className="space-y-8">
             {/* ── Autores ─────────────────────────────────────────────── */}
             <section>
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Autores</h2>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {authors.length} autor{authors.length !== 1 ? "es" : ""} cadastrado{authors.length !== 1 ? "s" : ""}
-                  </p>
-                </div>
-                <Button onClick={openCreateAuthor} startIcon={<PlusIcon />}>
-                  Novo autor
-                </Button>
-              </div>
+              <PageHeader
+                title="Autores"
+                description={`${authors.length} autor${authors.length !== 1 ? "es" : ""} cadastrado${authors.length !== 1 ? "s" : ""}`}
+                actions={
+                  <Button onClick={openCreateAuthor} startIcon={<PlusIcon />}>
+                    Novo autor
+                  </Button>
+                }
+              />
 
-              <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50">
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Nome
-                      </th>
-                      <th className="px-6 py-3" />
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {authors.length === 0 && (
-                      <tr>
-                        <td colSpan={2} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                          Nenhum autor cadastrado.
-                        </td>
-                      </tr>
-                    )}
+              {authors.length === 0 ? (
+                <EmptyState
+                  title="Nenhum autor cadastrado"
+                  action={
+                    <Button onClick={openCreateAuthor} startIcon={<PlusIcon />}>
+                      Novo autor
+                    </Button>
+                  }
+                />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <Th>Nome</Th>
+                    <Th />
+                  </TableHeader>
+                  <TableBody>
                     {authors.map((a) => (
-                      <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                        <td className="px-6 py-3 text-gray-800 dark:text-white/80">{authorFullName(a)}</td>
-                        <td className="px-6 py-3">
+                      <TableRow key={a.id}>
+                        <Td className="text-gray-800 dark:text-white/80">{authorFullName(a)}</Td>
+                        <Td>
                           <div className="flex justify-end gap-1">
                             <button
                               onClick={() => openEditAuthor(a)}
@@ -279,50 +278,46 @@ export default function AuthorsPublishersPage() {
                               <TrashIcon className="h-4 w-4" />
                             </button>
                           </div>
-                        </td>
-                      </tr>
+                        </Td>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              )}
             </section>
 
             {/* ── Editoras ────────────────────────────────────────────── */}
             <section>
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Editoras</h2>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {publishers.length} editora{publishers.length !== 1 ? "s" : ""} cadastrada{publishers.length !== 1 ? "s" : ""}
-                  </p>
-                </div>
-                <Button onClick={openCreatePublisher} startIcon={<PlusIcon />}>
-                  Nova editora
-                </Button>
-              </div>
+              <PageHeader
+                title="Editoras"
+                description={`${publishers.length} editora${publishers.length !== 1 ? "s" : ""} cadastrada${publishers.length !== 1 ? "s" : ""}`}
+                actions={
+                  <Button onClick={openCreatePublisher} startIcon={<PlusIcon />}>
+                    Nova editora
+                  </Button>
+                }
+              />
 
-              <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50">
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Nome
-                      </th>
-                      <th className="px-6 py-3" />
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {publishers.length === 0 && (
-                      <tr>
-                        <td colSpan={2} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                          Nenhuma editora cadastrada.
-                        </td>
-                      </tr>
-                    )}
+              {publishers.length === 0 ? (
+                <EmptyState
+                  title="Nenhuma editora cadastrada"
+                  action={
+                    <Button onClick={openCreatePublisher} startIcon={<PlusIcon />}>
+                      Nova editora
+                    </Button>
+                  }
+                />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <Th>Nome</Th>
+                    <Th />
+                  </TableHeader>
+                  <TableBody>
                     {publishers.map((p) => (
-                      <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                        <td className="px-6 py-3 text-gray-800 dark:text-white/80">{p.name}</td>
-                        <td className="px-6 py-3">
+                      <TableRow key={p.id}>
+                        <Td className="text-gray-800 dark:text-white/80">{p.name}</Td>
+                        <Td>
                           <div className="flex justify-end gap-1">
                             <button
                               onClick={() => openEditPublisher(p)}
@@ -339,12 +334,12 @@ export default function AuthorsPublishersPage() {
                               <TrashIcon className="h-4 w-4" />
                             </button>
                           </div>
-                        </td>
-                      </tr>
+                        </Td>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              )}
             </section>
           </div>
         )}
@@ -352,10 +347,10 @@ export default function AuthorsPublishersPage() {
 
       {/* Author create/edit modal */}
       <Modal isOpen={authorModalOpen} onClose={closeAuthorModal} className="max-w-md p-6 sm:p-8">
-        <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
+        <h2 className="mb-6 font-heading text-xl text-gray-900 dark:text-white">
           {editingAuthor ? "Editar autor" : "Novo autor"}
         </h2>
-        <div className="space-y-4">
+        <div className="space-y-4 font-ui">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Nome <span className="text-error-500">*</span>
@@ -394,10 +389,10 @@ export default function AuthorsPublishersPage() {
 
       {/* Publisher create/edit modal */}
       <Modal isOpen={publisherModalOpen} onClose={closePublisherModal} className="max-w-md p-6 sm:p-8">
-        <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
+        <h2 className="mb-6 font-heading text-xl text-gray-900 dark:text-white">
           {editingPublisher ? "Editar editora" : "Nova editora"}
         </h2>
-        <div className="space-y-4">
+        <div className="space-y-4 font-ui">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Nome <span className="text-error-500">*</span>
@@ -427,11 +422,11 @@ export default function AuthorsPublishersPage() {
 
       {/* Delete author modal */}
       <Modal isOpen={!!deleteAuthor} onClose={() => setDeleteAuthor(null)} className="max-w-sm p-6 sm:p-8">
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center font-ui">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-error-50 dark:bg-error-500/15">
             <TrashIcon className="h-7 w-7 text-error-500" />
           </div>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Eliminar autor?</h2>
+          <h2 className="mb-2 font-heading text-lg text-gray-900 dark:text-white">Eliminar autor?</h2>
           <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
             {deleteAuthor && (
               <>
@@ -457,11 +452,11 @@ export default function AuthorsPublishersPage() {
 
       {/* Delete publisher modal */}
       <Modal isOpen={!!deletePublisher} onClose={() => setDeletePublisher(null)} className="max-w-sm p-6 sm:p-8">
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center font-ui">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-error-50 dark:bg-error-500/15">
             <TrashIcon className="h-7 w-7 text-error-500" />
           </div>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Eliminar editora?</h2>
+          <h2 className="mb-2 font-heading text-lg text-gray-900 dark:text-white">Eliminar editora?</h2>
           <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
             {deletePublisher && (
               <>

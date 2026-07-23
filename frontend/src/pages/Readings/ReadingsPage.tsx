@@ -7,6 +7,7 @@ import Button from "../../components/ui/button/Button";
 import Badge from "../../components/ui/badge/Badge";
 import PageBreadCrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
+import PageHeader from "../../components/common/PageHeader";
 import { useAuth } from "../../hooks/useAuth";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -96,6 +97,7 @@ export default function ReadingsPage() {
 
   const [filterStatus, setFilterStatus] = useState<ReadingStatus | "">("");
   const [search, setSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState<"recent" | "old">("recent");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingReading, setEditingReading] = useState<Reading | null>(null);
@@ -117,7 +119,7 @@ export default function ReadingsPage() {
       apiRequest<Member[]>("/auth/members/").catch(() => [] as Member[]),  // ← novo
     ]);
     if (r === null) { setForbidden(true); } else { setReadings(r); setForbidden(false); }
-    setBooks(b as Book[]);
+    setBooks((b as Book[]).slice().sort((x, y) => y.id - x.id));
     setMembers(m as Member[]);
     setLoading(false);
   }
@@ -126,13 +128,19 @@ export default function ReadingsPage() {
 
   // ── Filter ─────────────────────────────────────────────────────────────────
 
-  const filtered = useMemo(() => readings.filter((r) => {
-    const matchStatus = !filterStatus || r.status === filterStatus;
-    const matchSearch = !search ||
-      r.book.title.toLowerCase().includes(search.toLowerCase()) ||
-      authorFullName(r.book.author).toLowerCase().includes(search.toLowerCase());
-    return matchStatus && matchSearch;
-  }), [readings, filterStatus, search]);
+  const filtered = useMemo(() => readings
+    .filter((r) => {
+      const matchStatus = !filterStatus || r.status === filterStatus;
+      const matchSearch = !search ||
+        r.book.title.toLowerCase().includes(search.toLowerCase()) ||
+        authorFullName(r.book.author).toLowerCase().includes(search.toLowerCase());
+      return matchStatus && matchSearch;
+    })
+    .sort((a, b) =>
+      sortOrder === "recent"
+        ? b.start_date.localeCompare(a.start_date)
+        : a.start_date.localeCompare(b.start_date)
+    ), [readings, filterStatus, search, sortOrder]);
 
   // ── Modal helpers ──────────────────────────────────────────────────────────
 
@@ -228,19 +236,19 @@ export default function ReadingsPage() {
       <div className="mx-auto max-w-screen-xl px-4 py-6 sm:px-6">
         <PageBreadCrumb pageTitle="Leituras" />
 
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Leituras</h1>
-            {!forbidden && (
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {readings.length} leitura{readings.length !== 1 ? "s" : ""} registada{readings.length !== 1 ? "s" : ""}
-              </p>
-            )}
-          </div>
-          {isAdmin && !forbidden && (
-            <Button onClick={openCreate} startIcon={<PlusIcon />}>Nova Leitura</Button>
-          )}
-        </div>
+        <PageHeader
+          title="Leituras"
+          description={
+            !forbidden
+              ? `${readings.length} leitura${readings.length !== 1 ? "s" : ""} registada${readings.length !== 1 ? "s" : ""}`
+              : undefined
+          }
+          actions={
+            isAdmin && !forbidden && (
+              <Button onClick={openCreate} startIcon={<PlusIcon />}>Nova Leitura</Button>
+            )
+          }
+        />
 
         {forbidden ? (
           <ForbiddenState />
@@ -248,7 +256,7 @@ export default function ReadingsPage() {
           <LoadingSkeleton />
         ) : (
           <>
-            <div className="mb-5 flex flex-col gap-3 sm:flex-row">
+            <div className="mb-5 flex flex-col gap-3 font-ui sm:flex-row">
               <div className="relative flex-1">
                 <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400"><SearchIcon /></span>
                 <input
@@ -266,6 +274,14 @@ export default function ReadingsPage() {
               >
                 <option value="">Todos os estados</option>
                 {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as "recent" | "old")}
+                className="h-11 rounded-lg border border-gray-300 bg-transparent px-4 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              >
+                <option value="recent">Mais recentes</option>
+                <option value="old">Mais antigas</option>
               </select>
             </div>
 
@@ -291,10 +307,10 @@ export default function ReadingsPage() {
 
       {/* Create / Edit Modal */}
       <Modal isOpen={modalOpen} onClose={closeModal} className="max-w-lg p-6 sm:p-8">
-        <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
+        <h2 className="mb-6 font-heading text-xl text-gray-900 dark:text-white">
           {editingReading ? "Editar Leitura" : "Nova Leitura"}
         </h2>
-        <div className="space-y-4">
+        <div className="space-y-4 font-ui">
 
           {/* Livro */}
           <div>
@@ -429,11 +445,11 @@ export default function ReadingsPage() {
 
       {/* Delete Modal */}
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} className="max-w-sm p-6 sm:p-8">
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center font-ui">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-error-50 dark:bg-error-500/15">
             <TrashIcon className="h-7 w-7 text-error-500" />
           </div>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Eliminar leitura?</h2>
+          <h2 className="mb-2 font-heading text-lg text-gray-900 dark:text-white">Eliminar leitura?</h2>
           <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
             A leitura de <strong>"{deleteReading?.book.title}"</strong> e todos os seus encontros serão eliminados. Esta ação não pode ser desfeita.
           </p>
@@ -475,7 +491,7 @@ function ReadingRow({ reading, isAdmin, onClick, onEdit, onDelete }: {
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 min-w-0">
-        <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">{reading.book.title}</p>
+        <p className="truncate font-heading text-base text-gray-900 dark:text-white">{reading.book.title}</p>
         <p className="text-xs text-gray-500 dark:text-gray-400">{authorFullName(reading.book.author)}</p>
         {/* Sugerido por */}
         {reading.suggested_by && (
@@ -512,7 +528,7 @@ function ForbiddenState() {
       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-warning-100 dark:bg-warning-500/15">
         <LockIcon className="h-7 w-7 text-warning-600 dark:text-warning-400" />
       </div>
-      <h3 className="mb-1 text-base font-semibold text-warning-700 dark:text-warning-400">Subscrição necessária</h3>
+      <h3 className="mb-1 font-heading text-base text-warning-700 dark:text-warning-400">Subscrição necessária</h3>
       <p className="text-sm text-warning-600 dark:text-warning-500">É necessária uma subscrição ativa para aceder às leituras.</p>
     </div>
   );
@@ -541,7 +557,7 @@ function EmptyState({ hasFilter, onClear }: { hasFilter: boolean; onClear: () =>
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
         <BookOpenIcon className="h-8 w-8 text-gray-400" />
       </div>
-      <h3 className="mb-1 text-base font-semibold text-gray-900 dark:text-white">
+      <h3 className="mb-1 font-heading text-base text-gray-900 dark:text-white">
         {hasFilter ? "Nenhuma leitura encontrada" : "Ainda não há leituras"}
       </h3>
       <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">

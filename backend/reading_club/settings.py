@@ -160,6 +160,7 @@ REST_FRAMEWORK = {
     # without throttling the rest of the API.
     "DEFAULT_THROTTLE_RATES": {
         "login": "5/min",
+        "contact": "5/hour",
     },
 }
 
@@ -211,6 +212,9 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL", "Sonhos Literários <no-reply@readingclub.local>"
 )
 FRONTEND_URL = "http://localhost:5173"
+CLUB_CONTACT_EMAIL = os.environ.get(
+    "CLUB_CONTACT_EMAIL", "clubedolivrosonhosliterarios@gmail.com"
+)
 
 # Mercado Pago (Checkout Pro) - no test credentials configured yet, so
 # these are empty in dev; billing/mercadopago.py raises a clear error

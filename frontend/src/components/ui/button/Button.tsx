@@ -37,7 +37,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-lg transition-[transform,background-color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 ${
+      className={`inline-flex items-center justify-center gap-2 rounded-lg font-ui font-medium transition-[transform,background-color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 ${
         !disabled ? "hover:-translate-y-px" : ""
       } ${className} ${sizeClasses[size]} ${variantClasses[variant]} ${
         disabled ? "cursor-not-allowed opacity-50" : ""

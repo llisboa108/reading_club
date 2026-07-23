@@ -69,7 +69,7 @@ export default function SignUpForm() {
       <div className="w-full max-w-md mx-auto mb-5 sm:pt-10">
         <Link
           to="/"
-          className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+          className="inline-flex items-center font-ui text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
           <ChevronLeftIcon className="size-5" />
           Voltar ao início
@@ -78,10 +78,10 @@ export default function SignUpForm() {
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
+            <h1 className="mb-2 font-heading text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
               Registar
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="font-ui text-sm text-gray-500 dark:text-gray-400">
               Informe os seus dados e o código de convite para se registar!
             </p>
           </div>
@@ -187,7 +187,7 @@ export default function SignUpForm() {
                     checked={isChecked}
                     onChange={setIsChecked}
                   />
-                  <p className="inline-block font-normal text-gray-500 dark:text-gray-400">
+                  <p className="inline-block font-ui font-normal text-gray-500 dark:text-gray-400">
                     Ao criar uma conta você concorda com os nossos{" "}
                     <span className="text-gray-800 dark:text-white/90">
                       Termos e Condições
@@ -203,7 +203,7 @@ export default function SignUpForm() {
                   <button
                     type="submit"
                     disabled={!isFormValid || loading}
-                    className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50"
+                    className="flex items-center justify-center w-full px-4 py-3 font-ui text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50"
                   >
                     {loading ? "A criar conta…" : "Registar"}
                   </button>
@@ -212,11 +212,11 @@ export default function SignUpForm() {
             </form>
 
             <div className="mt-5">
-              <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
+              <p className="font-ui text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
                 Já tem uma conta? {""}
                 <Link
                   to="/signin"
-                  className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
+                  className="font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400"
                 >
                   Entrar
                 </Link>

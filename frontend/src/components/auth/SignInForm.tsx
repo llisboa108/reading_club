@@ -48,7 +48,7 @@ export default function SignInForm() {
       <div className="w-full max-w-md pt-10 mx-auto">
         <Link
           to="/"
-          className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700"
+          className="inline-flex items-center font-ui text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
           <ChevronLeftIcon className="size-5" />
           Voltar ao início
@@ -58,16 +58,16 @@ export default function SignInForm() {
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 dark:text-white/90 text-title-sm">
+            <h1 className="mb-2 font-heading text-gray-800 dark:text-white/90 text-title-sm">
               Entrar
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="font-ui text-sm text-gray-500 dark:text-gray-400">
               Informe o seu email e senha para entrar!
             </p>
           </div>
 
           {error && (
-            <div className="mb-4 text-sm text-red-500">{error}</div>
+            <div className="mb-4 font-ui text-sm text-red-500">{error}</div>
           )}
 
           <form onSubmit={handleSubmit}>
@@ -114,14 +114,14 @@ export default function SignInForm() {
                     checked={isChecked}
                     onChange={setIsChecked}
                   />
-                  <span className="text-sm text-gray-700">
+                  <span className="font-ui text-sm text-gray-700 dark:text-gray-400">
                     Manter-me conectado
                   </span>
                 </div>
 
                 <Link
                   to="/forgot-password"
-                  className="text-sm text-brand-500"
+                  className="font-ui text-sm text-brand-500 hover:text-brand-600"
                 >
                   Esqueceu a senha?
                 </Link>
@@ -136,11 +136,11 @@ export default function SignInForm() {
           </form>
 
           <div className="mt-5">
-            <p className="text-sm text-gray-700">
+            <p className="font-ui text-sm text-gray-700 dark:text-gray-400">
               Ainda não tem uma conta?{" "}
               <Link
                 to="/signup"
-                className="text-brand-500"
+                className="font-medium text-brand-500 hover:text-brand-600"
               >
                 Registar
               </Link>

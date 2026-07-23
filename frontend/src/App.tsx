@@ -12,6 +12,10 @@ import BillingPage from "./pages/Billing/BillingPage";
 import PaymentConfirmationsPage from "./pages/Billing/PaymentConfirmationsPage";
 import MembersPage from "./pages/Members/MembersPage";
 import PlansPage from "./pages/Plans/PlansPage";
+import QuotesPage from "./pages/Quotes/QuotesPage";
+import ContactMessagesPage from "./pages/ContactMessages/ContactMessagesPage";
+import TeamMembersPage from "./pages/TeamMembers/TeamMembersPage";
+import TimelineEntriesPage from "./pages/TimelineEntries/TimelineEntriesPage";
 import AnalyticsPage from "./pages/Analytics/AnalyticsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -54,6 +58,10 @@ export default function App() {
             <Route path="/billing/confirmations" element={<PaymentConfirmationsPage />} />
             <Route path="/members" element={<MembersPage />} />
             <Route path="/plans" element={<PlansPage />} />
+            <Route path="/quotes" element={<QuotesPage />} />
+            <Route path="/contact-messages" element={<ContactMessagesPage />} />
+            <Route path="/team-members" element={<TeamMembersPage />} />
+            <Route path="/timeline-entries" element={<TimelineEntriesPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
           </Route>
 

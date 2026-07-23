@@ -6,6 +6,7 @@ import Button from "../../components/ui/button/Button";
 import Badge from "../../components/ui/badge/Badge";
 import PageBreadCrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
+import PageHeader from "../../components/common/PageHeader";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../../context/ToastContext";
 
@@ -99,6 +100,7 @@ export default function BooksPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterAuthor, setFilterAuthor] = useState("");
+  const [sortOrder, setSortOrder] = useState<"recent" | "old" | "title">("recent");
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -142,17 +144,22 @@ export default function BooksPage() {
   // ── Filter ─────────────────────────────────────────────────────────────────
 
   const filtered = useMemo(() => {
-    return books.filter((b) => {
-      const matchSearch =
-        !search ||
-        b.title.toLowerCase().includes(search.toLowerCase()) ||
-        authorFullName(b.author).toLowerCase().includes(search.toLowerCase()) ||
-        (b.isbn && b.isbn.includes(search));
-      const matchAuthor =
-        !filterAuthor || String(b.author.id) === filterAuthor;
-      return matchSearch && matchAuthor;
-    });
-  }, [books, search, filterAuthor]);
+    return books
+      .filter((b) => {
+        const matchSearch =
+          !search ||
+          b.title.toLowerCase().includes(search.toLowerCase()) ||
+          authorFullName(b.author).toLowerCase().includes(search.toLowerCase()) ||
+          (b.isbn && b.isbn.includes(search));
+        const matchAuthor =
+          !filterAuthor || String(b.author.id) === filterAuthor;
+        return matchSearch && matchAuthor;
+      })
+      .sort((a, b) => {
+        if (sortOrder === "title") return a.title.localeCompare(b.title, "pt-BR");
+        return sortOrder === "recent" ? b.id - a.id : a.id - b.id;
+      });
+  }, [books, search, filterAuthor, sortOrder]);
 
   // ── Modal open/close ───────────────────────────────────────────────────────
 
@@ -316,24 +323,20 @@ export default function BooksPage() {
         <PageBreadCrumb pageTitle="Livros" />
 
         {/* Header */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Catálogo de Livros
-            </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {books.length} livro{books.length !== 1 ? "s" : ""} no catálogo
-            </p>
-          </div>
-          {isAdmin && (
-            <Button onClick={openCreate} startIcon={<PlusIcon />}>
-              Novo Livro
-            </Button>
-          )}
-        </div>
+        <PageHeader
+          title="Catálogo de Livros"
+          description={`${books.length} livro${books.length !== 1 ? "s" : ""} no catálogo`}
+          actions={
+            isAdmin && (
+              <Button onClick={openCreate} startIcon={<PlusIcon />}>
+                Novo Livro
+              </Button>
+            )
+          }
+        />
 
         {/* Filters */}
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+        <div className="mb-6 flex flex-col gap-3 font-ui sm:flex-row">
           <div className="relative flex-1">
             <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
               <SearchIcon />
@@ -357,6 +360,15 @@ export default function BooksPage() {
                 {authorFullName(a)}
               </option>
             ))}
+          </select>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as "recent" | "old" | "title")}
+            className="h-11 rounded-lg border border-gray-300 bg-transparent px-4 py-2 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+          >
+            <option value="recent">Mais recentes</option>
+            <option value="old">Mais antigos</option>
+            <option value="title">Título (A-Z)</option>
           </select>
         </div>
 
@@ -383,11 +395,11 @@ export default function BooksPage() {
 
       {/* Create / Edit Modal */}
       <Modal isOpen={modalOpen} onClose={closeModal} className="max-w-lg p-6 sm:p-8">
-        <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
+        <h2 className="mb-6 font-heading text-xl text-gray-900 dark:text-white">
           {editingBook ? "Editar Livro" : "Novo Livro"}
         </h2>
 
-        <div className="space-y-4">
+        <div className="space-y-4 font-ui">
           {/* Título */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -577,11 +589,11 @@ export default function BooksPage() {
 
       {/* Delete confirm modal */}
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} className="max-w-sm p-6 sm:p-8">
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center font-ui">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-error-50 dark:bg-error-500/15">
             <TrashIcon className="h-7 w-7 text-error-500" />
           </div>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 className="mb-2 font-heading text-lg text-gray-900 dark:text-white">
             Eliminar livro?
           </h2>
           <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
@@ -644,9 +656,9 @@ function BookCard({
       </div>
 
       {/* Info */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col font-ui">
         <h3
-          className="mb-1 cursor-pointer line-clamp-2 text-sm font-semibold leading-snug text-gray-900 hover:text-brand-600 dark:text-white dark:hover:text-brand-400"
+          className="mb-1 cursor-pointer line-clamp-2 font-heading text-base leading-snug text-gray-900 hover:text-brand-600 dark:text-white dark:hover:text-brand-400"
           onClick={onView}
         >
           {book.title}
@@ -711,10 +723,10 @@ function EmptyState({ hasSearch, onClear }: { hasSearch: boolean; onClear: () =>
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
         <BookOpenIcon className="h-8 w-8 text-gray-400" />
       </div>
-      <h3 className="mb-1 text-base font-semibold text-gray-900 dark:text-white">
+      <h3 className="mb-1 font-heading text-lg text-gray-900 dark:text-white">
         {hasSearch ? "Nenhum livro encontrado" : "Ainda não há livros"}
       </h3>
-      <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+      <p className="mb-4 font-ui text-sm text-gray-500 dark:text-gray-400">
         {hasSearch ? "Tenta mudar os filtros de pesquisa." : "Adiciona o primeiro livro ao catálogo."}
       </p>
       {hasSearch && (

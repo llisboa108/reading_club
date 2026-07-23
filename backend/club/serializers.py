@@ -19,6 +19,10 @@ from .models import (
     Notification,
     BlogCategory,
     BlogPost,
+    Quote,
+    ContactMessage,
+    TeamMember,
+    TimelineEntry,
 )
 
 User = settings.AUTH_USER_MODEL
@@ -353,3 +357,60 @@ class ClubStatsSerializer(serializers.Serializer):
     pages_read = serializers.IntegerField()
     reading_hours = serializers.IntegerField()
     meets_held = serializers.IntegerField()
+
+
+# Landing page quotes carousel
+class QuoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quote
+        fields = ("id", "text", "attribution", "order", "is_active")
+
+
+class QuoteWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quote
+        fields = ("text", "attribution", "order", "is_active")
+
+
+# Public contact/inquiry form
+class ContactMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactMessage
+        fields = ("id", "name", "email", "message", "is_read", "created_at")
+        read_only_fields = ("created_at",)
+
+
+class ContactMessageCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactMessage
+        fields = ("name", "email", "message")
+
+
+# Landing page team grid
+class TeamMemberSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField()
+
+    class Meta:
+        model = TeamMember
+        fields = ("id", "name", "role", "image", "instagram", "order", "is_active")
+
+
+class TeamMemberWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TeamMember
+        fields = ("name", "role", "image", "instagram", "order", "is_active")
+
+
+# Landing page history timeline
+class TimelineEntrySerializer(serializers.ModelSerializer):
+    image = serializers.ImageField()
+
+    class Meta:
+        model = TimelineEntry
+        fields = ("id", "title", "date", "description", "image", "link", "order", "is_active")
+
+
+class TimelineEntryWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TimelineEntry
+        fields = ("title", "date", "description", "image", "link", "order", "is_active")

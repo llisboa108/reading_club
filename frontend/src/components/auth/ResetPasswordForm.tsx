@@ -56,7 +56,7 @@ export default function ResetPasswordForm() {
       <div className="w-full max-w-md pt-10 mx-auto">
         <Link
           to="/signin"
-          className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700"
+          className="inline-flex items-center font-ui text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
           <ChevronLeftIcon className="size-5" />
           Voltar ao login
@@ -66,16 +66,16 @@ export default function ResetPasswordForm() {
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 dark:text-white/90 text-title-sm">
+            <h1 className="mb-2 font-heading text-gray-800 dark:text-white/90 text-title-sm">
               Redefinir senha
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="font-ui text-sm text-gray-500 dark:text-gray-400">
               Escolha uma nova senha para a sua conta.
             </p>
           </div>
 
           {!linkIsValid ? (
-            <div className="rounded-lg bg-error-50 px-4 py-3 text-sm text-error-600 dark:bg-error-500/15 dark:text-error-400">
+            <div className="rounded-lg bg-error-50 px-4 py-3 font-ui text-sm text-error-600 dark:bg-error-500/15 dark:text-error-400">
               Link inválido.{" "}
               <Link to="/forgot-password" className="underline">
                 Peça um novo link de redefinição
@@ -85,7 +85,7 @@ export default function ResetPasswordForm() {
           ) : (
             <>
               {error && (
-                <div className="mb-4 text-sm text-red-500">{error}</div>
+                <div className="mb-4 font-ui text-sm text-red-500">{error}</div>
               )}
 
               <form onSubmit={handleSubmit}>

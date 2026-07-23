@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
@@ -21,7 +22,22 @@ from .models import (
     Meet,
     MeetUser,
     MeetType,
+    Quote,
+    ContactMessage,
+    TeamMember,
+    TimelineEntry,
 )
+
+# Minimal valid 1x1 transparent GIF, used to exercise ImageField uploads
+# without needing a real photo on disk.
+TINY_GIF = (
+    b"GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff!\xf9\x04"
+    b"\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;"
+)
+
+
+def make_test_image(name="test.gif"):
+    return SimpleUploadedFile(name, TINY_GIF, content_type="image/gif")
 
 User = get_user_model()
 
@@ -221,6 +237,266 @@ class PublicClubStatsTests(APITestCase):
         # No force_authenticate call - the landing page calls this anonymously.
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class QuoteTests(APITestCase):
+    url = "/api/v1/club/quotes/"
+
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            email="admin@example.com", password="Str0ng!Passw0rd", is_staff=True
+        )
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+        self.active_quote = Quote.objects.create(
+            text="Ler é sonhar de olhos abertos.", attribution="Sonhos Literários", order=0
+        )
+        self.inactive_quote = Quote.objects.create(
+            text="Rascunho ainda não publicado.", is_active=False, order=1
+        )
+
+    def test_public_list_only_returns_active_quotes_without_authentication(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        texts = [q["text"] for q in response.data["results"]] if "results" in response.data else [
+            q["text"] for q in response.data
+        ]
+        self.assertIn(self.active_quote.text, texts)
+        self.assertNotIn(self.inactive_quote.text, texts)
+
+    def test_admin_list_includes_inactive_quotes(self):
+        self.client.force_authenticate(self.admin)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        texts = [q["text"] for q in response.data["results"]] if "results" in response.data else [
+            q["text"] for q in response.data
+        ]
+        self.assertIn(self.inactive_quote.text, texts)
+
+    def test_non_admin_cannot_create_quote(self):
+        self.client.force_authenticate(self.member)
+        response = self.client.post(self.url, {"text": "Nova citação"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_anonymous_cannot_create_quote(self):
+        # No credentials attempted at all -> DRF reports 401, not 403 (see
+        # APIView.permission_denied: 403 only once an authenticator has
+        # actually run and failed, otherwise it's "not authenticated").
+        response = self.client.post(self.url, {"text": "Nova citação"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_admin_can_create_edit_and_delete_quote(self):
+        self.client.force_authenticate(self.admin)
+
+        create_response = self.client.post(
+            self.url, {"text": "Uma nova citação", "order": 2}, format="json"
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
+        # QuoteWriteSerializer excludes "id" (mirrors PlanWriteSerializer),
+        # so look the row up by its unique text instead of the response body.
+        quote_id = Quote.objects.get(text="Uma nova citação").id
+
+        edit_response = self.client.patch(
+            f"{self.url}{quote_id}/", {"text": "Citação editada"}, format="json"
+        )
+        self.assertEqual(edit_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(edit_response.data["text"], "Citação editada")
+
+        delete_response = self.client.delete(f"{self.url}{quote_id}/")
+        self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Quote.objects.filter(id=quote_id).exists())
+
+
+class ContactMessageTests(APITestCase):
+    url = "/api/v1/club/contact-messages/"
+
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            email="admin@example.com", password="Str0ng!Passw0rd", is_staff=True
+        )
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+
+    def test_anonymous_can_submit_contact_message(self):
+        response = self.client.post(
+            self.url,
+            {"name": "Visitante", "email": "visitante@example.com", "message": "Quero saber mais."},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(ContactMessage.objects.count(), 1)
+        saved = ContactMessage.objects.first()
+        self.assertEqual(saved.name, "Visitante")
+        self.assertFalse(saved.is_read)
+
+    def test_submitting_contact_message_emails_the_club(self):
+        mail.outbox = []
+        self.client.post(
+            self.url,
+            {"name": "Visitante", "email": "visitante@example.com", "message": "Quero saber mais."},
+            format="json",
+        )
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Visitante", mail.outbox[0].subject)
+
+    def test_non_admin_cannot_list_contact_messages(self):
+        ContactMessage.objects.create(
+            name="Visitante", email="visitante@example.com", message="Oi"
+        )
+        self.client.force_authenticate(self.member)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_anonymous_cannot_list_contact_messages(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_admin_can_list_and_mark_message_as_read(self):
+        message = ContactMessage.objects.create(
+            name="Visitante", email="visitante@example.com", message="Oi"
+        )
+        self.client.force_authenticate(self.admin)
+
+        list_response = self.client.get(self.url)
+        self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+
+        patch_response = self.client.patch(
+            f"{self.url}{message.id}/", {"is_read": True}, format="json"
+        )
+        self.assertEqual(patch_response.status_code, status.HTTP_200_OK)
+        message.refresh_from_db()
+        self.assertTrue(message.is_read)
+
+
+class TeamMemberTests(APITestCase):
+    url = "/api/v1/club/team-members/"
+
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            email="admin@example.com", password="Str0ng!Passw0rd", is_staff=True
+        )
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+        self.active_member = TeamMember.objects.create(
+            name="Membro Ativo", role="Membro desde 2020", image=make_test_image(), order=0
+        )
+        self.inactive_member = TeamMember.objects.create(
+            name="Membro Inativo", image=make_test_image(), is_active=False, order=1
+        )
+
+    def _rows(self, response):
+        return response.data["results"] if "results" in response.data else response.data
+
+    def test_public_list_only_returns_active_members(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        names = [m["name"] for m in self._rows(response)]
+        self.assertIn(self.active_member.name, names)
+        self.assertNotIn(self.inactive_member.name, names)
+
+    def test_admin_list_includes_inactive_members(self):
+        self.client.force_authenticate(self.admin)
+        response = self.client.get(self.url)
+
+        names = [m["name"] for m in self._rows(response)]
+        self.assertIn(self.inactive_member.name, names)
+
+    def test_non_admin_cannot_create_member(self):
+        self.client.force_authenticate(self.member)
+        response = self.client.post(
+            self.url, {"name": "Novo Membro", "image": make_test_image()}, format="multipart"
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_create_edit_and_delete_member(self):
+        self.client.force_authenticate(self.admin)
+
+        create_response = self.client.post(
+            self.url,
+            {"name": "Novo Membro", "role": "Membro desde 2024", "image": make_test_image(), "order": 7},
+            format="multipart",
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
+        member_id = TeamMember.objects.get(name="Novo Membro").id
+
+        edit_response = self.client.patch(
+            f"{self.url}{member_id}/", {"role": "Papel editado"}, format="multipart"
+        )
+        self.assertEqual(edit_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(edit_response.data["role"], "Papel editado")
+
+        delete_response = self.client.delete(f"{self.url}{member_id}/")
+        self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(TeamMember.objects.filter(id=member_id).exists())
+
+
+class TimelineEntryTests(APITestCase):
+    url = "/api/v1/club/timeline-entries/"
+
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            email="admin@example.com", password="Str0ng!Passw0rd", is_staff=True
+        )
+        self.member = User.objects.create_user(
+            email="member@example.com", password="Str0ng!Passw0rd"
+        )
+        self.active_entry = TimelineEntry.objects.create(
+            title="Marco Ativo", date="2024", description="Descrição.", image=make_test_image(), order=0
+        )
+        self.inactive_entry = TimelineEntry.objects.create(
+            title="Marco Inativo", date="2024", description="Descrição.",
+            image=make_test_image(), is_active=False, order=1
+        )
+
+    def _rows(self, response):
+        return response.data["results"] if "results" in response.data else response.data
+
+    def test_public_list_only_returns_active_entries(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        titles = [e["title"] for e in self._rows(response)]
+        self.assertIn(self.active_entry.title, titles)
+        self.assertNotIn(self.inactive_entry.title, titles)
+
+    def test_non_admin_cannot_create_entry(self):
+        self.client.force_authenticate(self.member)
+        response = self.client.post(
+            self.url,
+            {"title": "Novo Marco", "date": "2025", "description": "X", "image": make_test_image()},
+            format="multipart",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_create_edit_and_delete_entry(self):
+        self.client.force_authenticate(self.admin)
+
+        create_response = self.client.post(
+            self.url,
+            {"title": "Novo Marco", "date": "2025", "description": "Descrição do marco.",
+             "image": make_test_image(), "order": 20},
+            format="multipart",
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
+        entry_id = TimelineEntry.objects.get(title="Novo Marco").id
+
+        edit_response = self.client.patch(
+            f"{self.url}{entry_id}/", {"description": "Descrição editada."}, format="multipart"
+        )
+        self.assertEqual(edit_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(edit_response.data["description"], "Descrição editada.")
+
+        delete_response = self.client.delete(f"{self.url}{entry_id}/")
+        self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(TimelineEntry.objects.filter(id=entry_id).exists())
 
 
 class SendMeetRemindersCommandTests(TestCase):

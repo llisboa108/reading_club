@@ -4,6 +4,7 @@ import Chart from "react-apexcharts";
 import { apiRequest } from "../../api/client";
 import PageBreadCrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
+import Card from "../../components/ui/card/Card";
 import { useAuth } from "../../hooks/useAuth";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -240,7 +241,7 @@ export default function AnalyticsPage() {
               {data.payments_by_method.length === 0 ? (
                 <EmptyChart />
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto font-ui">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-gray-200 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:text-gray-400">
@@ -277,26 +278,26 @@ export default function AnalyticsPage() {
 
 function KpiCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-      <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-      <h4 className="mt-1 text-2xl font-bold text-gray-800 dark:text-white/90">{value}</h4>
-      {sub && <span className="text-xs text-gray-400 dark:text-gray-500">{sub}</span>}
-    </div>
+    <Card>
+      <span className="font-ui text-sm text-gray-500 dark:text-gray-400">{label}</span>
+      <h4 className="mt-1 font-heading text-2xl text-gray-800 dark:text-white/90">{value}</h4>
+      {sub && <span className="font-ui text-xs text-gray-400 dark:text-gray-500">{sub}</span>}
+    </Card>
   );
 }
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 sm:p-6">
-      <h3 className="mb-4 text-base font-semibold text-gray-800 dark:text-white/90">{title}</h3>
+    <Card className="font-ui">
+      <h3 className="mb-4 font-heading text-base text-gray-800 dark:text-white/90">{title}</h3>
       {children}
-    </div>
+    </Card>
   );
 }
 
 function EmptyChart() {
   return (
-    <div className="flex h-[200px] items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+    <div className="flex h-[200px] items-center justify-center font-ui text-sm text-gray-400 dark:text-gray-500">
       Sem dados suficientes ainda.
     </div>
   );
