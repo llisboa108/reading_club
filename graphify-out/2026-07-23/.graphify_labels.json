@@ -71,13 +71,10 @@
   "69": "WSGI Config",
   "70": "Dependency: eslint",
   "71": "Dependency: eslint-plugin-react-hooks",
-  "72": "Dependency: globals",
   "73": "Dependency: openapi-typescript",
   "74": "Dependency: postcss",
   "75": "swiper",
   "76": "typescript-eslint",
-  "77": "vite-plugin-svgr",
-  "78": "ChangePasswordView",
   "79": "0008_seed_initial_quotes.py",
   "80": "club/management/commands/__init__.py",
   "81": "useGoBack Hook",
@@ -122,6 +119,5 @@
   "120": "react-dnd",
   "121": "react-dropzone",
   "122": "react-helmet-async",
-  "123": "@react-jvectormap/world",
-  "124": "Badge.tsx"
+  "123": "@react-jvectormap/world"
 }

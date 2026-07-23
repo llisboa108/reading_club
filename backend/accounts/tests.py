@@ -36,6 +36,14 @@ class RegisterViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(User.objects.filter(email="member@example.com").exists())
 
+    def test_register_sends_welcome_email(self):
+        response = self.client.post(self.url, self._payload(), format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["member@example.com"])
+        self.assertIn("Bem-vindo", mail.outbox[0].subject)
+
     def test_register_rejects_weak_password(self):
         response = self.client.post(
             self.url, self._payload(password="1234567"), format="json"

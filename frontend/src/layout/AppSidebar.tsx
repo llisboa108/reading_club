@@ -106,6 +106,16 @@ function MailIcon() {
   );
 }
 
+function MegaphoneIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 11v2a2 2 0 0 0 2 2h1l3 5V4L6 9H5a2 2 0 0 0-2 2z" />
+      <path d="M13 8a3 3 0 0 1 0 8" />
+      <path d="M17 5a7 7 0 0 1 0 14" />
+    </svg>
+  );
+}
+
 // ── Itens de navegação do clube, agrupados por categoria ─────────────────────
 
 type NavGroup = {
@@ -230,6 +240,12 @@ const navGroups: NavGroup[] = [
         name: "Analytics",
         path: "/analytics",
         adminOrFinancial: true,
+      },
+      {
+        icon: <MegaphoneIcon />,
+        name: "Comunicados",
+        path: "/communications",
+        admin: true,
       },
     ],
   },

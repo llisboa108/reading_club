@@ -1,0 +1,10 @@
+{% extends "emails/base.html" %}
+{% block title %}Bem-vindo(a) ao Sonhos Literários{% endblock %}
+{% block content %}
+<p style="margin:0 0 16px;">Olá, {{ full_name }}!</p>
+<p style="margin:0 0 16px;">A sua conta no Clube de Leitura Sonhos Literários foi criada com sucesso. Estamos muito felizes em ter você com a gente.</p>
+<p style="margin:0 0 16px;">Já pode entrar na sua área de membro para conferir as leituras em andamento, os próximos encontros e a sua assinatura.</p>
+<p style="margin:24px 0 0;">
+<a href="{{ frontend_url }}/signin" style="display:inline-block; background-color:#4430b0; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:8px; font-weight:bold;">Acessar minha conta</a>
+</p>
+{% endblock %}

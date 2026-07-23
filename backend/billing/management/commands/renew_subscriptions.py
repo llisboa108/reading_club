@@ -1,8 +1,9 @@
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from datetime import timedelta
 
-from api.emails import send_notification_email
+from api.emails import send_template_email
 from billing.models import (
     Subscription,
     SubscriptionStatus,
@@ -11,16 +12,19 @@ from billing.models import (
     PaymentMethod,
 )
 from club.models import Notification, NotificationType
+from communications.models import EmailCategory
 
 
 class Command(BaseCommand):
-    help = "Generate advance charges, notify users and expire unpaid subscriptions"
+    help = "Generate advance charges, remind and expire unpaid subscriptions"
 
     def handle(self, *args, **options):
         today = timezone.now().date()
         advance_day = today + timedelta(days=10)
+        due_soon_day = today + timedelta(days=3)
 
         self.generate_advance_payments(advance_day)
+        self.remind_pending_payments(due_soon_day)
         self.expire_unpaid_subscriptions(today)
 
     def generate_advance_payments(self, advance_day):
@@ -74,16 +78,16 @@ class Command(BaseCommand):
                 content_object=payment,
             )
 
-            send_notification_email(
+            send_template_email(
+                "charge_generated",
+                {
+                    "amount": amount,
+                    "due_date": sub.next_billing_date.strftime("%d/%m/%Y"),
+                },
                 subject="A sua assinatura expira em 10 dias",
-                message=(
-                    "Olá!\n\n"
-                    "A sua assinatura do Clube Sonhos Literários expira em 10 dias. "
-                    f"Um novo pagamento de R$ {amount} foi gerado, com vencimento "
-                    f"em {sub.next_billing_date.strftime('%d/%m/%Y')}.\n\n"
-                    "Aceda à sua conta para regularizar o pagamento."
-                ),
                 recipient=sub.user.email,
+                category=EmailCategory.TRANSACTIONAL,
+                user=sub.user,
             )
 
             created += 1
@@ -92,6 +96,55 @@ class Command(BaseCommand):
             self.style.SUCCESS(
                 f"{created} advance payment(s) generated."
             )
+        )
+
+    def remind_pending_payments(self, due_soon_day):
+        payments = Payment.objects.filter(
+            status=PaymentStatus.PENDING,
+            due_date=due_soon_day,
+        ).select_related("subscription__user")
+
+        payment_content_type = ContentType.objects.get_for_model(Payment)
+        reminded = 0
+
+        for payment in payments:
+            # Idempotent: skip if already reminded for this exact payment.
+            already_sent = Notification.objects.filter(
+                user=payment.subscription.user,
+                type=NotificationType.PAYMENT,
+                content_type=payment_content_type,
+                object_id=payment.id,
+                message="A sua mensalidade vence em 3 dias.",
+            ).exists()
+
+            if already_sent:
+                continue
+
+            user = payment.subscription.user
+
+            Notification.objects.create(
+                user=user,
+                type=NotificationType.PAYMENT,
+                message="A sua mensalidade vence em 3 dias.",
+                content_object=payment,
+            )
+
+            send_template_email(
+                "payment_due_soon",
+                {
+                    "amount": payment.amount,
+                    "due_date": payment.due_date.strftime("%d/%m/%Y"),
+                },
+                subject="A sua mensalidade vence em breve",
+                recipient=user.email,
+                category=EmailCategory.TRANSACTIONAL,
+                user=user,
+            )
+
+            reminded += 1
+
+        self.stdout.write(
+            self.style.SUCCESS(f"{reminded} due-soon reminder(s) sent.")
         )
 
     def expire_unpaid_subscriptions(self, today):
@@ -124,15 +177,13 @@ class Command(BaseCommand):
                 content_object=sub,
             )
 
-            send_notification_email(
+            send_template_email(
+                "subscription_expired",
+                {},
                 subject="A sua assinatura expirou",
-                message=(
-                    "Olá!\n\n"
-                    "A sua assinatura do Clube Sonhos Literários expirou por falta de "
-                    "pagamento. Aceda à sua conta e regularize o pagamento para "
-                    "reativar o acesso."
-                ),
                 recipient=sub.user.email,
+                category=EmailCategory.TRANSACTIONAL,
+                user=sub.user,
             )
 
             expired += 1

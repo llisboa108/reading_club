@@ -1,0 +1,7 @@
+{% extends "emails/base.html" %}
+{% block title %}Pagamento confirmado{% endblock %}
+{% block content %}
+<p style="margin:0 0 16px;">Olá!</p>
+<p style="margin:0 0 16px;">O seu pagamento de <strong>R$ {{ amount }}</strong> foi confirmado. A sua assinatura está ativa até <strong>{{ end_date }}</strong>.</p>
+<p style="margin:0;">Obrigado por continuar com a gente!</p>
+{% endblock %}

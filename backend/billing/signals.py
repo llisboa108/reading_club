@@ -11,7 +11,9 @@ from billing.models import (
     Subscription,
     SubscriptionStatus,
 )
+from api.emails import send_template_email
 from club.models import Notification, NotificationType
+from communications.models import EmailCategory
 
 User = get_user_model()
 
@@ -83,6 +85,15 @@ def handle_payment_confirmation(sender, instance: Payment, created, **kwargs):
         type=NotificationType.PAYMENT,
         message="O seu pagamento foi confirmado. A sua assinatura está ativa.",
         content_object=instance,
+    )
+
+    send_template_email(
+        "payment_confirmed",
+        {"amount": instance.amount, "end_date": new_end_date.strftime("%d/%m/%Y")},
+        subject="Pagamento confirmado",
+        recipient=subscription.user.email,
+        category=EmailCategory.TRANSACTIONAL,
+        user=subscription.user,
     )
 
 # Create subscription for new user

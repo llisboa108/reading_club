@@ -14,6 +14,7 @@ import MembersPage from "./pages/Members/MembersPage";
 import PlansPage from "./pages/Plans/PlansPage";
 import QuotesPage from "./pages/Quotes/QuotesPage";
 import ContactMessagesPage from "./pages/ContactMessages/ContactMessagesPage";
+import CommunicationsPage from "./pages/Communications/CommunicationsPage";
 import TeamMembersPage from "./pages/TeamMembers/TeamMembersPage";
 import TimelineEntriesPage from "./pages/TimelineEntries/TimelineEntriesPage";
 import AnalyticsPage from "./pages/Analytics/AnalyticsPage";
@@ -60,6 +61,7 @@ export default function App() {
             <Route path="/plans" element={<PlansPage />} />
             <Route path="/quotes" element={<QuotesPage />} />
             <Route path="/contact-messages" element={<ContactMessagesPage />} />
+            <Route path="/communications" element={<CommunicationsPage />} />
             <Route path="/team-members" element={<TeamMembersPage />} />
             <Route path="/timeline-entries" element={<TimelineEntriesPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />

@@ -4,8 +4,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from api.emails import send_notification_email
+from api.emails import send_template_email
 from club.models import Meet, Notification, NotificationType
+from communications.models import EmailCategory
 
 
 class Command(BaseCommand):
@@ -50,18 +51,18 @@ class Command(BaseCommand):
                     content_object=meet,
                 )
 
-                send_notification_email(
+                send_template_email(
+                    "meet_reminder",
+                    {
+                        "book_title": book_title,
+                        "when": when,
+                        "link": meet.meeting_link if meet.meet_type == "ONLINE" else None,
+                        "address": meet.address if meet.meet_type != "ONLINE" else None,
+                    },
                     subject=f"Lembrete: encontro amanhã - {book_title}",
-                    message=(
-                        f"Olá!\n\nO encontro sobre \"{book_title}\" é amanhã, {when}.\n\n"
-                        + (
-                            f"Link: {meet.meeting_link}\n\n"
-                            if meet.meet_type == "ONLINE" and meet.meeting_link
-                            else (f"Local: {meet.address}\n\n" if meet.address else "")
-                        )
-                        + "Até lá!"
-                    ),
                     recipient=participant.email,
+                    category=EmailCategory.TRANSACTIONAL,
+                    user=participant,
                 )
 
                 notified += 1

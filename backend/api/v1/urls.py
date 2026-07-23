@@ -12,6 +12,9 @@ urlpatterns = [
     # Billing domain (quando existir)
     path("billing/", include("billing.urls")),
 
+    # Communications domain
+    path("communications/", include("communications.urls")),
+
     # Cross-cutting
     path("analytics/", AnalyticsView.as_view(), name="analytics"),
 ]

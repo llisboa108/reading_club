@@ -1,0 +1,9 @@
+{% extends "emails/base.html" %}
+{% block title %}A sua assinatura expirou{% endblock %}
+{% block content %}
+<p style="margin:0 0 16px;">Olá!</p>
+<p style="margin:0 0 16px;">A sua assinatura do Clube Sonhos Literários expirou por falta de pagamento.</p>
+<p style="margin:24px 0 0;">
+<a href="{{ frontend_url }}/billing" style="display:inline-block; background-color:#4430b0; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:8px; font-weight:bold;">Regularizar e reativar</a>
+</p>
+{% endblock %}

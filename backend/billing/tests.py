@@ -73,6 +73,16 @@ class PaymentConfirmationTests(APITestCase):
         expected_end = placeholder_end_date + relativedelta(months=1)
         self.assertEqual(self.subscription.end_date, expected_end)
 
+    def test_confirm_payment_sends_confirmation_email(self):
+        payment = self._create_pending_payment()
+
+        self.client.force_authenticate(self.financial_user)
+        self.client.post(self._confirm_url(payment), {"confirm": True}, format="json")
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.member.email])
+        self.assertIn("confirmado", mail.outbox[0].subject.lower())
+
     def test_confirm_payment_extends_active_subscription_from_current_end_date(self):
         # Subscription is already active with time remaining.
         current_end_date = timezone.now().date() + relativedelta(days=20)
@@ -446,6 +456,44 @@ class RenewSubscriptionsCommandTests(TestCase):
         call_command("renew_subscriptions")
 
         self.assertEqual(Payment.objects.filter(subscription=self.subscription).count(), 1)
+
+    def test_due_soon_reminder_sent_for_pending_payment_three_days_out(self):
+        due_date = timezone.now().date() + timedelta(days=3)
+        payment = Payment.objects.create(
+            subscription=self.subscription,
+            amount=self.plan.price,
+            due_date=due_date,
+        )
+
+        call_command("renew_subscriptions")
+
+        notification = self.member.notifications.get(
+            type="PAYMENT", message="A sua mensalidade vence em 3 dias."
+        )
+        payment_content_type = ContentType.objects.get_for_model(Payment)
+        self.assertEqual(notification.content_type, payment_content_type)
+        self.assertEqual(notification.object_id, payment.id)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.member.email])
+
+    def test_due_soon_reminder_does_not_duplicate_on_second_run(self):
+        due_date = timezone.now().date() + timedelta(days=3)
+        Payment.objects.create(
+            subscription=self.subscription,
+            amount=self.plan.price,
+            due_date=due_date,
+        )
+
+        call_command("renew_subscriptions")
+        call_command("renew_subscriptions")
+
+        self.assertEqual(
+            self.member.notifications.filter(
+                type="PAYMENT", message="A sua mensalidade vence em 3 dias."
+            ).count(),
+            1,
+        )
 
     def test_expired_subscription_links_to_subscription_and_sends_email(self):
         self.subscription.status = SubscriptionStatus.ACTIVE

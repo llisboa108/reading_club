@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'accounts',
     'club',
     'billing',
+    'communications',
     'api',
 ]
 
@@ -193,16 +194,16 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # Email: defaults to printing to the runserver console in dev. Set EMAIL_HOST_USER
-# and EMAIL_HOST_PASSWORD in .env to switch to real delivery - Mailgun's SMTP
+# and EMAIL_HOST_PASSWORD in .env to switch to real delivery - Brevo's SMTP
 # relay works with Django's built-in SMTP backend, no extra package needed;
 # see .env.example for the exact variables (host/port already default to
-# Mailgun's SMTP endpoint).
+# Brevo's SMTP endpoint).
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 
 if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.mailgun.org")
+    EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp-relay.brevo.com")
     EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
     EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "true").lower() == "true"
 else:

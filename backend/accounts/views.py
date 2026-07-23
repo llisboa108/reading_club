@@ -10,11 +10,12 @@ from django.conf import settings
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
+from api.emails import send_template_email
 from api.throttling import LoginRateThrottle
+from communications.models import EmailCategory
 
 User = get_user_model()
 
@@ -68,7 +69,16 @@ class RegisterView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        user = serializer.save()
+
+        send_template_email(
+            "welcome",
+            {"full_name": user.profile.full_name},
+            subject="Bem-vindo(a) ao Sonhos Literários",
+            recipient=user.email,
+            category=EmailCategory.TRANSACTIONAL,
+            user=user,
+        )
 
         return Response(
             {"message": "Account created successfully"},
@@ -188,15 +198,13 @@ class PasswordResetRequestView(APIView):
             token = PasswordResetTokenGenerator().make_token(user)
             reset_link = f"{settings.FRONTEND_URL}/reset-password?uid={uid}&token={token}"
 
-            send_mail(
-                subject="Redefinição de senha - Clube de Leitura",
-                message=(
-                    "Recebemos um pedido para redefinir a sua senha.\n\n"
-                    f"Use o link abaixo para escolher uma nova senha:\n{reset_link}\n\n"
-                    "Se não foi você quem pediu, ignore este e-mail."
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
+            send_template_email(
+                "password_reset",
+                {"reset_link": reset_link},
+                subject="Redefinição de senha - Sonhos Literários",
+                recipient=user.email,
+                category=EmailCategory.TRANSACTIONAL,
+                user=user,
             )
 
         return Response(

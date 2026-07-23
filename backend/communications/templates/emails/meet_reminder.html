@@ -1,0 +1,12 @@
+{% extends "emails/base.html" %}
+{% block title %}Lembrete de encontro{% endblock %}
+{% block content %}
+<p style="margin:0 0 16px;">Olá!</p>
+<p style="margin:0 0 16px;">O encontro sobre "<strong>{{ book_title }}</strong>" é amanhã, <strong>{{ when }}</strong>.</p>
+{% if link %}
+<p style="margin:0 0 16px;">Link do encontro: <a href="{{ link }}" style="color:#4430b0;">{{ link }}</a></p>
+{% elif address %}
+<p style="margin:0 0 16px;">Local: {{ address }}</p>
+{% endif %}
+<p style="margin:0;">Até lá!</p>
+{% endblock %}
