@@ -212,7 +212,7 @@ else:
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL", "Sonhos Literários <no-reply@readingclub.local>"
 )
-FRONTEND_URL = "http://localhost:5173"
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
 CLUB_CONTACT_EMAIL = os.environ.get(
     "CLUB_CONTACT_EMAIL", "clubedolivrosonhosliterarios@gmail.com"
 )
